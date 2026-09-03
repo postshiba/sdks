@@ -213,7 +213,7 @@ use PostShiba\Webhooks;
 $ok = Webhooks::verify($secret, $timestamp, $rawBody, $signature);
 ```
 
-## Errors
+## Errors and throttling
 
 Non-2xx responses raise `PostShiba\Error` with `error`, `field`, and `message`.
 
@@ -228,6 +228,8 @@ try {
     $e->getMessage();
 }
 ```
+
+A `429` response with `error` `throttled` means the cluster hit its hourly send limit. Do not retry that send immediately. Immediate retries hit the same cap. Wait until the next hour. Laravel and Symfony transports do not delay the job. In a queued mailable, catch `Error` and check `$e->error === 'throttled'` before sending again. `$e->status` is the HTTP status.
 
 Missing `teamId` on a team-scoped call raises `InvalidArgumentException`.
 

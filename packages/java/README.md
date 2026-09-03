@@ -121,7 +121,7 @@ HMAC-SHA256 of `{timestamp}.{rawBody}` against `X-Capsule-Signature`. A `sha256=
 boolean ok = client.webhooks.verify(secret, timestamp, rawBody, signature);
 ```
 
-## Errors
+## Errors and throttling
 
 Non-2xx responses throw `ApiError` with `error`, `field`, and `message` from the JSON body.
 
@@ -132,6 +132,8 @@ try {
 	System.err.println(e.error + " " + e.field + " " + e.message);
 }
 ```
+
+A `429` response with `error` `throttled` means the cluster hit its hourly send limit. Do not retry that send immediately. Immediate retries hit the same cap. Wait until the next hour. The client does not delay for you. In a queued worker, catch `ApiError` and check `e.error.equals("throttled")` before sending again.
 
 A team-scoped call without `teamId` throws `IllegalStateException`.
 

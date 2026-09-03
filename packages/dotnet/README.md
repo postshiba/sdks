@@ -103,9 +103,11 @@ var ok = Webhooks.Verify(secret, timestamp, signature, rawBody);
 
 HMAC-SHA256 of `{timestamp}.{rawBody}` compared to `X-Capsule-Signature` after a `sha256=` prefix is stripped.
 
-## Errors
+## Errors and throttling
 
 Non-2xx responses throw `ApiException` with `Error`, `Field`, and `Message`.
+
+A `429` response with `error` `throttled` means the cluster hit its hourly send limit. Do not retry that send immediately. Immediate retries hit the same cap. Wait until the next hour. The client does not delay for you. In a queued job, catch `ApiException` and check `e.Error == "throttled"` before sending again.
 
 ## Contributing
 

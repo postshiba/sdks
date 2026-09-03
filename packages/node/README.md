@@ -215,7 +215,7 @@ HMAC-SHA256 of `{timestamp}.{rawBody}` against `X-Capsule-Signature`. A `sha256=
 const ok = postshiba.webhooks.verify(rawBody, timestamp, signature, secret)
 ```
 
-## Errors
+## Errors and throttling
 
 Non-2xx responses throw `PostShibaError` with `error`, `field`, and `message` from the JSON body.
 
@@ -230,6 +230,8 @@ try {
 	}
 }
 ```
+
+A `429` response with `error` `throttled` means the cluster hit its hourly send limit. Do not retry that send immediately. Immediate retries hit the same cap. Wait until the next hour. The client does not delay for you. In a queued job, catch `PostShibaError` and check `err.error === "throttled"` before sending again.
 
 Missing `teamId` on a team-scoped call throws before any request.
 

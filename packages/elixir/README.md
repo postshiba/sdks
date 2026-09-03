@@ -179,7 +179,7 @@ HMAC-SHA256 of `{timestamp}.{rawBody}` compared to `X-Capsule-Signature`. A `sha
 PostShiba.Webhooks.verify(raw_body, timestamp, signature, secret)
 ```
 
-## Errors
+## Errors and throttling
 
 Non-2xx responses raise `%PostShiba.Error{}` with `error`, `field`, and `message`.
 
@@ -191,6 +191,8 @@ rescue
     IO.inspect({error.field, error.message})
 end
 ```
+
+A `429` response with `error` `throttled` means the cluster hit its hourly send limit. Do not retry that send immediately. Immediate retries hit the same cap. Wait until the next hour. The Swoosh adapter does not delay for you. In a queued job, catch `%PostShiba.Error{}` and check `error.error == "throttled"` before sending again.
 
 A team-scoped call without `team_id` raises. The client does not read a team id from `Users.me`.
 

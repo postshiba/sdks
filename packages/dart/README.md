@@ -205,7 +205,7 @@ HMAC-SHA256 of `{timestamp}.{rawBody}` against `X-Capsule-Signature`.
 final ok = Webhooks.verify(secret, body, signature, timestamp);
 ```
 
-## Errors
+## Errors and throttling
 
 Non-2xx responses throw `ApiException` with `error`, `field`, and `message`.
 
@@ -218,6 +218,8 @@ try {
   print(e.message);
 }
 ```
+
+A `429` response with `error` `throttled` means the cluster hit its hourly send limit. Do not retry that send immediately. Immediate retries hit the same cap. Wait until the next hour. The client does not delay for you. In a queued job, catch `ApiException` and check `e.error == "throttled"` before sending again. `e.statusCode` is the HTTP status.
 
 Team-scoped calls throw `StateError` when `teamId` is missing.
 

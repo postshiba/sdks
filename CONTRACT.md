@@ -28,6 +28,7 @@ Ids used in fixtures and tests:
 
 Non-2xx responses raise a typed error with `error`, `field`, and `message` from `{error, field, message}`.
 Do not swallow HTTP failures.
+A `429` body with `error` `throttled` is the cluster hourly send limit. Immediate retries hit the same cap.
 Never expose `dkim_private_key` or `provider_resources`.
 `webhook_secret` and SMTP `password` only when the API returns them (create/show).
 
@@ -140,8 +141,10 @@ Sections, in order:
 5. Mail adapter (only if this package has one)
 6. API (one snippet per resource group)
 7. Verify webhooks
-8. Errors
+8. Errors and throttling
 9. Contributing with the test command
+
+The Errors and throttling section has a typed error snippet, then a throttling paragraph. A `429` with `error` `throttled` is the hourly send cap. Do not retry that send immediately. Wait until the next hour. Mail adapters do not delay. Catch `throttled` in queued jobs before sending again. Use this package's real exception name. Do not invent `RateLimitExceeded` or a retry-delay env var.
 
 Not published yet. Do not add badges that imply a registry version.
 

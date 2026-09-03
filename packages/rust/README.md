@@ -136,7 +136,7 @@ let ok = postshiba::webhooks::verify(
 
 `verify` checks HMAC-SHA256 of `{timestamp}.{rawBody}` against `X-Capsule-Signature` after stripping a `sha256=` prefix.
 
-## Errors
+## Errors and throttling
 
 Non-2xx responses return `Error` with `error`, `field`, and `message` from the API body.
 
@@ -146,6 +146,8 @@ match client.clusters().create(&body) {
     Err(err) => eprintln!("{} {} {}", err.error.unwrap_or_default(), err.field.unwrap_or_default(), err.message),
 }
 ```
+
+A `429` response with `error` `throttled` means the cluster hit its hourly send limit. Do not retry that send immediately. Immediate retries hit the same cap. Wait until the next hour. The client does not delay for you. In a queued worker, check `err.error.as_deref() == Some("throttled")` before sending again.
 
 Team-scoped methods return an error if `team_id` is missing.
 

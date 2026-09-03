@@ -34,9 +34,11 @@ wp_mail(
 
 Open **Settings → PostShiba**. Set the API key, from email, optional from name, and optional base URL. The default base URL is `https://app.postshiba.com`. Use **Send test email** to mail the current user.
 
-## Errors
+## Errors and throttling
 
 A failed send returns `false` from `wp_mail`. The API body fields are `error`, `field`, and `message`.
+
+If `error` is `throttled`, the cluster hit its hourly send limit. Do not retry that send immediately. Immediate retries hit the same cap. Wait until the next hour.
 
 ## Contributing
 

@@ -184,7 +184,7 @@ ok = client.webhooks.verify(raw_body, request.headers["X-Capsule-Signature"], ti
 
 The check is HMAC-SHA256 of `{timestamp}.{raw_body}` compared to `X-Capsule-Signature` after a `sha256=` prefix.
 
-## Errors
+## Errors and throttling
 
 Non-2xx responses raise `Error` with `error`, `field`, and `message`.
 
@@ -196,6 +196,8 @@ try:
 except Error as e:
 	print(e.error, e.field, e.message)
 ```
+
+A `429` response with `error` `throttled` means the cluster hit its hourly send limit. Do not retry that send immediately. Immediate retries hit the same cap. Wait until the next hour. The Django backend does not delay for you. In a queued task, catch `Error` and check `e.error == "throttled"` before sending again.
 
 Team-scoped calls raise if `team_id` is missing.
 

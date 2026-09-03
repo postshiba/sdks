@@ -28,6 +28,8 @@ Creates missing repos when `CREATE_REPOS=1` and `gh` can write to the `postshiba
 
 Each package is a thin HTTPS client. Authenticate with a platform application token. Send through `POST /api/v1/emails`. Manage clusters, domains, inboxes, and the rest of the catalog from the same client.
 
+Failed REST calls raise a typed error with `error`, `field`, and `message`. A `429` with `error` `throttled` is the cluster hourly send limit. Do not retry that send immediately. Wait until the next hour. Each language README has the catch shape.
+
 Mail adapters live in the language package. They call `emails.send`. The core client loads without Rails, Laravel, Django, Nest, or Swoosh. The WordPress plugin replaces wp_mail and lives in its own package.
 
 ## Testing

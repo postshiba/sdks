@@ -184,7 +184,7 @@ PostShiba::Webhooks.verify(
 
 HMAC-SHA256 of `{timestamp}.{raw body}`, compared to `X-Capsule-Signature` after a `sha256=` prefix is stripped.
 
-## Errors
+## Errors and throttling
 
 Non-2xx responses raise `PostShiba::Error` with `error`, `field`, and `message` from the JSON body.
 
@@ -197,6 +197,8 @@ rescue PostShiba::Error => e
   e.message
 end
 ```
+
+A `429` response with `error` `throttled` means the cluster hit its hourly send limit. Do not retry that send immediately. Immediate retries hit the same cap. Wait until the next hour. ActionMailer does not delay for you. In a queued job, rescue `PostShiba::Error` and check `e.error == "throttled"` before delivering again.
 
 A team-scoped call without `team_id` raises `ArgumentError`.
 

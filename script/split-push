@@ -30,6 +30,7 @@ packages=(
   "dotnet:postshiba-dotnet"
   "elixir:postshiba-elixir"
   "dart:postshiba-dart"
+  "wordpress:postshiba-wordpress"
 )
 
 ensure_repo() {
@@ -76,7 +77,12 @@ fi
 for pair in "${packages[@]}"; do
   dir="${pair%%:*}"
   repo="${pair##*:}"
-  if ! ensure_repo "$repo" "PostShiba $dir SDK. Mirror of $ORG/sdks packages/$dir. Open PRs on $ORG/sdks."; then
+  if [[ "$dir" == "wordpress" ]]; then
+    desc="PostShiba WordPress plugin. Mirror of $ORG/sdks packages/wordpress. Open PRs on $ORG/sdks."
+  else
+    desc="PostShiba $dir SDK. Mirror of $ORG/sdks packages/$dir. Open PRs on $ORG/sdks."
+  fi
+  if ! ensure_repo "$repo" "$desc"; then
     failed=1
     continue
   fi

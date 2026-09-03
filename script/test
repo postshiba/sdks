@@ -54,6 +54,7 @@ if [[ -d "$root/packages/dart" ]]; then
 else
   missing dart
 fi
+if [[ -d "$root/packages/wordpress" ]]; then run wordpress composer test; else missing wordpress; fi
 
 if [[ "$failed" -ne 0 ]]; then
   echo "SDK test sweep failed"

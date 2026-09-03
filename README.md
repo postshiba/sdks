@@ -22,12 +22,13 @@ Creates missing repos when `CREATE_REPOS=1` and `gh` can write to the `postshiba
 - [.NET](https://github.com/postshiba/postshiba-dotnet) ([source](packages/dotnet/README.md))
 - [Elixir](https://github.com/postshiba/postshiba-elixir) ([source](packages/elixir/README.md), Swoosh included)
 - [Dart](https://github.com/postshiba/postshiba-dart) ([source](packages/dart/README.md))
+- [WordPress](https://github.com/postshiba/postshiba-wordpress) ([source](packages/wordpress/README.md)) plugin. Not a language client.
 
 ## How It Works
 
 Each package is a thin HTTPS client. Authenticate with a platform application token. Send through `POST /api/v1/emails`. Manage clusters, domains, inboxes, and the rest of the catalog from the same client.
 
-Mail adapters live in the language package. They call `emails.send`. The core client loads without Rails, Laravel, Django, Nest, or Swoosh.
+Mail adapters live in the language package. They call `emails.send`. The core client loads without Rails, Laravel, Django, Nest, or Swoosh. The WordPress plugin replaces wp_mail and lives in its own package.
 
 ## Testing
 

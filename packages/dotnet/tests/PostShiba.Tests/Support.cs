@@ -44,6 +44,7 @@ sealed class MockHandler : HttpMessageHandler
     public Uri? Uri { get; private set; }
     public string? Authorization { get; private set; }
     public string? IdempotencyKey { get; private set; }
+    public string? ClusterId { get; private set; }
     public string? Body { get; private set; }
     public Func<HttpResponseMessage> Respond { get; set; } = () => Json(HttpStatusCode.OK, "{}");
 
@@ -67,6 +68,9 @@ sealed class MockHandler : HttpMessageHandler
         IdempotencyKey = request.Headers.TryGetValues("Idempotency-Key", out var values)
             ? values.First()
             : null;
+        ClusterId = request.Headers.TryGetValues("X-Capsule-Cluster-Id", out var clusterValues)
+            ? clusterValues.First()
+            : null;
         Body = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
         return Respond();
     }
@@ -78,7 +82,7 @@ sealed class Harness : IDisposable
     public HttpClient Http { get; }
     public Client Client { get; }
 
-    public Harness(string? teamId = "1", string? baseUrl = "https://api.example.test", string apiKey = "test-key")
+    public Harness(string? teamId = "KjkAJW", string? baseUrl = "https://api.example.test", string apiKey = "test-key")
     {
         Http = new HttpClient(Handler);
         Client = new Client(apiKey, baseUrl, teamId, Http);

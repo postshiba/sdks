@@ -19,7 +19,7 @@ Open pull requests on [postshiba/sdks](https://github.com/postshiba/sdks).
 ## Send an email
 
 ```ruby
-postshiba = PostShiba.new(api_key: "ps_...", team_id: 1)
+postshiba = PostShiba.new(api_key: "ps_...", team_id: "KjkAJW")
 
 postshiba.send_email(
   from: "hello@mail.example.com",
@@ -28,6 +28,12 @@ postshiba.send_email(
   html: "<p>Hello</p>",
   text: "Hello"
 )
+```
+
+Pass `cluster_id` to send `X-Capsule-Cluster-Id`. The path stays `POST /api/v1/emails`.
+
+```ruby
+postshiba.send_email(body, cluster_id: "NmQpXr")
 ```
 
 Cluster send takes an idempotency key and a sandbox flag:
@@ -53,6 +59,17 @@ config.action_mailer.postshiba_settings = {
 
 Then `deliver_now` on any mailer. `to`, `from`, `subject`, `html`, `text`, and attachments map to `send_email`.
 
+Set `cluster_id` in `postshiba_settings` to send `X-Capsule-Cluster-Id`. A mail header of that name wins and is not copied into the JSON body.
+
+```ruby
+config.action_mailer.postshiba_settings = {
+  api_key: ENV["POSTSHIBA_API_KEY"],
+  cluster_id: "NmQpXr"
+}
+
+mail.header["X-Capsule-Cluster-Id"] = "NmQpXr"
+```
+
 Without Rails, require the adapter yourself:
 
 ```ruby
@@ -62,7 +79,7 @@ require "postshiba/action_mailer"
 ## API
 
 ```ruby
-postshiba = PostShiba.new(api_key: "ps_...", team_id: 1, base_url: "https://app.postshiba.com")
+postshiba = PostShiba.new(api_key: "ps_...", team_id: "KjkAJW", base_url: "https://app.postshiba.com")
 ```
 
 Users
@@ -75,7 +92,8 @@ Emails
 
 ```ruby
 postshiba.send_email(from: "hello@mail.example.com", to: ["you@example.com"], subject: "Hello", text: "Hello")
-postshiba.send_on_cluster(4, {from: "hello@mail.example.com", to: ["you@example.com"], subject: "Hello", text: "Hello"}, sandbox: true)
+postshiba.send_email({from: "hello@mail.example.com", to: ["you@example.com"], subject: "Hello", text: "Hello"}, cluster_id: "NmQpXr")
+postshiba.send_on_cluster("NmQpXr", {from: "hello@mail.example.com", to: ["you@example.com"], subject: "Hello", text: "Hello"}, sandbox: true)
 ```
 
 Clusters
@@ -95,7 +113,7 @@ Sending domains
 ```ruby
 postshiba.list_sending_domains
 postshiba.get_sending_domain(8)
-postshiba.create_sending_domain(sending_domain: {name: "mail.example.com", tenant_id: 12})
+postshiba.create_sending_domain(sending_domain: {name: "mail.example.com", tenant_id: "WbLcFd"})
 postshiba.verify_sending_domain(8)
 postshiba.suspend_sending_domain(8)
 postshiba.resume_sending_domain(8)
@@ -126,8 +144,8 @@ Messages
 
 ```ruby
 postshiba.list_messages(3)
-postshiba.get_message(3, 21)
-postshiba.download_attachment(3, 21, 1)
+postshiba.get_message("PqRzMn", "GxTyVu")
+postshiba.download_attachment("PqRzMn", "GxTyVu", 1)
 ```
 
 Events
@@ -140,8 +158,8 @@ postshiba.get_event(44)
 SMTP credentials
 
 ```ruby
-postshiba.create_smtp_credential(4, smtp_credential: {tenant_id: 12})
-postshiba.delete_smtp_credential(4, 9)
+postshiba.create_smtp_credential("NmQpXr", smtp_credential: {tenant_id: "WbLcFd"})
+postshiba.delete_smtp_credential("NmQpXr", "RvWsXq")
 ```
 
 Webhooks
@@ -149,7 +167,7 @@ Webhooks
 ```ruby
 postshiba.list_webhooks
 postshiba.get_webhook(2)
-postshiba.create_webhook(webhook_endpoint: {url: "https://hooks.example.com/capsule", event_types: ["delivered"], cluster_id: 4})
+postshiba.create_webhook(webhook_endpoint: {url: "https://hooks.example.com/capsule", event_types: ["delivered"], cluster_id: "NmQpXr"})
 postshiba.update_webhook(2, webhook_endpoint: {enabled: false, event_types: ["delivered", "bounce"]})
 postshiba.delete_webhook(2)
 ```
@@ -158,7 +176,7 @@ Suppressions
 
 ```ruby
 postshiba.list_suppressions
-postshiba.create_suppression(suppression: {email: "blocked@example.com", tenant_id: 12})
+postshiba.create_suppression(suppression: {email: "blocked@example.com", tenant_id: "WbLcFd"})
 postshiba.delete_suppression(7)
 ```
 

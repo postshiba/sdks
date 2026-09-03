@@ -20,7 +20,7 @@ Open pull requests on [postshiba/sdks](https://github.com/postshiba/sdks).
 ## Send an email
 
 ```dart
-final client = PostShiba("ps_xxx", teamId: 1);
+final client = PostShiba("ps_xxx", teamId: "KjkAJW");
 
 await client.emails.send({
   "from": "hello@mail.example.com",
@@ -29,6 +29,12 @@ await client.emails.send({
   "html": "<p>Hi</p>",
   "text": "Hi",
 });
+```
+
+Pass a cluster id to pin `X-Capsule-Cluster-Id`. Omit it and the header is not sent.
+
+```dart
+await client.emails.send({...}, clusterId: "NmQpXr");
 ```
 
 Cluster send accepts `Idempotency-Key` and `sandbox`:
@@ -53,14 +59,14 @@ await client.emails.sendOnCluster(
 final client = PostShiba(
   "ps_xxx",
   baseUrl: "https://app.postshiba.com",
-  teamId: 1,
+  teamId: "KjkAJW",
 );
 ```
 
 Inject `http.Client` in tests:
 
 ```dart
-PostShiba("ps_xxx", teamId: 1, httpClient: mock);
+PostShiba("ps_xxx", teamId: "KjkAJW", httpClient: mock);
 ```
 
 ### Users
@@ -72,104 +78,104 @@ await client.users.me();
 ### Emails
 
 ```dart
-await client.emails.send({...});
-await client.emails.sendOnCluster(4, {...}, sandbox: true);
+await client.emails.send({...}, clusterId: "NmQpXr");
+await client.emails.sendOnCluster("NmQpXr", {...}, sandbox: true);
 ```
 
 ### Clusters
 
 ```dart
 await client.clusters.list();
-await client.clusters.get(4);
+await client.clusters.get("NmQpXr");
 await client.clusters.create({
   "cluster": {"name": "edge", "size": "small", "region": "manual", "plan": "nano"},
 });
-await client.clusters.update(4, {
+await client.clusters.update("NmQpXr", {
   "cluster": {"plan": "small"},
 });
-await client.clusters.suspend(4);
-await client.clusters.resume(4);
-await client.clusters.delete(4);
+await client.clusters.suspend("NmQpXr");
+await client.clusters.resume("NmQpXr");
+await client.clusters.delete("NmQpXr");
 ```
 
 ### Sending domains
 
 ```dart
 await client.sendingDomains.list();
-await client.sendingDomains.get(8);
+await client.sendingDomains.get("HsVtYk");
 await client.sendingDomains.create({
-  "sending_domain": {"name": "mail.example.com", "tenant_id": 12},
+  "sending_domain": {"name": "mail.example.com", "tenant_id": "WbLcFd"},
 });
-await client.sendingDomains.verify(8);
-await client.sendingDomains.suspend(8);
-await client.sendingDomains.resume(8);
-await client.sendingDomains.makePrimary(8);
-await client.sendingDomains.delete(8);
+await client.sendingDomains.verify("HsVtYk");
+await client.sendingDomains.suspend("HsVtYk");
+await client.sendingDomains.resume("HsVtYk");
+await client.sendingDomains.makePrimary("HsVtYk");
+await client.sendingDomains.delete("HsVtYk");
 ```
 
 ### Tenants
 
 ```dart
 await client.tenants.list();
-await client.tenants.get(12);
+await client.tenants.get("WbLcFd");
 await client.tenants.create({
   "tenant": {"name": "Acme Florist"},
 });
-await client.tenants.delete(12);
+await client.tenants.delete("WbLcFd");
 ```
 
 ### Inboxes
 
 ```dart
 await client.inboxes.list();
-await client.inboxes.get(3);
+await client.inboxes.get("PqRzMn");
 await client.inboxes.create({
   "inbox": {"name": "agent", "webhook_url": "https://hooks.example.com/mail"},
 });
-await client.inboxes.verify(3);
-await client.inboxes.delete(3);
+await client.inboxes.verify("PqRzMn");
+await client.inboxes.delete("PqRzMn");
 ```
 
 ### Messages
 
 ```dart
-await client.messages.list(3);
-await client.messages.get(3, 21);
-await client.messages.downloadAttachment(3, 21, 1);
+await client.messages.list("PqRzMn");
+await client.messages.get("PqRzMn", "GxTyVu");
+await client.messages.downloadAttachment("PqRzMn", "GxTyVu", 1);
 ```
 
 ### Events
 
 ```dart
-await client.events.list(4);
-await client.events.get(44);
+await client.events.list("NmQpXr");
+await client.events.get("JkLmNp");
 ```
 
 ### SMTP credentials
 
 ```dart
-await client.smtpCredentials.create(4, {
-  "smtp_credential": {"tenant_id": 12},
+await client.smtpCredentials.create("NmQpXr", {
+  "smtp_credential": {"tenant_id": "WbLcFd"},
 });
-await client.smtpCredentials.delete(4, 9);
+await client.smtpCredentials.delete("NmQpXr", "RvWsXq");
 ```
 
 ### Webhooks
 
 ```dart
 await client.webhooks.list();
-await client.webhooks.get(2);
+await client.webhooks.get("CdFgHj");
 await client.webhooks.create({
   "webhook_endpoint": {
     "url": "https://hooks.example.com/capsule",
     "event_types": ["delivered", "bounce"],
-    "cluster_id": 4,
+    "cluster_id": "NmQpXr",
   },
 });
-await client.webhooks.update(2, {
+await client.webhooks.update("CdFgHj", {
   "webhook_endpoint": {"enabled": false, "event_types": ["delivered", "bounce"]},
 });
-await client.webhooks.delete(2);
+await client.webhooks.delete("CdFgHj");
 ```
 
 ### Suppressions
@@ -177,9 +183,9 @@ await client.webhooks.delete(2);
 ```dart
 await client.suppressions.list();
 await client.suppressions.create({
-  "suppression": {"email": "blocked@example.com", "tenant_id": 12},
+  "suppression": {"email": "blocked@example.com", "tenant_id": "WbLcFd"},
 });
-await client.suppressions.delete(7);
+await client.suppressions.delete("YtReWq");
 ```
 
 ### Firewall
@@ -194,7 +200,7 @@ await client.firewall.update({
 await client.firewall.addEntry({
   "firewall_entry": {"list": "deny", "value": "mailinator.com"},
 });
-await client.firewall.deleteEntry(3);
+await client.firewall.deleteEntry("BnMkLo");
 ```
 
 ## Verify webhooks

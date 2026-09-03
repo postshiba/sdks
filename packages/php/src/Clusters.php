@@ -13,7 +13,7 @@ class Clusters
         return $this->client->request('GET', '/api/v1/teams/'.$this->client->teamId().'/clusters');
     }
 
-    public function get(int|string $id): mixed
+    public function get(string $id): mixed
     {
         return $this->client->request('GET', '/api/v1/clusters/'.$id);
     }
@@ -23,22 +23,22 @@ class Clusters
         return $this->client->request('POST', '/api/v1/teams/'.$this->client->teamId().'/clusters', $params);
     }
 
-    public function update(int|string $id, array $params): mixed
+    public function update(string $id, array $params): mixed
     {
         return $this->client->request('PATCH', '/api/v1/clusters/'.$id, $params);
     }
 
-    public function suspend(int|string $id): mixed
+    public function suspend(string $id): mixed
     {
         return $this->client->request('POST', '/api/v1/clusters/'.$id.'/suspend');
     }
 
-    public function resume(int|string $id): mixed
+    public function resume(string $id): mixed
     {
         return $this->client->request('POST', '/api/v1/clusters/'.$id.'/resume');
     }
 
-    public function delete(int|string $id): mixed
+    public function delete(string $id): mixed
     {
         return $this->client->request('DELETE', '/api/v1/clusters/'.$id);
     }

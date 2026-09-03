@@ -32,10 +32,16 @@ client.emails.send(Map.of(
 ));
 ```
 
+Pass a cluster id to pin `X-Capsule-Cluster-Id`. Omit it and the header is not sent.
+
+```java
+client.emails.send(body, new PostShiba.SendOptions().clusterId("NmQpXr"));
+```
+
 Cluster send can add `Idempotency-Key` and `"sandbox": true`.
 
 ```java
-PostShiba client = new PostShiba("ps_...", new PostShiba.Options().teamId(1));
+PostShiba client = new PostShiba("ps_...", new PostShiba.Options().teamId("KjkAJW"));
 
 client.emails.sendOnCluster(
 	4,
@@ -47,68 +53,68 @@ client.emails.sendOnCluster(
 ## API
 
 ```java
-PostShiba client = new PostShiba("ps_...", new PostShiba.Options().teamId(1));
+PostShiba client = new PostShiba("ps_...", new PostShiba.Options().teamId("KjkAJW"));
 
 client.users.me();
 
 client.clusters.list();
-client.clusters.get(4);
+client.clusters.get("NmQpXr");
 client.clusters.create(Map.of("cluster", Map.of("name", "edge", "size", "small", "region", "manual", "plan", "nano")));
-client.clusters.update(4, Map.of("cluster", Map.of("plan", "small")));
-client.clusters.suspend(4);
-client.clusters.resume(4);
-client.clusters.delete(4);
+client.clusters.update("NmQpXr", Map.of("cluster", Map.of("plan", "small")));
+client.clusters.suspend("NmQpXr");
+client.clusters.resume("NmQpXr");
+client.clusters.delete("NmQpXr");
 
 client.sendingDomains.list();
-client.sendingDomains.get(8);
-client.sendingDomains.create(Map.of("sending_domain", Map.of("name", "mail.example.com", "tenant_id", 12)));
-client.sendingDomains.verify(8);
-client.sendingDomains.suspend(8);
-client.sendingDomains.resume(8);
-client.sendingDomains.makePrimary(8);
-client.sendingDomains.delete(8);
+client.sendingDomains.get("HsVtYk");
+client.sendingDomains.create(Map.of("sending_domain", Map.of("name", "mail.example.com", "tenant_id", "WbLcFd")));
+client.sendingDomains.verify("HsVtYk");
+client.sendingDomains.suspend("HsVtYk");
+client.sendingDomains.resume("HsVtYk");
+client.sendingDomains.makePrimary("HsVtYk");
+client.sendingDomains.delete("HsVtYk");
 
 client.tenants.list();
-client.tenants.get(12);
+client.tenants.get("WbLcFd");
 client.tenants.create(Map.of("tenant", Map.of("name", "Acme Florist")));
-client.tenants.delete(12);
+client.tenants.delete("WbLcFd");
 
 client.inboxes.list();
-client.inboxes.get(3);
+client.inboxes.get("PqRzMn");
 client.inboxes.create(Map.of("inbox", Map.of("name", "agent", "webhook_url", "https://hooks.example.com/mail")));
-client.inboxes.verify(3);
-client.inboxes.delete(3);
+client.inboxes.verify("PqRzMn");
+client.inboxes.delete("PqRzMn");
 
-client.messages.list(3);
-client.messages.get(3, 21);
-client.messages.downloadAttachment(3, 21, 1);
+client.messages.list("PqRzMn");
+client.messages.get("PqRzMn", "GxTyVu");
+client.messages.downloadAttachment("PqRzMn", "GxTyVu", 1);
 
-client.events.list(4);
-client.events.get(44);
+client.events.list("NmQpXr");
+client.events.get("JkLmNp");
 
-client.smtpCredentials.create(4, Map.of("smtp_credential", Map.of("tenant_id", 12)));
-client.smtpCredentials.delete(4, 9);
+client.smtpCredentials.create("NmQpXr", Map.of("smtp_credential", Map.of("tenant_id", "WbLcFd")));
+client.smtpCredentials.delete("NmQpXr", "RvWsXq");
 
 client.webhooks.list();
-client.webhooks.get(2);
+client.webhooks.get("CdFgHj");
 client.webhooks.create(Map.of(
 	"webhook_endpoint",
-	Map.of("url", "https://hooks.example.com/capsule", "event_types", List.of("delivered", "bounce"), "cluster_id", 4)
+	Map.of("url", "https://hooks.example.com/capsule", "event_types", List.of("delivered", "bounce"), "cluster_id", "NmQpXr")
 ));
-client.webhooks.update(2, Map.of(
+client.webhooks.update("CdFgHj", Map.of(
 	"webhook_endpoint",
 	Map.of("enabled", false, "event_types", List.of("delivered", "bounce"))
 ));
-client.webhooks.delete(2);
+client.webhooks.delete("CdFgHj");
 
 client.suppressions.list();
-client.suppressions.create(Map.of("suppression", Map.of("email", "blocked@example.com", "tenant_id", 12)));
-client.suppressions.delete(7);
+client.suppressions.create(Map.of("suppression", Map.of("email", "blocked@example.com", "tenant_id", "WbLcFd")));
+client.suppressions.delete("YtReWq");
 
 client.firewall.get();
 client.firewall.update(Map.of("firewall", Map.of("enabled_checks", List.of("temp_providers", "plus_addressing"))));
 client.firewall.addEntry(Map.of("firewall_entry", Map.of("list", "deny", "value", "mailinator.com")));
-client.firewall.deleteEntry(3);
+client.firewall.deleteEntry("BnMkLo");
 ```
 
 Responses are Jackson `JsonNode` trees. Request bodies are maps or other JSON-serializable objects.

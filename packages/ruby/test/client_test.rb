@@ -5,17 +5,17 @@ require "test_helper"
 class ClientTest < Minitest::Test
   include FixtureHelper
 
-  TEAM = 1
-  CLUSTER = 4
-  SENDING_DOMAIN = 8
-  TENANT = 12
-  INBOX = 3
-  MESSAGE = 21
-  EVENT = 44
-  SMTP = 9
-  SUPPRESSION = 7
-  FIREWALL_ENTRY = 3
-  WEBHOOK = 2
+  TEAM = "KjkAJW"
+  CLUSTER = "NmQpXr"
+  SENDING_DOMAIN = "HsVtYk"
+  TENANT = "WbLcFd"
+  INBOX = "PqRzMn"
+  MESSAGE = "GxTyVu"
+  EVENT = "JkLmNp"
+  SMTP = "RvWsXq"
+  SUPPRESSION = "YtReWq"
+  FIREWALL_ENTRY = "BnMkLo"
+  WEBHOOK = "CdFgHj"
 
   def setup
     @client = PostShiba.new(api_key: "test-key", team_id: TEAM, base_url: "https://api.example.test")
@@ -42,8 +42,28 @@ class ClientTest < Minitest::Test
   end
 
   def test_send_email_happy_path
-    stub_json(:post, "/api/v1/emails", "email_send_response", request: fixture("email_send_request"))
+    stub_request(:post, "https://api.example.test/api/v1/emails")
+      .with { |req|
+        req.headers["Authorization"] == "Bearer test-key" &&
+          req.headers["X-Capsule-Cluster-Id"].nil? &&
+          JSON.parse(req.body) == fixture("email_send_request")
+      }
+      .to_return(status: 200, body: fixture_json("email_send_response"), headers: {"Content-Type" => "application/json"})
+
     assert_equal fixture("email_send_response"), @client.send_email(fixture("email_send_request"))
+  end
+
+  def test_send_email_with_cluster_id
+    stub_request(:post, "https://api.example.test/api/v1/emails")
+      .with { |req|
+        req.headers["Authorization"] == "Bearer test-key" &&
+          req.headers["X-Capsule-Cluster-Id"] == "NmQpXr" &&
+          JSON.parse(req.body) == fixture("email_send_request")
+      }
+      .to_return(status: 200, body: fixture_json("email_send_response"), headers: {"Content-Type" => "application/json"})
+
+    result = @client.send_email(fixture("email_send_request"), cluster_id: CLUSTER)
+    assert_equal fixture("email_send_response"), result
   end
 
   def test_send_on_cluster_idempotency_and_sandbox

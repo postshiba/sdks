@@ -13,7 +13,7 @@ class Inboxes
         return $this->client->request('GET', '/api/v1/teams/'.$this->client->teamId().'/inboxes');
     }
 
-    public function get(int|string $id): mixed
+    public function get(string $id): mixed
     {
         return $this->client->request('GET', '/api/v1/inboxes/'.$id);
     }
@@ -23,12 +23,12 @@ class Inboxes
         return $this->client->request('POST', '/api/v1/teams/'.$this->client->teamId().'/inboxes', $params);
     }
 
-    public function verify(int|string $id): mixed
+    public function verify(string $id): mixed
     {
         return $this->client->request('POST', '/api/v1/inboxes/'.$id.'/verify');
     }
 
-    public function delete(int|string $id): mixed
+    public function delete(string $id): mixed
     {
         return $this->client->request('DELETE', '/api/v1/inboxes/'.$id);
     }

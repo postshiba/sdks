@@ -21,7 +21,7 @@ Send mail with `emails.send`. Nest services inject the same client and call that
 ```ts
 import { PostShiba } from "postshiba"
 
-const postshiba = new PostShiba(process.env.POSTSHIBA_API_KEY, { teamId: 1 })
+const postshiba = new PostShiba(process.env.POSTSHIBA_API_KEY, { teamId: "KjkAJW" })
 
 await postshiba.emails.send({
 	from: "hello@mail.example.com",
@@ -32,10 +32,16 @@ await postshiba.emails.send({
 })
 ```
 
+Pass `clusterId` to send `X-Capsule-Cluster-Id`. The path stays `POST /api/v1/emails`.
+
+```ts
+await postshiba.emails.send(body, { clusterId: "NmQpXr" })
+```
+
 Cluster send can set `sandbox` and send `Idempotency-Key`:
 
 ```ts
-await postshiba.emails.sendOnCluster(4, body, {
+await postshiba.emails.sendOnCluster("NmQpXr", body, {
 	sandbox: true,
 	idempotencyKey: "ikey-1",
 })
@@ -54,7 +60,7 @@ import type { PostShiba } from "postshiba"
 	imports: [
 		PostShibaModule.register({
 			apiKey: process.env.POSTSHIBA_API_KEY!,
-			teamId: 1,
+			teamId: "KjkAJW",
 		}),
 	],
 })
@@ -76,7 +82,7 @@ export class MailService {
 }
 ```
 
-`sendMail` maps `to`, `from`, `subject`, `html`, `text`, and `attachments` onto `emails.send`. You can also call `this.postshiba.emails.send` directly.
+`sendMail` maps `to`, `from`, `subject`, `html`, `text`, and `attachments` onto `emails.send`. It does not pass a cluster id. Call `this.postshiba.emails.send(body, { clusterId: "NmQpXr" })` to pin a cluster.
 
 ## API
 
@@ -84,7 +90,7 @@ Override `baseUrl` when you are not on production.
 
 ```ts
 new PostShiba(process.env.POSTSHIBA_API_KEY, {
-	teamId: 1,
+	teamId: "KjkAJW",
 	baseUrl: "https://app.postshiba.com",
 })
 ```
@@ -99,73 +105,74 @@ await postshiba.users.me()
 
 ```ts
 await postshiba.emails.send(body)
-await postshiba.emails.sendOnCluster(4, body, { sandbox: true })
+await postshiba.emails.send(body, { clusterId: "NmQpXr" })
+await postshiba.emails.sendOnCluster("NmQpXr", body, { sandbox: true })
 ```
 
 ### Clusters
 
 ```ts
 await postshiba.clusters.list()
-await postshiba.clusters.get(4)
+await postshiba.clusters.get("NmQpXr")
 await postshiba.clusters.create({ cluster: { name: "edge", size: "small", region: "manual", plan: "nano" } })
-await postshiba.clusters.update(4, { cluster: { plan: "small" } })
-await postshiba.clusters.suspend(4)
-await postshiba.clusters.resume(4)
-await postshiba.clusters.delete(4)
+await postshiba.clusters.update("NmQpXr", { cluster: { plan: "small" } })
+await postshiba.clusters.suspend("NmQpXr")
+await postshiba.clusters.resume("NmQpXr")
+await postshiba.clusters.delete("NmQpXr")
 ```
 
 ### Sending domains
 
 ```ts
 await postshiba.sendingDomains.list()
-await postshiba.sendingDomains.get(8)
-await postshiba.sendingDomains.create({ sending_domain: { name: "mail.example.com", tenant_id: 12 } })
-await postshiba.sendingDomains.verify(8)
-await postshiba.sendingDomains.suspend(8)
-await postshiba.sendingDomains.resume(8)
-await postshiba.sendingDomains.makePrimary(8)
-await postshiba.sendingDomains.delete(8)
+await postshiba.sendingDomains.get("HsVtYk")
+await postshiba.sendingDomains.create({ sending_domain: { name: "mail.example.com", tenant_id: "WbLcFd" } })
+await postshiba.sendingDomains.verify("HsVtYk")
+await postshiba.sendingDomains.suspend("HsVtYk")
+await postshiba.sendingDomains.resume("HsVtYk")
+await postshiba.sendingDomains.makePrimary("HsVtYk")
+await postshiba.sendingDomains.delete("HsVtYk")
 ```
 
 ### Tenants
 
 ```ts
 await postshiba.tenants.list()
-await postshiba.tenants.get(12)
+await postshiba.tenants.get("WbLcFd")
 await postshiba.tenants.create({ tenant: { name: "Acme Florist" } })
-await postshiba.tenants.delete(12)
+await postshiba.tenants.delete("WbLcFd")
 ```
 
 ### Inboxes
 
 ```ts
 await postshiba.inboxes.list()
-await postshiba.inboxes.get(3)
+await postshiba.inboxes.get("PqRzMn")
 await postshiba.inboxes.create({ inbox: { name: "agent", webhook_url: "https://hooks.example.com/mail" } })
-await postshiba.inboxes.verify(3)
-await postshiba.inboxes.delete(3)
+await postshiba.inboxes.verify("PqRzMn")
+await postshiba.inboxes.delete("PqRzMn")
 ```
 
 ### Messages
 
 ```ts
-await postshiba.messages.list(3)
-await postshiba.messages.get(3, 21)
-await postshiba.messages.downloadAttachment(3, 21, 1)
+await postshiba.messages.list("PqRzMn")
+await postshiba.messages.get("PqRzMn", "GxTyVu")
+await postshiba.messages.downloadAttachment("PqRzMn", "GxTyVu", 1)
 ```
 
 ### Events
 
 ```ts
-await postshiba.events.list(4)
-await postshiba.events.get(44)
+await postshiba.events.list("NmQpXr")
+await postshiba.events.get("JkLmNp")
 ```
 
 ### SMTP credentials
 
 ```ts
-await postshiba.smtpCredentials.create(4, { smtp_credential: { tenant_id: 12 } })
-await postshiba.smtpCredentials.delete(4, 9)
+await postshiba.smtpCredentials.create("NmQpXr", { smtp_credential: { tenant_id: "WbLcFd" } })
+await postshiba.smtpCredentials.delete("NmQpXr", "RvWsXq")
 ```
 
 Create returns `password`. Delete does not.
@@ -174,18 +181,18 @@ Create returns `password`. Delete does not.
 
 ```ts
 await postshiba.webhooks.list()
-await postshiba.webhooks.get(2)
+await postshiba.webhooks.get("CdFgHj")
 await postshiba.webhooks.create({
 	webhook_endpoint: {
 		url: "https://hooks.example.com/capsule",
 		event_types: ["delivered", "bounce"],
-		cluster_id: 4,
+		cluster_id: "NmQpXr",
 	},
 })
-await postshiba.webhooks.update(2, {
+await postshiba.webhooks.update("CdFgHj", {
 	webhook_endpoint: { enabled: false, event_types: ["delivered", "bounce"] },
 })
-await postshiba.webhooks.delete(2)
+await postshiba.webhooks.delete("CdFgHj")
 ```
 
 List and update omit `secret`. Get and create return it.
@@ -194,8 +201,8 @@ List and update omit `secret`. Get and create return it.
 
 ```ts
 await postshiba.suppressions.list()
-await postshiba.suppressions.create({ suppression: { email: "blocked@example.com", tenant_id: 12 } })
-await postshiba.suppressions.delete(7)
+await postshiba.suppressions.create({ suppression: { email: "blocked@example.com", tenant_id: "WbLcFd" } })
+await postshiba.suppressions.delete("YtReWq")
 ```
 
 ### Firewall
@@ -204,7 +211,7 @@ await postshiba.suppressions.delete(7)
 await postshiba.firewall.get()
 await postshiba.firewall.update({ firewall: { enabled_checks: ["temp_providers", "plus_addressing"] } })
 await postshiba.firewall.addEntry({ firewall_entry: { list: "deny", value: "mailinator.com" } })
-await postshiba.firewall.deleteEntry(3)
+await postshiba.firewall.deleteEntry("BnMkLo")
 ```
 
 ## Verify webhooks

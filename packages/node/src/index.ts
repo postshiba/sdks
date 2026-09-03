@@ -1,11 +1,15 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-export type Id = number | string;
+export type Id = string;
 export type Json = Record<string, unknown>;
 
 export type PostShibaOptions = {
   baseUrl?: string;
   teamId?: Id;
+};
+
+export type SendOptions = {
+  clusterId?: Id;
 };
 
 export type ClusterSendOptions = {
@@ -94,7 +98,13 @@ export class PostShiba {
   };
 
   readonly emails = {
-    send: (body: Json) => this.request("POST", "/api/v1/emails", { body }),
+    send: (body: Json, options: SendOptions = {}) => {
+      const headers: Record<string, string> = {};
+      if (options.clusterId !== undefined && options.clusterId !== null && options.clusterId !== "") {
+        headers["X-Capsule-Cluster-Id"] = String(options.clusterId);
+      }
+      return this.request("POST", "/api/v1/emails", { body, headers });
+    },
     sendOnCluster: (clusterId: Id, body: Json, options: ClusterSendOptions = {}) => {
       const payload = options.sandbox ? { ...body, sandbox: true } : body;
       const headers: Record<string, string> = {};
@@ -142,7 +152,7 @@ export class PostShiba {
   readonly messages = {
     list: (inboxId: Id) => this.request("GET", `/api/v1/inboxes/${inboxId}/inbound_messages`),
     get: (inboxId: Id, id: Id) => this.request("GET", `/api/v1/inboxes/${inboxId}/inbound_messages/${id}`),
-    downloadAttachment: (inboxId: Id, id: Id, index: Id) =>
+    downloadAttachment: (inboxId: Id, id: Id, index: number) =>
       this.request("GET", `/api/v1/inboxes/${inboxId}/inbound_messages/${id}/attachments/${index}`, { binary: true }),
   };
 

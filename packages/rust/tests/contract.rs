@@ -7,17 +7,17 @@ use std::path::PathBuf;
 use std::sync::mpsc;
 use std::thread;
 
-const TEAM: u64 = 1;
-const CLUSTER: u64 = 4;
-const SENDING_DOMAIN: u64 = 8;
-const TENANT: u64 = 12;
-const INBOX: u64 = 3;
-const MESSAGE: u64 = 21;
-const EVENT: u64 = 44;
-const SMTP_CREDENTIAL: u64 = 9;
-const SUPPRESSION: u64 = 7;
-const FIREWALL_ENTRY: u64 = 3;
-const WEBHOOK: u64 = 2;
+const TEAM: &str = "KjkAJW";
+const CLUSTER: &str = "NmQpXr";
+const SENDING_DOMAIN: &str = "HsVtYk";
+const TENANT: &str = "WbLcFd";
+const INBOX: &str = "PqRzMn";
+const MESSAGE: &str = "GxTyVu";
+const EVENT: &str = "JkLmNp";
+const SMTP_CREDENTIAL: &str = "RvWsXq";
+const SUPPRESSION: &str = "YtReWq";
+const FIREWALL_ENTRY: &str = "BnMkLo";
+const WEBHOOK: &str = "CdFgHj";
 
 struct Recorded {
     method: String,
@@ -174,6 +174,19 @@ fn emails_send_happy_path() {
     assert_eq!(recorded.path, "/api/v1/emails");
     assert_eq!(recorded.json(), body);
     assert_eq!(got["queued"], true);
+    assert_eq!(recorded.header("x-capsule-cluster-id"), None);
+}
+
+#[test]
+fn emails_send_pins_cluster() {
+    let body = fixture("email_send_request");
+    let (got, recorded) = ok(&fixture("email_send_response"), |c| {
+        c.emails().send_with(&body, CLUSTER)
+    });
+    assert_eq!(got, fixture("email_send_response"));
+    assert_eq!(recorded.method, "POST");
+    assert_eq!(recorded.path, "/api/v1/emails");
+    assert_eq!(recorded.header("x-capsule-cluster-id"), Some("NmQpXr"));
 }
 
 #[test]
@@ -235,7 +248,7 @@ fn every_catalog_method() {
         ),
         (
             "POST",
-            "/api/v1/teams/1/clusters/4/sends",
+            "/api/v1/teams/KjkAJW/clusters/NmQpXr/sends",
             fixture("email_sandbox_response"),
             Box::new({
                 let email = email.clone();
@@ -244,19 +257,19 @@ fn every_catalog_method() {
         ),
         (
             "GET",
-            "/api/v1/teams/1/clusters",
+            "/api/v1/teams/KjkAJW/clusters",
             array("cluster"),
             Box::new(|c| c.clusters().list()),
         ),
         (
             "GET",
-            "/api/v1/clusters/4",
+            "/api/v1/clusters/NmQpXr",
             fixture("cluster"),
             Box::new(|c| c.clusters().get(CLUSTER)),
         ),
         (
             "POST",
-            "/api/v1/teams/1/clusters",
+            "/api/v1/teams/KjkAJW/clusters",
             fixture("cluster"),
             Box::new({
                 let cluster_create = cluster_create.clone();
@@ -265,7 +278,7 @@ fn every_catalog_method() {
         ),
         (
             "PATCH",
-            "/api/v1/clusters/4",
+            "/api/v1/clusters/NmQpXr",
             fixture("cluster_updated"),
             Box::new({
                 let cluster_update = cluster_update.clone();
@@ -274,37 +287,37 @@ fn every_catalog_method() {
         ),
         (
             "POST",
-            "/api/v1/clusters/4/suspend",
+            "/api/v1/clusters/NmQpXr/suspend",
             fixture("cluster_suspended"),
             Box::new(|c| c.clusters().suspend(CLUSTER)),
         ),
         (
             "POST",
-            "/api/v1/clusters/4/resume",
+            "/api/v1/clusters/NmQpXr/resume",
             fixture("cluster"),
             Box::new(|c| c.clusters().resume(CLUSTER)),
         ),
         (
             "DELETE",
-            "/api/v1/clusters/4",
+            "/api/v1/clusters/NmQpXr",
             fixture("cluster_deprovisioned"),
             Box::new(|c| c.clusters().delete(CLUSTER)),
         ),
         (
             "GET",
-            "/api/v1/teams/1/sending_domains",
+            "/api/v1/teams/KjkAJW/sending_domains",
             array("sending_domain"),
             Box::new(|c| c.sending_domains().list()),
         ),
         (
             "GET",
-            "/api/v1/sending_domains/8",
+            "/api/v1/sending_domains/HsVtYk",
             fixture("sending_domain"),
             Box::new(|c| c.sending_domains().get(SENDING_DOMAIN)),
         ),
         (
             "POST",
-            "/api/v1/teams/1/sending_domains",
+            "/api/v1/teams/KjkAJW/sending_domains",
             fixture("sending_domain"),
             Box::new({
                 let domain_create = domain_create.clone();
@@ -313,49 +326,49 @@ fn every_catalog_method() {
         ),
         (
             "POST",
-            "/api/v1/sending_domains/8/verify",
+            "/api/v1/sending_domains/HsVtYk/verify",
             fixture("sending_domain"),
             Box::new(|c| c.sending_domains().verify(SENDING_DOMAIN)),
         ),
         (
             "POST",
-            "/api/v1/sending_domains/8/suspend",
+            "/api/v1/sending_domains/HsVtYk/suspend",
             fixture("sending_domain_suspended"),
             Box::new(|c| c.sending_domains().suspend(SENDING_DOMAIN)),
         ),
         (
             "POST",
-            "/api/v1/sending_domains/8/resume",
+            "/api/v1/sending_domains/HsVtYk/resume",
             fixture("sending_domain"),
             Box::new(|c| c.sending_domains().resume(SENDING_DOMAIN)),
         ),
         (
             "POST",
-            "/api/v1/sending_domains/8/make_primary",
+            "/api/v1/sending_domains/HsVtYk/make_primary",
             fixture("sending_domain_primary"),
             Box::new(|c| c.sending_domains().make_primary(SENDING_DOMAIN)),
         ),
         (
             "DELETE",
-            "/api/v1/sending_domains/8",
+            "/api/v1/sending_domains/HsVtYk",
             fixture("empty"),
             Box::new(|c| c.sending_domains().delete(SENDING_DOMAIN)),
         ),
         (
             "GET",
-            "/api/v1/teams/1/tenants",
+            "/api/v1/teams/KjkAJW/tenants",
             array("tenant"),
             Box::new(|c| c.tenants().list()),
         ),
         (
             "GET",
-            "/api/v1/tenants/12",
+            "/api/v1/tenants/WbLcFd",
             fixture("tenant"),
             Box::new(|c| c.tenants().get(TENANT)),
         ),
         (
             "POST",
-            "/api/v1/teams/1/tenants",
+            "/api/v1/teams/KjkAJW/tenants",
             fixture("tenant"),
             Box::new({
                 let tenant_create = tenant_create.clone();
@@ -364,25 +377,25 @@ fn every_catalog_method() {
         ),
         (
             "DELETE",
-            "/api/v1/tenants/12",
+            "/api/v1/tenants/WbLcFd",
             fixture("empty"),
             Box::new(|c| c.tenants().delete(TENANT)),
         ),
         (
             "GET",
-            "/api/v1/teams/1/inboxes",
+            "/api/v1/teams/KjkAJW/inboxes",
             array("inbox_index"),
             Box::new(|c| c.inboxes().list()),
         ),
         (
             "GET",
-            "/api/v1/inboxes/3",
+            "/api/v1/inboxes/PqRzMn",
             fixture("inbox"),
             Box::new(|c| c.inboxes().get(INBOX)),
         ),
         (
             "POST",
-            "/api/v1/teams/1/inboxes",
+            "/api/v1/teams/KjkAJW/inboxes",
             fixture("inbox"),
             Box::new({
                 let inbox_create = inbox_create.clone();
@@ -391,43 +404,43 @@ fn every_catalog_method() {
         ),
         (
             "POST",
-            "/api/v1/inboxes/3/verify",
+            "/api/v1/inboxes/PqRzMn/verify",
             fixture("inbox_index"),
             Box::new(|c| c.inboxes().verify(INBOX)),
         ),
         (
             "DELETE",
-            "/api/v1/inboxes/3",
+            "/api/v1/inboxes/PqRzMn",
             fixture("inbox_index"),
             Box::new(|c| c.inboxes().delete(INBOX)),
         ),
         (
             "GET",
-            "/api/v1/inboxes/3/inbound_messages",
+            "/api/v1/inboxes/PqRzMn/inbound_messages",
             array("message"),
             Box::new(|c| c.messages().list(INBOX)),
         ),
         (
             "GET",
-            "/api/v1/inboxes/3/inbound_messages/21",
+            "/api/v1/inboxes/PqRzMn/inbound_messages/GxTyVu",
             fixture("message_show"),
             Box::new(|c| c.messages().get(INBOX, MESSAGE)),
         ),
         (
             "GET",
-            "/api/v1/teams/1/clusters/4/message_events",
+            "/api/v1/teams/KjkAJW/clusters/NmQpXr/message_events",
             array("event"),
             Box::new(|c| c.events().list(CLUSTER)),
         ),
         (
             "GET",
-            "/api/v1/message_events/44",
+            "/api/v1/message_events/JkLmNp",
             fixture("event"),
             Box::new(|c| c.events().get(EVENT)),
         ),
         (
             "POST",
-            "/api/v1/teams/1/clusters/4/smtp_credentials",
+            "/api/v1/teams/KjkAJW/clusters/NmQpXr/smtp_credentials",
             fixture("smtp_credential_create"),
             Box::new({
                 let smtp_create = smtp_create.clone();
@@ -436,25 +449,25 @@ fn every_catalog_method() {
         ),
         (
             "DELETE",
-            "/api/v1/teams/1/clusters/4/smtp_credentials/9",
+            "/api/v1/teams/KjkAJW/clusters/NmQpXr/smtp_credentials/RvWsXq",
             fixture("smtp_credential_deleted"),
             Box::new(|c| c.smtp_credentials().delete(CLUSTER, SMTP_CREDENTIAL)),
         ),
         (
             "GET",
-            "/api/v1/teams/1/webhook_endpoints",
+            "/api/v1/teams/KjkAJW/webhook_endpoints",
             array("webhook"),
             Box::new(|c| c.webhooks().list()),
         ),
         (
             "GET",
-            "/api/v1/webhook_endpoints/2",
+            "/api/v1/webhook_endpoints/CdFgHj",
             fixture("webhook_show"),
             Box::new(|c| c.webhooks().get(WEBHOOK)),
         ),
         (
             "POST",
-            "/api/v1/teams/1/webhook_endpoints",
+            "/api/v1/teams/KjkAJW/webhook_endpoints",
             fixture("webhook_show"),
             Box::new({
                 let webhook_create = webhook_create.clone();
@@ -463,7 +476,7 @@ fn every_catalog_method() {
         ),
         (
             "PATCH",
-            "/api/v1/webhook_endpoints/2",
+            "/api/v1/webhook_endpoints/CdFgHj",
             fixture("webhook"),
             Box::new({
                 let webhook_update = webhook_update.clone();
@@ -472,19 +485,19 @@ fn every_catalog_method() {
         ),
         (
             "DELETE",
-            "/api/v1/webhook_endpoints/2",
+            "/api/v1/webhook_endpoints/CdFgHj",
             fixture("empty"),
             Box::new(|c| c.webhooks().delete(WEBHOOK)),
         ),
         (
             "GET",
-            "/api/v1/teams/1/suppressions",
+            "/api/v1/teams/KjkAJW/suppressions",
             array("suppression"),
             Box::new(|c| c.suppressions().list()),
         ),
         (
             "POST",
-            "/api/v1/teams/1/suppressions",
+            "/api/v1/teams/KjkAJW/suppressions",
             fixture("suppression"),
             Box::new({
                 let suppression_create = suppression_create.clone();
@@ -493,19 +506,19 @@ fn every_catalog_method() {
         ),
         (
             "DELETE",
-            "/api/v1/suppressions/7",
+            "/api/v1/suppressions/YtReWq",
             fixture("empty"),
             Box::new(|c| c.suppressions().delete(SUPPRESSION)),
         ),
         (
             "GET",
-            "/api/v1/teams/1/firewall",
+            "/api/v1/teams/KjkAJW/firewall",
             fixture("firewall"),
             Box::new(|c| c.firewall().get()),
         ),
         (
             "PATCH",
-            "/api/v1/teams/1/firewall",
+            "/api/v1/teams/KjkAJW/firewall",
             fixture("firewall"),
             Box::new({
                 let firewall_update = firewall_update.clone();
@@ -514,7 +527,7 @@ fn every_catalog_method() {
         ),
         (
             "POST",
-            "/api/v1/teams/1/firewall_entries",
+            "/api/v1/teams/KjkAJW/firewall_entries",
             fixture("firewall_entry"),
             Box::new({
                 let firewall_entry = firewall_entry.clone();
@@ -523,7 +536,7 @@ fn every_catalog_method() {
         ),
         (
             "DELETE",
-            "/api/v1/firewall_entries/3",
+            "/api/v1/firewall_entries/BnMkLo",
             fixture("empty"),
             Box::new(|c| c.firewall().delete_entry(FIREWALL_ENTRY)),
         ),
@@ -551,7 +564,7 @@ fn every_catalog_method() {
     assert_eq!(recorded.method, "GET");
     assert_eq!(
         recorded.path,
-        "/api/v1/inboxes/3/inbound_messages/21/attachments/1"
+        "/api/v1/inboxes/PqRzMn/inbound_messages/GxTyVu/attachments/1"
     );
 }
 

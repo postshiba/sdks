@@ -42,7 +42,7 @@ defmodule PostShiba.Swoosh.AdapterTest do
 
   test "deliver sends the mapped payload through emails.send" do
     bypass = Bypass.open()
-    client = PostShiba.new("sk_test", "http://127.0.0.1:#{bypass.port}", 1)
+    client = PostShiba.new("sk_test", "http://127.0.0.1:#{bypass.port}", "KjkAJW")
 
     Bypass.expect(bypass, "POST", "/api/v1/emails", fn conn ->
       body =

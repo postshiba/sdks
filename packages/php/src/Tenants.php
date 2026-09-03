@@ -13,7 +13,7 @@ class Tenants
         return $this->client->request('GET', '/api/v1/teams/'.$this->client->teamId().'/tenants');
     }
 
-    public function get(int|string $id): mixed
+    public function get(string $id): mixed
     {
         return $this->client->request('GET', '/api/v1/tenants/'.$id);
     }
@@ -23,7 +23,7 @@ class Tenants
         return $this->client->request('POST', '/api/v1/teams/'.$this->client->teamId().'/tenants', $params);
     }
 
-    public function delete(int|string $id): mixed
+    public function delete(string $id): mixed
     {
         return $this->client->request('DELETE', '/api/v1/tenants/'.$id);
     }

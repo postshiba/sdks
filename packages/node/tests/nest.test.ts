@@ -15,14 +15,14 @@ describe("PostShibaModule", () => {
   });
 
   it("provides a PostShiba client", () => {
-    const mod = PostShibaModule.register({ apiKey: "sk_test", teamId: 1, baseUrl: "https://api.example.test" });
+    const mod = PostShibaModule.register({ apiKey: "sk_test", teamId: "KjkAJW", baseUrl: "https://api.example.test" });
     expect(mod.exports).toContain(POSTSHIBA);
     const provider = (mod.providers ?? []).find((item) => typeof item === "object" && "provide" in item && item.provide === POSTSHIBA) as {
       useValue: PostShiba;
     };
     expect(provider.useValue).toBeInstanceOf(PostShiba);
     expect(provider.useValue.apiKey).toBe("sk_test");
-    expect(provider.useValue.teamId).toBe(1);
+    expect(provider.useValue.teamId).toBe("KjkAJW");
     expect(provider.useValue.baseUrl).toBe("https://api.example.test");
   });
 
@@ -33,7 +33,7 @@ describe("PostShibaModule", () => {
         headers: { "content-type": "application/json" },
       }),
     );
-    const client = new PostShiba("sk_test", { teamId: 1 });
+    const client = new PostShiba("sk_test", { teamId: "KjkAJW" });
     await sendMail(client, {
       from: "hello@mail.example.com",
       to: "you@example.com",

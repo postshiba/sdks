@@ -29,7 +29,7 @@ A thin HTTPS client. You pass a platform application token. Calls go to `/api/v1
 ```php
 use PostShiba\PostShiba;
 
-$client = new PostShiba(getenv('POSTSHIBA_API_KEY'), null, 1);
+$client = new PostShiba(getenv('POSTSHIBA_API_KEY'), null, 'KjkAJW');
 
 $client->emails->send([
     'from' => 'hello@mail.example.com',
@@ -40,15 +40,21 @@ $client->emails->send([
 ]);
 ```
 
+Pass a cluster id to send `X-Capsule-Cluster-Id`. The path stays `POST /api/v1/emails`.
+
+```php
+$client->emails->send($params, 'NmQpXr');
+```
+
 Cluster send with an idempotency key and sandbox:
 
 ```php
-$client->emails->sendOnCluster(4, $params, 'idem-1', true);
+$client->emails->sendOnCluster("NmQpXr", $params, 'idem-1', true);
 ```
 
 ## Mail adapter
 
-The HTTP client loads without Laravel or Symfony. Adapters live in optional files and call `emails.send`.
+The HTTP client loads without Laravel or Symfony. Adapters live in optional files and call `emails.send` without a cluster id. Call `$client->emails->send($params, 'NmQpXr')` yourself to pin a cluster.
 
 ### Laravel
 
@@ -97,7 +103,7 @@ services:
 ```
 
 ```env
-MAILER_DSN=postshiba://API_KEY@default?team_id=1
+MAILER_DSN=postshiba://API_KEY@default?team_id=KjkAJW
 ```
 
 ```php
@@ -106,7 +112,7 @@ use Symfony\Component\Mime\Email;
 use PostShiba\PostShiba;
 use PostShiba\Symfony\Transport;
 
-$mailer = new Mailer(new Transport(new PostShiba(getenv('POSTSHIBA_API_KEY'), null, 1)));
+$mailer = new Mailer(new Transport(new PostShiba(getenv('POSTSHIBA_API_KEY'), null, 'KjkAJW')));
 $mailer->send(
     (new Email())
         ->from('hello@mail.example.com')
@@ -125,82 +131,82 @@ $client->users->me();
 
 ```php
 $client->clusters->list();
-$client->clusters->get(4);
+$client->clusters->get("NmQpXr");
 $client->clusters->create(['cluster' => ['name' => 'edge', 'size' => 'small', 'region' => 'manual', 'plan' => 'nano']]);
-$client->clusters->update(4, ['cluster' => ['plan' => 'small']]);
-$client->clusters->suspend(4);
-$client->clusters->resume(4);
-$client->clusters->delete(4);
+$client->clusters->update("NmQpXr", ['cluster' => ['plan' => 'small']]);
+$client->clusters->suspend("NmQpXr");
+$client->clusters->resume("NmQpXr");
+$client->clusters->delete("NmQpXr");
 ```
 
 ```php
 $client->sendingDomains->list();
-$client->sendingDomains->get(8);
+$client->sendingDomains->get("HsVtYk");
 $client->sendingDomains->create(['sending_domain' => ['name' => 'mail.example.com', 'tenant_id' => 12]]);
-$client->sendingDomains->verify(8);
-$client->sendingDomains->suspend(8);
-$client->sendingDomains->resume(8);
-$client->sendingDomains->makePrimary(8);
-$client->sendingDomains->delete(8);
+$client->sendingDomains->verify("HsVtYk");
+$client->sendingDomains->suspend("HsVtYk");
+$client->sendingDomains->resume("HsVtYk");
+$client->sendingDomains->makePrimary("HsVtYk");
+$client->sendingDomains->delete("HsVtYk");
 ```
 
 ```php
 $client->tenants->list();
-$client->tenants->get(12);
+$client->tenants->get("WbLcFd");
 $client->tenants->create(['tenant' => ['name' => 'Acme Florist']]);
-$client->tenants->delete(12);
+$client->tenants->delete("WbLcFd");
 ```
 
 ```php
 $client->inboxes->list();
-$client->inboxes->get(3);
+$client->inboxes->get("PqRzMn");
 $client->inboxes->create(['inbox' => ['name' => 'agent', 'webhook_url' => 'https://hooks.example.com/mail']]);
-$client->inboxes->verify(3);
-$client->inboxes->delete(3);
+$client->inboxes->verify("PqRzMn");
+$client->inboxes->delete("PqRzMn");
 ```
 
 ```php
-$client->messages->list(3);
-$client->messages->get(3, 21);
-$client->messages->downloadAttachment(3, 21, 1);
+$client->messages->list("PqRzMn");
+$client->messages->get("PqRzMn", "GxTyVu");
+$client->messages->downloadAttachment('PqRzMn', 'GxTyVu', 1);
 ```
 
 ```php
-$client->events->list(4);
-$client->events->get(44);
+$client->events->list("NmQpXr");
+$client->events->get("JkLmNp");
 ```
 
 ```php
-$client->smtpCredentials->create(4, ['smtp_credential' => ['tenant_id' => 12]]);
-$client->smtpCredentials->delete(4, 9);
+$client->smtpCredentials->create("NmQpXr", ['smtp_credential' => ['tenant_id' => 12]]);
+$client->smtpCredentials->delete("NmQpXr", "RvWsXq");
 ```
 
 ```php
 $client->webhooks->list();
-$client->webhooks->get(2);
+$client->webhooks->get("CdFgHj");
 $client->webhooks->create(['webhook_endpoint' => [
     'url' => 'https://hooks.example.com/capsule',
     'event_types' => ['delivered', 'bounce'],
-    'cluster_id' => 4,
+    'cluster_id' => 'NmQpXr',
 ]]);
-$client->webhooks->update(2, ['webhook_endpoint' => [
+$client->webhooks->update("CdFgHj", ['webhook_endpoint' => [
     'enabled' => false,
     'event_types' => ['delivered', 'bounce'],
 ]]);
-$client->webhooks->delete(2);
+$client->webhooks->delete("CdFgHj");
 ```
 
 ```php
 $client->suppressions->list();
 $client->suppressions->create(['suppression' => ['email' => 'blocked@example.com', 'tenant_id' => 12]]);
-$client->suppressions->delete(7);
+$client->suppressions->delete("YtReWq");
 ```
 
 ```php
 $client->firewall->get();
 $client->firewall->update(['firewall' => ['enabled_checks' => ['temp_providers', 'plus_addressing']]]);
 $client->firewall->addEntry(['firewall_entry' => ['list' => 'deny', 'value' => 'mailinator.com']]);
-$client->firewall->deleteEntry(3);
+$client->firewall->deleteEntry("BnMkLo");
 ```
 
 ## Verify webhooks

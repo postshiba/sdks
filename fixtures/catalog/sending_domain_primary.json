@@ -1,7 +1,7 @@
 {
-  "id": 8,
+  "id": "HsVtYk",
   "name": "mail.example.com",
-  "tenant_id": 12,
+  "tenant_id": "WbLcFd",
   "tenant": "default",
   "dkim_status": "pending",
   "return_path_status": "pending",

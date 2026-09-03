@@ -52,7 +52,7 @@ public final class PostShiba {
         Options opts = options == null ? new Options() : options;
         String url = opts.baseUrl == null || opts.baseUrl.isEmpty() ? DEFAULT_BASE_URL : opts.baseUrl;
         this.baseUrl = trimTrailingSlash(url);
-        this.teamId = opts.teamId == null ? null : String.valueOf(opts.teamId);
+        this.teamId = opts.teamId;
         this.httpClient = opts.httpClient == null
                 ? HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build()
                 : opts.httpClient;
@@ -68,13 +68,22 @@ public final class PostShiba {
             return this;
         }
 
-        public Options teamId(Object teamId) {
-            this.teamId = teamId == null ? null : String.valueOf(teamId);
+        public Options teamId(String teamId) {
+            this.teamId = teamId;
             return this;
         }
 
         public Options httpClient(HttpClient httpClient) {
             this.httpClient = httpClient;
+            return this;
+        }
+    }
+
+    public static final class SendOptions {
+        public String clusterId;
+
+        public SendOptions clusterId(String clusterId) {
+            this.clusterId = clusterId;
             return this;
         }
     }
@@ -102,14 +111,22 @@ public final class PostShiba {
 
     public final class Emails {
         public JsonNode send(Object body) {
-            return request("POST", "/api/v1/emails", body, null);
+            return send(body, null);
         }
 
-        public JsonNode sendOnCluster(Object clusterId, Object body) {
+        public JsonNode send(Object body, SendOptions options) {
+            Map<String, String> headers = null;
+            if (options != null && options.clusterId != null && !options.clusterId.isEmpty()) {
+                headers = Map.of("X-Capsule-Cluster-Id", options.clusterId);
+            }
+            return request("POST", "/api/v1/emails", body, headers);
+        }
+
+        public JsonNode sendOnCluster(String clusterId, Object body) {
             return sendOnCluster(clusterId, body, null);
         }
 
-        public JsonNode sendOnCluster(Object clusterId, Object body, SendOnClusterOptions options) {
+        public JsonNode sendOnCluster(String clusterId, Object body, SendOnClusterOptions options) {
             Object payload = body;
             Map<String, String> headers = null;
             if (options != null) {
@@ -129,7 +146,7 @@ public final class PostShiba {
             return request("GET", teamsPath("/clusters"), null, null);
         }
 
-        public JsonNode get(Object id) {
+        public JsonNode get(String id) {
             return request("GET", "/api/v1/clusters/" + id(id), null, null);
         }
 
@@ -137,19 +154,19 @@ public final class PostShiba {
             return request("POST", teamsPath("/clusters"), body, null);
         }
 
-        public JsonNode update(Object id, Object body) {
+        public JsonNode update(String id, Object body) {
             return request("PATCH", "/api/v1/clusters/" + id(id), body, null);
         }
 
-        public JsonNode suspend(Object id) {
+        public JsonNode suspend(String id) {
             return request("POST", "/api/v1/clusters/" + id(id) + "/suspend", null, null);
         }
 
-        public JsonNode resume(Object id) {
+        public JsonNode resume(String id) {
             return request("POST", "/api/v1/clusters/" + id(id) + "/resume", null, null);
         }
 
-        public JsonNode delete(Object id) {
+        public JsonNode delete(String id) {
             return request("DELETE", "/api/v1/clusters/" + id(id), null, null);
         }
     }
@@ -159,7 +176,7 @@ public final class PostShiba {
             return request("GET", teamsPath("/sending_domains"), null, null);
         }
 
-        public JsonNode get(Object id) {
+        public JsonNode get(String id) {
             return request("GET", "/api/v1/sending_domains/" + id(id), null, null);
         }
 
@@ -167,23 +184,23 @@ public final class PostShiba {
             return request("POST", teamsPath("/sending_domains"), body, null);
         }
 
-        public JsonNode verify(Object id) {
+        public JsonNode verify(String id) {
             return request("POST", "/api/v1/sending_domains/" + id(id) + "/verify", null, null);
         }
 
-        public JsonNode suspend(Object id) {
+        public JsonNode suspend(String id) {
             return request("POST", "/api/v1/sending_domains/" + id(id) + "/suspend", null, null);
         }
 
-        public JsonNode resume(Object id) {
+        public JsonNode resume(String id) {
             return request("POST", "/api/v1/sending_domains/" + id(id) + "/resume", null, null);
         }
 
-        public JsonNode makePrimary(Object id) {
+        public JsonNode makePrimary(String id) {
             return request("POST", "/api/v1/sending_domains/" + id(id) + "/make_primary", null, null);
         }
 
-        public JsonNode delete(Object id) {
+        public JsonNode delete(String id) {
             return request("DELETE", "/api/v1/sending_domains/" + id(id), null, null);
         }
     }
@@ -193,7 +210,7 @@ public final class PostShiba {
             return request("GET", teamsPath("/tenants"), null, null);
         }
 
-        public JsonNode get(Object id) {
+        public JsonNode get(String id) {
             return request("GET", "/api/v1/tenants/" + id(id), null, null);
         }
 
@@ -201,7 +218,7 @@ public final class PostShiba {
             return request("POST", teamsPath("/tenants"), body, null);
         }
 
-        public JsonNode delete(Object id) {
+        public JsonNode delete(String id) {
             return request("DELETE", "/api/v1/tenants/" + id(id), null, null);
         }
     }
@@ -211,7 +228,7 @@ public final class PostShiba {
             return request("GET", teamsPath("/inboxes"), null, null);
         }
 
-        public JsonNode get(Object id) {
+        public JsonNode get(String id) {
             return request("GET", "/api/v1/inboxes/" + id(id), null, null);
         }
 
@@ -219,28 +236,28 @@ public final class PostShiba {
             return request("POST", teamsPath("/inboxes"), body, null);
         }
 
-        public JsonNode verify(Object id) {
+        public JsonNode verify(String id) {
             return request("POST", "/api/v1/inboxes/" + id(id) + "/verify", null, null);
         }
 
-        public JsonNode delete(Object id) {
+        public JsonNode delete(String id) {
             return request("DELETE", "/api/v1/inboxes/" + id(id), null, null);
         }
     }
 
     public final class Messages {
-        public JsonNode list(Object inboxId) {
+        public JsonNode list(String inboxId) {
             return request("GET", "/api/v1/inboxes/" + id(inboxId) + "/inbound_messages", null, null);
         }
 
-        public JsonNode get(Object inboxId, Object id) {
+        public JsonNode get(String inboxId, String id) {
             return request("GET", "/api/v1/inboxes/" + id(inboxId) + "/inbound_messages/" + id(id), null, null);
         }
 
-        public byte[] downloadAttachment(Object inboxId, Object id, Object index) {
+        public byte[] downloadAttachment(String inboxId, String id, int index) {
             return requestRaw(
                     "GET",
-                    "/api/v1/inboxes/" + id(inboxId) + "/inbound_messages/" + id(id) + "/attachments/" + id(index),
+                    "/api/v1/inboxes/" + id(inboxId) + "/inbound_messages/" + id(id) + "/attachments/" + index,
                     null,
                     null
             );
@@ -248,21 +265,21 @@ public final class PostShiba {
     }
 
     public final class Events {
-        public JsonNode list(Object clusterId) {
+        public JsonNode list(String clusterId) {
             return request("GET", teamsPath("/clusters/" + id(clusterId) + "/message_events"), null, null);
         }
 
-        public JsonNode get(Object id) {
+        public JsonNode get(String id) {
             return request("GET", "/api/v1/message_events/" + id(id), null, null);
         }
     }
 
     public final class SmtpCredentials {
-        public JsonNode create(Object clusterId, Object body) {
+        public JsonNode create(String clusterId, Object body) {
             return request("POST", teamsPath("/clusters/" + id(clusterId) + "/smtp_credentials"), body, null);
         }
 
-        public JsonNode delete(Object clusterId, Object id) {
+        public JsonNode delete(String clusterId, String id) {
             return request("DELETE", teamsPath("/clusters/" + id(clusterId) + "/smtp_credentials/" + id(id)), null, null);
         }
     }
@@ -272,7 +289,7 @@ public final class PostShiba {
             return request("GET", teamsPath("/webhook_endpoints"), null, null);
         }
 
-        public JsonNode get(Object id) {
+        public JsonNode get(String id) {
             return request("GET", "/api/v1/webhook_endpoints/" + id(id), null, null);
         }
 
@@ -280,11 +297,11 @@ public final class PostShiba {
             return request("POST", teamsPath("/webhook_endpoints"), body, null);
         }
 
-        public JsonNode update(Object id, Object body) {
+        public JsonNode update(String id, Object body) {
             return request("PATCH", "/api/v1/webhook_endpoints/" + id(id), body, null);
         }
 
-        public JsonNode delete(Object id) {
+        public JsonNode delete(String id) {
             return request("DELETE", "/api/v1/webhook_endpoints/" + id(id), null, null);
         }
 
@@ -313,7 +330,7 @@ public final class PostShiba {
             return request("POST", teamsPath("/suppressions"), body, null);
         }
 
-        public JsonNode delete(Object id) {
+        public JsonNode delete(String id) {
             return request("DELETE", "/api/v1/suppressions/" + id(id), null, null);
         }
     }
@@ -331,7 +348,7 @@ public final class PostShiba {
             return request("POST", teamsPath("/firewall_entries"), body, null);
         }
 
-        public JsonNode deleteEntry(Object id) {
+        public JsonNode deleteEntry(String id) {
             return request("DELETE", "/api/v1/firewall_entries/" + id(id), null, null);
         }
     }
@@ -431,8 +448,8 @@ public final class PostShiba {
         }
     }
 
-    private static String id(Object value) {
-        return String.valueOf(value);
+    private static String id(String value) {
+        return value;
     }
 
     private static String trimTrailingSlash(String url) {

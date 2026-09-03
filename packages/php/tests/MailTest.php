@@ -12,7 +12,7 @@ final class MailTest extends TestCase
     {
         $http = new FakeHttp();
         $http->enqueueJson(200, ['queued' => true, 'message_id' => 'm1']);
-        $client = new PostShiba('tok_test', 'https://api.example.test', 1, $http);
+        $client = new PostShiba('tok_test', 'https://api.example.test', 'KjkAJW', $http);
 
         $payload = Mail::payload([
             'from' => 'hello@mail.example.com',

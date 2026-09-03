@@ -74,7 +74,7 @@ class PostShiba {
 
   final String apiKey;
   final String baseUrl;
-  final Object? teamId;
+  final String? teamId;
   final http.Client _http;
 
   late final users = Users(this);
@@ -154,12 +154,22 @@ class Emails {
   Emails(this._client);
   final PostShiba _client;
 
-  Future<Map<String, dynamic>> send(Map<String, dynamic> params) async {
-    return _map(await _client._request('POST', '/api/v1/emails', body: params));
+  Future<Map<String, dynamic>> send(
+    Map<String, dynamic> params, {
+    String? clusterId,
+  }) async {
+    return _map(await _client._request(
+      'POST',
+      '/api/v1/emails',
+      body: params,
+      headers: {
+        if (clusterId != null) 'X-Capsule-Cluster-Id': '$clusterId',
+      },
+    ));
   }
 
   Future<Map<String, dynamic>> sendOnCluster(
-    Object clusterId,
+    String clusterId,
     Map<String, dynamic> params, {
     String? idempotencyKey,
     bool sandbox = false,
@@ -187,7 +197,7 @@ class Clusters {
     return _list(await _client._request('GET', _client._teamPath('/clusters')));
   }
 
-  Future<Map<String, dynamic>> get(Object id) async {
+  Future<Map<String, dynamic>> get(String id) async {
     return _map(await _client._request('GET', '/api/v1/clusters/$id'));
   }
 
@@ -200,7 +210,7 @@ class Clusters {
   }
 
   Future<Map<String, dynamic>> update(
-    Object id,
+    String id,
     Map<String, dynamic> params,
   ) async {
     return _map(await _client._request(
@@ -210,15 +220,15 @@ class Clusters {
     ));
   }
 
-  Future<Map<String, dynamic>> suspend(Object id) async {
+  Future<Map<String, dynamic>> suspend(String id) async {
     return _map(await _client._request('POST', '/api/v1/clusters/$id/suspend'));
   }
 
-  Future<Map<String, dynamic>> resume(Object id) async {
+  Future<Map<String, dynamic>> resume(String id) async {
     return _map(await _client._request('POST', '/api/v1/clusters/$id/resume'));
   }
 
-  Future<Map<String, dynamic>> delete(Object id) async {
+  Future<Map<String, dynamic>> delete(String id) async {
     return _map(await _client._request('DELETE', '/api/v1/clusters/$id'));
   }
 }
@@ -233,7 +243,7 @@ class SendingDomains {
     );
   }
 
-  Future<Map<String, dynamic>> get(Object id) async {
+  Future<Map<String, dynamic>> get(String id) async {
     return _map(await _client._request('GET', '/api/v1/sending_domains/$id'));
   }
 
@@ -245,31 +255,31 @@ class SendingDomains {
     ));
   }
 
-  Future<Map<String, dynamic>> verify(Object id) async {
+  Future<Map<String, dynamic>> verify(String id) async {
     return _map(
       await _client._request('POST', '/api/v1/sending_domains/$id/verify'),
     );
   }
 
-  Future<Map<String, dynamic>> suspend(Object id) async {
+  Future<Map<String, dynamic>> suspend(String id) async {
     return _map(
       await _client._request('POST', '/api/v1/sending_domains/$id/suspend'),
     );
   }
 
-  Future<Map<String, dynamic>> resume(Object id) async {
+  Future<Map<String, dynamic>> resume(String id) async {
     return _map(
       await _client._request('POST', '/api/v1/sending_domains/$id/resume'),
     );
   }
 
-  Future<Map<String, dynamic>> makePrimary(Object id) async {
+  Future<Map<String, dynamic>> makePrimary(String id) async {
     return _map(
       await _client._request('POST', '/api/v1/sending_domains/$id/make_primary'),
     );
   }
 
-  Future<Map<String, dynamic>> delete(Object id) async {
+  Future<Map<String, dynamic>> delete(String id) async {
     return _map(await _client._request('DELETE', '/api/v1/sending_domains/$id'));
   }
 }
@@ -282,7 +292,7 @@ class Tenants {
     return _list(await _client._request('GET', _client._teamPath('/tenants')));
   }
 
-  Future<Map<String, dynamic>> get(Object id) async {
+  Future<Map<String, dynamic>> get(String id) async {
     return _map(await _client._request('GET', '/api/v1/tenants/$id'));
   }
 
@@ -294,7 +304,7 @@ class Tenants {
     ));
   }
 
-  Future<Map<String, dynamic>> delete(Object id) async {
+  Future<Map<String, dynamic>> delete(String id) async {
     return _map(await _client._request('DELETE', '/api/v1/tenants/$id'));
   }
 }
@@ -307,7 +317,7 @@ class Inboxes {
     return _list(await _client._request('GET', _client._teamPath('/inboxes')));
   }
 
-  Future<Map<String, dynamic>> get(Object id) async {
+  Future<Map<String, dynamic>> get(String id) async {
     return _map(await _client._request('GET', '/api/v1/inboxes/$id'));
   }
 
@@ -319,11 +329,11 @@ class Inboxes {
     ));
   }
 
-  Future<Map<String, dynamic>> verify(Object id) async {
+  Future<Map<String, dynamic>> verify(String id) async {
     return _map(await _client._request('POST', '/api/v1/inboxes/$id/verify'));
   }
 
-  Future<Map<String, dynamic>> delete(Object id) async {
+  Future<Map<String, dynamic>> delete(String id) async {
     return _map(await _client._request('DELETE', '/api/v1/inboxes/$id'));
   }
 }
@@ -332,14 +342,14 @@ class Messages {
   Messages(this._client);
   final PostShiba _client;
 
-  Future<List<dynamic>> list(Object inboxId) async {
+  Future<List<dynamic>> list(String inboxId) async {
     return _list(await _client._request(
       'GET',
       '/api/v1/inboxes/$inboxId/inbound_messages',
     ));
   }
 
-  Future<Map<String, dynamic>> get(Object inboxId, Object id) async {
+  Future<Map<String, dynamic>> get(String inboxId, String id) async {
     return _map(await _client._request(
       'GET',
       '/api/v1/inboxes/$inboxId/inbound_messages/$id',
@@ -347,9 +357,9 @@ class Messages {
   }
 
   Future<Uint8List> downloadAttachment(
-    Object inboxId,
-    Object id,
-    Object index,
+    String inboxId,
+    String id,
+    int index,
   ) async {
     return await _client._request(
       'GET',
@@ -363,14 +373,14 @@ class Events {
   Events(this._client);
   final PostShiba _client;
 
-  Future<List<dynamic>> list(Object clusterId) async {
+  Future<List<dynamic>> list(String clusterId) async {
     return _list(await _client._request(
       'GET',
       _client._teamPath('/clusters/$clusterId/message_events'),
     ));
   }
 
-  Future<Map<String, dynamic>> get(Object id) async {
+  Future<Map<String, dynamic>> get(String id) async {
     return _map(await _client._request('GET', '/api/v1/message_events/$id'));
   }
 }
@@ -380,7 +390,7 @@ class SmtpCredentials {
   final PostShiba _client;
 
   Future<Map<String, dynamic>> create(
-    Object clusterId,
+    String clusterId,
     Map<String, dynamic> params,
   ) async {
     return _map(await _client._request(
@@ -390,7 +400,7 @@ class SmtpCredentials {
     ));
   }
 
-  Future<Map<String, dynamic>> delete(Object clusterId, Object id) async {
+  Future<Map<String, dynamic>> delete(String clusterId, String id) async {
     return _map(await _client._request(
       'DELETE',
       _client._teamPath('/clusters/$clusterId/smtp_credentials/$id'),
@@ -408,7 +418,7 @@ class WebhookEndpoints {
     );
   }
 
-  Future<Map<String, dynamic>> get(Object id) async {
+  Future<Map<String, dynamic>> get(String id) async {
     return _map(await _client._request('GET', '/api/v1/webhook_endpoints/$id'));
   }
 
@@ -420,7 +430,7 @@ class WebhookEndpoints {
     ));
   }
 
-  Future<Map<String, dynamic>> update(Object id, Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> update(String id, Map<String, dynamic> params) async {
     return _map(await _client._request(
       'PATCH',
       '/api/v1/webhook_endpoints/$id',
@@ -428,7 +438,7 @@ class WebhookEndpoints {
     ));
   }
 
-  Future<Map<String, dynamic>> delete(Object id) async {
+  Future<Map<String, dynamic>> delete(String id) async {
     return _map(await _client._request('DELETE', '/api/v1/webhook_endpoints/$id'));
   }
 }
@@ -451,7 +461,7 @@ class Suppressions {
     ));
   }
 
-  Future<Map<String, dynamic>> delete(Object id) async {
+  Future<Map<String, dynamic>> delete(String id) async {
     return _map(await _client._request('DELETE', '/api/v1/suppressions/$id'));
   }
 }
@@ -480,7 +490,7 @@ class Firewall {
     ));
   }
 
-  Future<Map<String, dynamic>> deleteEntry(Object id) async {
+  Future<Map<String, dynamic>> deleteEntry(String id) async {
     return _map(await _client._request('DELETE', '/api/v1/firewall_entries/$id'));
   }
 }

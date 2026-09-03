@@ -18,7 +18,7 @@ class Suppressions
         return $this->client->request('POST', '/api/v1/teams/'.$this->client->teamId().'/suppressions', $params);
     }
 
-    public function delete(int|string $id): mixed
+    public function delete(string $id): mixed
     {
         return $this->client->request('DELETE', '/api/v1/suppressions/'.$id);
     }

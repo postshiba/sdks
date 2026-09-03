@@ -84,8 +84,11 @@ class _Emails:
     def __init__(self, client):
         self._client = client
 
-    def send(self, body):
-        return self._client.request("POST", "/api/v1/emails", body=body)
+    def send(self, body, cluster_id=None):
+        headers = None
+        if cluster_id is not None and cluster_id != "":
+            headers = {"X-Capsule-Cluster-Id": str(cluster_id)}
+        return self._client.request("POST", "/api/v1/emails", body=body, headers=headers)
 
     def send_on_cluster(self, cluster_id, body, idempotency_key=None, sandbox=False):
         payload = dict(body)

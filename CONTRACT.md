@@ -10,19 +10,22 @@ JSON only. No `provision!`.
 Constructor: `PostShiba(apiKey, { baseUrl?, teamId? })`.
 `teamId` is required for every team-scoped path. `GET /users/me` does not return a team id. Raise if it is missing. Do not guess.
 
+Public Capsule resource ids are strings (letters-only Hashids). Interpolate them into paths as-is. URL-encode only when a character needs it. Do not coerce an id to an integer. `emails.send` / `send_email` sets `X-Capsule-Cluster-Id` to the obfuscated cluster id string. Keep the existing option names (`clusterId`, `cluster_id`). Typed packages take `string` for team, cluster, tenant, domain, inbox, credential, webhook, message, and suppression ids. Do not advertise sending raw integers.
+
 Ids used in fixtures and tests:
 
-- team `1`
-- cluster `4`
-- sending domain `8`
-- tenant `12`
-- inbox `3`
-- inbound message `21`
-- event `44`
-- SMTP credential `9`
-- suppression `7`
-- firewall entry `3`
-- webhook `2`
+- user `UsErKj`
+- team `KjkAJW`
+- cluster `NmQpXr`
+- sending domain `HsVtYk`
+- tenant `WbLcFd`
+- inbox `PqRzMn`
+- inbound message `GxTyVu`
+- event `JkLmNp`
+- SMTP credential `RvWsXq`
+- suppression `YtReWq`
+- firewall entry `BnMkLo`
+- webhook `CdFgHj`
 
 ## Errors
 
@@ -92,6 +95,7 @@ Load request and response bodies from `fixtures/catalog/<file>.json`. Do not inv
 | `firewall.deleteEntry` | | DELETE | `/api/v1/firewall_entries/:id` | | empty object |
 
 `emails.sendOnCluster` also sends header `Idempotency-Key` when the caller passes one.
+`emails.send` sends request header `X-Capsule-Cluster-Id` when the caller passes a cluster id. The path stays `POST /api/v1/emails`. Omit the option and the server picks a cluster. This is not `sendOnCluster` (that stays `POST /teams/:teamId/clusters/:clusterId/sends`).
 Sandbox send adds `"sandbox": true` on the JSON body. Response is `email_sandbox_response` (`queued` false).
 
 `can_i_send_this` and tenant suspend/resume exist on the server. Leave them out. Stay on the table above.
@@ -105,6 +109,7 @@ Cover:
 
 - Bearer header and `baseUrl` override
 - `emails.send` happy path
+- `emails.send` with a cluster id sets `X-Capsule-Cluster-Id` and does not change the path
 - cluster send with `Idempotency-Key` and `sandbox`
 - every method in the table
 - `403` from `error_403.json` and `422` from `error_422.json` raise

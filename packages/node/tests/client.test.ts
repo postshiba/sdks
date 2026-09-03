@@ -29,7 +29,7 @@ describe("PostShiba", () => {
     vi.unstubAllGlobals();
   });
 
-  function client(teamId: number | undefined = 1) {
+  function client(teamId: string | undefined = "KjkAJW") {
     return new PostShiba("sk_test", { teamId });
   }
 
@@ -57,18 +57,31 @@ describe("PostShiba", () => {
     expect(init.method).toBe("POST");
     expect(headers.get("Content-Type")).toBe("application/json");
     expect(JSON.parse(String(init.body))).toEqual(body);
+    expect(headers.get("X-Capsule-Cluster-Id")).toBeNull();
+    expect(result).toEqual(fixture("email_send_response"));
+  });
+
+  it("sends an email with X-Capsule-Cluster-Id", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(fixture("email_send_response")));
+    const body = fixture("email_send_request");
+    const result = await client().emails.send(body, { clusterId: "NmQpXr" });
+    const { url, init, headers } = lastCall();
+    expect(url).toBe("https://app.postshiba.com/api/v1/emails");
+    expect(init.method).toBe("POST");
+    expect(headers.get("X-Capsule-Cluster-Id")).toBe("NmQpXr");
+    expect(JSON.parse(String(init.body))).toEqual(body);
     expect(result).toEqual(fixture("email_send_response"));
   });
 
   it("sends on a cluster with Idempotency-Key and sandbox", async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(fixture("email_sandbox_response")));
     const body = fixture("email_send_request");
-    const result = await client().emails.sendOnCluster(4, body, {
+    const result = await client().emails.sendOnCluster("NmQpXr", body, {
       idempotencyKey: "ikey-1",
       sandbox: true,
     });
     const { url, init, headers } = lastCall();
-    expect(url).toBe("https://app.postshiba.com/api/v1/teams/1/clusters/4/sends");
+    expect(url).toBe("https://app.postshiba.com/api/v1/teams/KjkAJW/clusters/NmQpXr/sends");
     expect(headers.get("Idempotency-Key")).toBe("ikey-1");
     expect(JSON.parse(String(init.body))).toEqual({ ...body, sandbox: true });
     expect(result).toEqual(fixture("email_sandbox_response"));
@@ -94,125 +107,125 @@ describe("PostShiba", () => {
       },
       {
         name: "emails.sendOnCluster",
-        call: (c) => c.emails.sendOnCluster(4, fixture("email_send_request")),
+        call: (c) => c.emails.sendOnCluster("NmQpXr", fixture("email_send_request")),
         method: "POST",
-        path: "/api/v1/teams/1/clusters/4/sends",
+        path: "/api/v1/teams/KjkAJW/clusters/NmQpXr/sends",
         request: "email_send_request",
         response: fixture("email_sandbox_response"),
       },
-      { name: "clusters.list", call: (c) => c.clusters.list(), method: "GET", path: "/api/v1/teams/1/clusters", response: [fixture("cluster")] },
-      { name: "clusters.get", call: (c) => c.clusters.get(4), method: "GET", path: "/api/v1/clusters/4", response: fixture("cluster") },
+      { name: "clusters.list", call: (c) => c.clusters.list(), method: "GET", path: "/api/v1/teams/KjkAJW/clusters", response: [fixture("cluster")] },
+      { name: "clusters.get", call: (c) => c.clusters.get("NmQpXr"), method: "GET", path: "/api/v1/clusters/NmQpXr", response: fixture("cluster") },
       {
         name: "clusters.create",
         call: (c) => c.clusters.create(fixture("cluster_create_request")),
         method: "POST",
-        path: "/api/v1/teams/1/clusters",
+        path: "/api/v1/teams/KjkAJW/clusters",
         request: "cluster_create_request",
         response: fixture("cluster"),
       },
       {
         name: "clusters.update",
-        call: (c) => c.clusters.update(4, fixture("cluster_update_request")),
+        call: (c) => c.clusters.update("NmQpXr", fixture("cluster_update_request")),
         method: "PATCH",
-        path: "/api/v1/clusters/4",
+        path: "/api/v1/clusters/NmQpXr",
         request: "cluster_update_request",
         response: fixture("cluster_updated"),
       },
-      { name: "clusters.suspend", call: (c) => c.clusters.suspend(4), method: "POST", path: "/api/v1/clusters/4/suspend", response: fixture("cluster_suspended") },
-      { name: "clusters.resume", call: (c) => c.clusters.resume(4), method: "POST", path: "/api/v1/clusters/4/resume", response: fixture("cluster") },
-      { name: "clusters.delete", call: (c) => c.clusters.delete(4), method: "DELETE", path: "/api/v1/clusters/4", response: fixture("cluster_deprovisioned") },
-      { name: "sendingDomains.list", call: (c) => c.sendingDomains.list(), method: "GET", path: "/api/v1/teams/1/sending_domains", response: [fixture("sending_domain")] },
-      { name: "sendingDomains.get", call: (c) => c.sendingDomains.get(8), method: "GET", path: "/api/v1/sending_domains/8", response: fixture("sending_domain") },
+      { name: "clusters.suspend", call: (c) => c.clusters.suspend("NmQpXr"), method: "POST", path: "/api/v1/clusters/NmQpXr/suspend", response: fixture("cluster_suspended") },
+      { name: "clusters.resume", call: (c) => c.clusters.resume("NmQpXr"), method: "POST", path: "/api/v1/clusters/NmQpXr/resume", response: fixture("cluster") },
+      { name: "clusters.delete", call: (c) => c.clusters.delete("NmQpXr"), method: "DELETE", path: "/api/v1/clusters/NmQpXr", response: fixture("cluster_deprovisioned") },
+      { name: "sendingDomains.list", call: (c) => c.sendingDomains.list(), method: "GET", path: "/api/v1/teams/KjkAJW/sending_domains", response: [fixture("sending_domain")] },
+      { name: "sendingDomains.get", call: (c) => c.sendingDomains.get("HsVtYk"), method: "GET", path: "/api/v1/sending_domains/HsVtYk", response: fixture("sending_domain") },
       {
         name: "sendingDomains.create",
         call: (c) => c.sendingDomains.create(fixture("sending_domain_create_request")),
         method: "POST",
-        path: "/api/v1/teams/1/sending_domains",
+        path: "/api/v1/teams/KjkAJW/sending_domains",
         request: "sending_domain_create_request",
         response: fixture("sending_domain"),
       },
-      { name: "sendingDomains.verify", call: (c) => c.sendingDomains.verify(8), method: "POST", path: "/api/v1/sending_domains/8/verify", response: fixture("sending_domain") },
-      { name: "sendingDomains.suspend", call: (c) => c.sendingDomains.suspend(8), method: "POST", path: "/api/v1/sending_domains/8/suspend", response: fixture("sending_domain_suspended") },
-      { name: "sendingDomains.resume", call: (c) => c.sendingDomains.resume(8), method: "POST", path: "/api/v1/sending_domains/8/resume", response: fixture("sending_domain") },
-      { name: "sendingDomains.makePrimary", call: (c) => c.sendingDomains.makePrimary(8), method: "POST", path: "/api/v1/sending_domains/8/make_primary", response: fixture("sending_domain_primary") },
-      { name: "sendingDomains.delete", call: (c) => c.sendingDomains.delete(8), method: "DELETE", path: "/api/v1/sending_domains/8", response: fixture("empty") },
-      { name: "tenants.list", call: (c) => c.tenants.list(), method: "GET", path: "/api/v1/teams/1/tenants", response: [fixture("tenant")] },
-      { name: "tenants.get", call: (c) => c.tenants.get(12), method: "GET", path: "/api/v1/tenants/12", response: fixture("tenant") },
+      { name: "sendingDomains.verify", call: (c) => c.sendingDomains.verify("HsVtYk"), method: "POST", path: "/api/v1/sending_domains/HsVtYk/verify", response: fixture("sending_domain") },
+      { name: "sendingDomains.suspend", call: (c) => c.sendingDomains.suspend("HsVtYk"), method: "POST", path: "/api/v1/sending_domains/HsVtYk/suspend", response: fixture("sending_domain_suspended") },
+      { name: "sendingDomains.resume", call: (c) => c.sendingDomains.resume("HsVtYk"), method: "POST", path: "/api/v1/sending_domains/HsVtYk/resume", response: fixture("sending_domain") },
+      { name: "sendingDomains.makePrimary", call: (c) => c.sendingDomains.makePrimary("HsVtYk"), method: "POST", path: "/api/v1/sending_domains/HsVtYk/make_primary", response: fixture("sending_domain_primary") },
+      { name: "sendingDomains.delete", call: (c) => c.sendingDomains.delete("HsVtYk"), method: "DELETE", path: "/api/v1/sending_domains/HsVtYk", response: fixture("empty") },
+      { name: "tenants.list", call: (c) => c.tenants.list(), method: "GET", path: "/api/v1/teams/KjkAJW/tenants", response: [fixture("tenant")] },
+      { name: "tenants.get", call: (c) => c.tenants.get("WbLcFd"), method: "GET", path: "/api/v1/tenants/WbLcFd", response: fixture("tenant") },
       {
         name: "tenants.create",
         call: (c) => c.tenants.create(fixture("tenant_create_request")),
         method: "POST",
-        path: "/api/v1/teams/1/tenants",
+        path: "/api/v1/teams/KjkAJW/tenants",
         request: "tenant_create_request",
         response: fixture("tenant"),
       },
-      { name: "tenants.delete", call: (c) => c.tenants.delete(12), method: "DELETE", path: "/api/v1/tenants/12", response: fixture("empty") },
-      { name: "inboxes.list", call: (c) => c.inboxes.list(), method: "GET", path: "/api/v1/teams/1/inboxes", response: [fixture("inbox_index")] },
-      { name: "inboxes.get", call: (c) => c.inboxes.get(3), method: "GET", path: "/api/v1/inboxes/3", response: fixture("inbox") },
+      { name: "tenants.delete", call: (c) => c.tenants.delete("WbLcFd"), method: "DELETE", path: "/api/v1/tenants/WbLcFd", response: fixture("empty") },
+      { name: "inboxes.list", call: (c) => c.inboxes.list(), method: "GET", path: "/api/v1/teams/KjkAJW/inboxes", response: [fixture("inbox_index")] },
+      { name: "inboxes.get", call: (c) => c.inboxes.get("PqRzMn"), method: "GET", path: "/api/v1/inboxes/PqRzMn", response: fixture("inbox") },
       {
         name: "inboxes.create",
         call: (c) => c.inboxes.create(fixture("inbox_create_request")),
         method: "POST",
-        path: "/api/v1/teams/1/inboxes",
+        path: "/api/v1/teams/KjkAJW/inboxes",
         request: "inbox_create_request",
         response: fixture("inbox"),
       },
-      { name: "inboxes.verify", call: (c) => c.inboxes.verify(3), method: "POST", path: "/api/v1/inboxes/3/verify", response: fixture("inbox_index") },
-      { name: "inboxes.delete", call: (c) => c.inboxes.delete(3), method: "DELETE", path: "/api/v1/inboxes/3", response: fixture("inbox_index") },
-      { name: "messages.list", call: (c) => c.messages.list(3), method: "GET", path: "/api/v1/inboxes/3/inbound_messages", response: [fixture("message")] },
-      { name: "messages.get", call: (c) => c.messages.get(3, 21), method: "GET", path: "/api/v1/inboxes/3/inbound_messages/21", response: fixture("message_show") },
-      { name: "events.list", call: (c) => c.events.list(4), method: "GET", path: "/api/v1/teams/1/clusters/4/message_events", response: [fixture("event")] },
-      { name: "events.get", call: (c) => c.events.get(44), method: "GET", path: "/api/v1/message_events/44", response: fixture("event") },
+      { name: "inboxes.verify", call: (c) => c.inboxes.verify("PqRzMn"), method: "POST", path: "/api/v1/inboxes/PqRzMn/verify", response: fixture("inbox_index") },
+      { name: "inboxes.delete", call: (c) => c.inboxes.delete("PqRzMn"), method: "DELETE", path: "/api/v1/inboxes/PqRzMn", response: fixture("inbox_index") },
+      { name: "messages.list", call: (c) => c.messages.list("PqRzMn"), method: "GET", path: "/api/v1/inboxes/PqRzMn/inbound_messages", response: [fixture("message")] },
+      { name: "messages.get", call: (c) => c.messages.get("PqRzMn", "GxTyVu"), method: "GET", path: "/api/v1/inboxes/PqRzMn/inbound_messages/GxTyVu", response: fixture("message_show") },
+      { name: "events.list", call: (c) => c.events.list("NmQpXr"), method: "GET", path: "/api/v1/teams/KjkAJW/clusters/NmQpXr/message_events", response: [fixture("event")] },
+      { name: "events.get", call: (c) => c.events.get("JkLmNp"), method: "GET", path: "/api/v1/message_events/JkLmNp", response: fixture("event") },
       {
         name: "smtpCredentials.create",
-        call: (c) => c.smtpCredentials.create(4, fixture("smtp_credential_create_request")),
+        call: (c) => c.smtpCredentials.create("NmQpXr", fixture("smtp_credential_create_request")),
         method: "POST",
-        path: "/api/v1/teams/1/clusters/4/smtp_credentials",
+        path: "/api/v1/teams/KjkAJW/clusters/NmQpXr/smtp_credentials",
         request: "smtp_credential_create_request",
         response: fixture("smtp_credential_create"),
       },
       {
         name: "smtpCredentials.delete",
-        call: (c) => c.smtpCredentials.delete(4, 9),
+        call: (c) => c.smtpCredentials.delete("NmQpXr", "RvWsXq"),
         method: "DELETE",
-        path: "/api/v1/teams/1/clusters/4/smtp_credentials/9",
+        path: "/api/v1/teams/KjkAJW/clusters/NmQpXr/smtp_credentials/RvWsXq",
         response: fixture("smtp_credential_deleted"),
       },
-      { name: "webhooks.list", call: (c) => c.webhooks.list(), method: "GET", path: "/api/v1/teams/1/webhook_endpoints", response: [fixture("webhook")] },
-      { name: "webhooks.get", call: (c) => c.webhooks.get(2), method: "GET", path: "/api/v1/webhook_endpoints/2", response: fixture("webhook_show") },
+      { name: "webhooks.list", call: (c) => c.webhooks.list(), method: "GET", path: "/api/v1/teams/KjkAJW/webhook_endpoints", response: [fixture("webhook")] },
+      { name: "webhooks.get", call: (c) => c.webhooks.get("CdFgHj"), method: "GET", path: "/api/v1/webhook_endpoints/CdFgHj", response: fixture("webhook_show") },
       {
         name: "webhooks.create",
         call: (c) => c.webhooks.create(fixture("webhook_create_request")),
         method: "POST",
-        path: "/api/v1/teams/1/webhook_endpoints",
+        path: "/api/v1/teams/KjkAJW/webhook_endpoints",
         request: "webhook_create_request",
         response: fixture("webhook_show"),
       },
       {
         name: "webhooks.update",
-        call: (c) => c.webhooks.update(2, fixture("webhook_update_request")),
+        call: (c) => c.webhooks.update("CdFgHj", fixture("webhook_update_request")),
         method: "PATCH",
-        path: "/api/v1/webhook_endpoints/2",
+        path: "/api/v1/webhook_endpoints/CdFgHj",
         request: "webhook_update_request",
         response: fixture("webhook"),
       },
-      { name: "webhooks.delete", call: (c) => c.webhooks.delete(2), method: "DELETE", path: "/api/v1/webhook_endpoints/2", response: fixture("empty") },
-      { name: "suppressions.list", call: (c) => c.suppressions.list(), method: "GET", path: "/api/v1/teams/1/suppressions", response: [fixture("suppression")] },
+      { name: "webhooks.delete", call: (c) => c.webhooks.delete("CdFgHj"), method: "DELETE", path: "/api/v1/webhook_endpoints/CdFgHj", response: fixture("empty") },
+      { name: "suppressions.list", call: (c) => c.suppressions.list(), method: "GET", path: "/api/v1/teams/KjkAJW/suppressions", response: [fixture("suppression")] },
       {
         name: "suppressions.create",
         call: (c) => c.suppressions.create(fixture("suppression_create_request")),
         method: "POST",
-        path: "/api/v1/teams/1/suppressions",
+        path: "/api/v1/teams/KjkAJW/suppressions",
         request: "suppression_create_request",
         response: fixture("suppression"),
       },
-      { name: "suppressions.delete", call: (c) => c.suppressions.delete(7), method: "DELETE", path: "/api/v1/suppressions/7", response: fixture("empty") },
-      { name: "firewall.get", call: (c) => c.firewall.get(), method: "GET", path: "/api/v1/teams/1/firewall", response: fixture("firewall") },
+      { name: "suppressions.delete", call: (c) => c.suppressions.delete("YtReWq"), method: "DELETE", path: "/api/v1/suppressions/YtReWq", response: fixture("empty") },
+      { name: "firewall.get", call: (c) => c.firewall.get(), method: "GET", path: "/api/v1/teams/KjkAJW/firewall", response: fixture("firewall") },
       {
         name: "firewall.update",
         call: (c) => c.firewall.update(fixture("firewall_update_request")),
         method: "PATCH",
-        path: "/api/v1/teams/1/firewall",
+        path: "/api/v1/teams/KjkAJW/firewall",
         request: "firewall_update_request",
         response: fixture("firewall"),
       },
@@ -220,11 +233,11 @@ describe("PostShiba", () => {
         name: "firewall.addEntry",
         call: (c) => c.firewall.addEntry(fixture("firewall_entry_create_request")),
         method: "POST",
-        path: "/api/v1/teams/1/firewall_entries",
+        path: "/api/v1/teams/KjkAJW/firewall_entries",
         request: "firewall_entry_create_request",
         response: fixture("firewall_entry"),
       },
-      { name: "firewall.deleteEntry", call: (c) => c.firewall.deleteEntry(3), method: "DELETE", path: "/api/v1/firewall_entries/3", response: fixture("empty") },
+      { name: "firewall.deleteEntry", call: (c) => c.firewall.deleteEntry("BnMkLo"), method: "DELETE", path: "/api/v1/firewall_entries/BnMkLo", response: fixture("empty") },
     ];
 
     for (const row of cases) {
@@ -238,9 +251,9 @@ describe("PostShiba", () => {
     }
 
     fetchMock.mockResolvedValueOnce(new Response(Buffer.from("png"), { status: 200 }));
-    const bytes = await client().messages.downloadAttachment(3, 21, 1);
+    const bytes = await client().messages.downloadAttachment("PqRzMn", "GxTyVu", 1);
     const { url, init } = lastCall();
-    expect(url).toBe("https://app.postshiba.com/api/v1/inboxes/3/inbound_messages/21/attachments/1");
+    expect(url).toBe("https://app.postshiba.com/api/v1/inboxes/PqRzMn/inbound_messages/GxTyVu/attachments/1");
     expect(init.method).toBe("GET");
     expect(bytes).toBeInstanceOf(ArrayBuffer);
   });
@@ -271,11 +284,11 @@ describe("PostShiba", () => {
 
   it("returns SMTP password on create and omits it on delete", async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(fixture("smtp_credential_create")));
-    const created = (await client().smtpCredentials.create(4, fixture("smtp_credential_create_request"))) as Record<string, unknown>;
+    const created = (await client().smtpCredentials.create("NmQpXr", fixture("smtp_credential_create_request"))) as Record<string, unknown>;
     expect(created.password).toBe("once-only-password");
 
     fetchMock.mockResolvedValueOnce(jsonResponse(fixture("smtp_credential_deleted")));
-    const deleted = (await client().smtpCredentials.delete(4, 9)) as Record<string, unknown>;
+    const deleted = (await client().smtpCredentials.delete("NmQpXr", "RvWsXq")) as Record<string, unknown>;
     expect(deleted).not.toHaveProperty("password");
   });
 
@@ -285,7 +298,7 @@ describe("PostShiba", () => {
     expect(listed[0]).not.toHaveProperty("secret");
 
     fetchMock.mockResolvedValueOnce(jsonResponse(fixture("webhook_show")));
-    const shown = (await client().webhooks.get(2)) as Record<string, unknown>;
+    const shown = (await client().webhooks.get("CdFgHj")) as Record<string, unknown>;
     expect(shown.secret).toBe("hex-secret");
 
     fetchMock.mockResolvedValueOnce(jsonResponse(fixture("webhook_show")));
@@ -293,7 +306,7 @@ describe("PostShiba", () => {
     expect(created.secret).toBe("hex-secret");
 
     fetchMock.mockResolvedValueOnce(jsonResponse(fixture("webhook")));
-    const updated = (await client().webhooks.update(2, fixture("webhook_update_request"))) as Record<string, unknown>;
+    const updated = (await client().webhooks.update("CdFgHj", fixture("webhook_update_request"))) as Record<string, unknown>;
     expect(updated).toEqual(fixture("webhook"));
     expect(updated).not.toHaveProperty("secret");
   });

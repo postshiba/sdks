@@ -21,15 +21,19 @@ class Client
      * @param array<string, mixed> $payload
      * @return array<string, mixed>
      */
-    public function send(array $payload): array
+    public function send(array $payload, ?string $clusterId = null): array
     {
         $url = $this->baseUrl.'/api/v1/emails';
+        $headers = [
+            'Authorization' => 'Bearer '.$this->apiKey,
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ];
+        if ($clusterId !== null && $clusterId !== '') {
+            $headers['X-Capsule-Cluster-Id'] = $clusterId;
+        }
         $args = [
-            'headers' => [
-                'Authorization' => 'Bearer '.$this->apiKey,
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ],
+            'headers' => $headers,
             'body' => json_encode($payload, JSON_THROW_ON_ERROR),
             'timeout' => 15,
         ];

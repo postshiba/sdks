@@ -16,8 +16,16 @@ public sealed class EmailsResource
     readonly Client _client;
     internal EmailsResource(Client client) => _client = client;
 
-    public Task<JsonElement> SendAsync(object body, CancellationToken cancellationToken = default) =>
-        _client.SendAsync(HttpMethod.Post, "/api/v1/emails", body, cancellationToken: cancellationToken);
+    public Task<JsonElement> SendAsync(
+        object body,
+        CancellationToken cancellationToken = default,
+        string? clusterId = null) =>
+        _client.SendAsync(
+            HttpMethod.Post,
+            "/api/v1/emails",
+            body,
+            clusterId: clusterId,
+            cancellationToken: cancellationToken);
 
     public Task<JsonElement> SendOnClusterAsync(
         string clusterId,
@@ -31,7 +39,7 @@ public sealed class EmailsResource
             body,
             sandbox,
             idempotencyKey,
-            cancellationToken);
+            cancellationToken: cancellationToken);
 }
 
 public sealed class ClustersResource

@@ -43,6 +43,21 @@ public class ClientTest
         AssertJsonEqual(Catalog.Text("email_send_request"), harness.Handler.Body!);
         Assert.True(result.GetProperty("queued").GetBoolean());
         Assert.Equal("abc@capsule.test", result.GetProperty("message_id").GetString());
+        Assert.Null(harness.Handler.ClusterId);
+    }
+
+    [Fact]
+    public async Task Emails_send_pins_cluster()
+    {
+        using var harness = new Harness();
+        harness.Handler.Respond = () => MockHandler.Json(HttpStatusCode.OK, Catalog.Text("email_send_response"));
+
+        var result = await harness.Client.Emails.SendAsync(Catalog.Json("email_send_request"), clusterId: "NmQpXr");
+
+        Assert.Equal(HttpMethod.Post, harness.Handler.Method);
+        Assert.Equal("https://api.example.test/api/v1/emails", harness.Handler.Uri!.ToString());
+        Assert.Equal("NmQpXr", harness.Handler.ClusterId);
+        Assert.True(result.GetProperty("queued").GetBoolean());
     }
 
     [Fact]
@@ -52,13 +67,13 @@ public class ClientTest
         harness.Handler.Respond = () => MockHandler.Json(HttpStatusCode.OK, Catalog.Text("email_sandbox_response"));
 
         var result = await harness.Client.Emails.SendOnClusterAsync(
-            "4",
+            "NmQpXr",
             Catalog.Json("email_send_request"),
             idempotencyKey: "idem-1",
             sandbox: true);
 
         Assert.Equal(HttpMethod.Post, harness.Handler.Method);
-        Assert.Equal("https://api.example.test/api/v1/teams/1/clusters/4/sends", harness.Handler.Uri!.ToString());
+        Assert.Equal("https://api.example.test/api/v1/teams/KjkAJW/clusters/NmQpXr/sends", harness.Handler.Uri!.ToString());
         Assert.Equal("idem-1", harness.Handler.IdempotencyKey);
         using var sent = JsonDocument.Parse(harness.Handler.Body!);
         Assert.True(sent.RootElement.GetProperty("sandbox").GetBoolean());
@@ -120,11 +135,11 @@ public class ClientTest
     {
         using var harness = new Harness();
         harness.Handler.Respond = () => MockHandler.Json(HttpStatusCode.OK, Catalog.Text("smtp_credential_create"));
-        var created = await harness.Client.SmtpCredentials.CreateAsync("4", Catalog.Json("smtp_credential_create_request"));
+        var created = await harness.Client.SmtpCredentials.CreateAsync("NmQpXr", Catalog.Json("smtp_credential_create_request"));
         Assert.Equal("once-only-password", created.GetProperty("password").GetString());
 
         harness.Handler.Respond = () => MockHandler.Json(HttpStatusCode.OK, Catalog.Text("smtp_credential_deleted"));
-        var deleted = await harness.Client.SmtpCredentials.DeleteAsync("4", "9");
+        var deleted = await harness.Client.SmtpCredentials.DeleteAsync("NmQpXr", "RvWsXq");
         Assert.False(deleted.TryGetProperty("password", out _));
     }
 
@@ -137,7 +152,7 @@ public class ClientTest
         Assert.False(list[0].TryGetProperty("secret", out _));
 
         harness.Handler.Respond = () => MockHandler.Json(HttpStatusCode.OK, Catalog.Text("webhook_show"));
-        var shown = await harness.Client.Webhooks.GetAsync("2");
+        var shown = await harness.Client.Webhooks.GetAsync("CdFgHj");
         Assert.Equal("hex-secret", shown.GetProperty("secret").GetString());
 
         harness.Handler.Respond = () => MockHandler.Json(HttpStatusCode.OK, Catalog.Text("webhook_show"));
@@ -145,7 +160,7 @@ public class ClientTest
         Assert.Equal("hex-secret", created.GetProperty("secret").GetString());
 
         harness.Handler.Respond = () => MockHandler.Json(HttpStatusCode.OK, Catalog.Text("webhook"));
-        var updated = await harness.Client.Webhooks.UpdateAsync("2", Catalog.Json("webhook_update_request"));
+        var updated = await harness.Client.Webhooks.UpdateAsync("CdFgHj", Catalog.Json("webhook_update_request"));
         Assert.Equal(Catalog.Json("webhook").ToString(), updated.ToString());
         Assert.False(updated.TryGetProperty("secret", out _));
     }

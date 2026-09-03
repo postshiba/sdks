@@ -11,7 +11,7 @@ module PostShiba
       end
 
       def deliver!(mail)
-        client.send_email(payload_from(mail))
+        client.send_email(payload_from(mail), cluster_id: cluster_id_for(mail))
       end
 
       private
@@ -22,6 +22,15 @@ module PostShiba
           base_url: @settings[:base_url],
           team_id: @settings[:team_id]
         )
+      end
+
+      def cluster_id_for(mail)
+        field = mail["X-Capsule-Cluster-Id"]
+        from_mail = field.respond_to?(:unparsed_value) ? field.unparsed_value : field
+        from_mail = from_mail.to_s.strip unless from_mail.nil?
+        return from_mail unless from_mail.nil? || from_mail.empty?
+
+        @settings[:cluster_id]
       end
 
       def payload_from(mail)

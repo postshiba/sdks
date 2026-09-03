@@ -23,7 +23,7 @@ class Firewall
         return $this->client->request('POST', '/api/v1/teams/'.$this->client->teamId().'/firewall_entries', $params);
     }
 
-    public function deleteEntry(int|string $id): mixed
+    public function deleteEntry(string $id): mixed
     {
         return $this->client->request('DELETE', '/api/v1/firewall_entries/'.$id);
     }

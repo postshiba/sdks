@@ -8,7 +8,7 @@ class Events
     {
     }
 
-    public function list(int|string $clusterId): mixed
+    public function list(string $clusterId): mixed
     {
         return $this->client->request(
             'GET',
@@ -16,7 +16,7 @@ class Events
         );
     }
 
-    public function get(int|string $id): mixed
+    public function get(string $id): mixed
     {
         return $this->client->request('GET', '/api/v1/message_events/'.$id);
     }

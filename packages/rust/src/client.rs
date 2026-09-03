@@ -26,8 +26,8 @@ impl Client {
         self
     }
 
-    pub fn team_id(mut self, team_id: impl ToString) -> Self {
-        self.team_id = Some(team_id.to_string());
+    pub fn team_id(mut self, team_id: impl AsRef<str>) -> Self {
+        self.team_id = Some(team_id.as_ref().to_owned());
         self
     }
 
@@ -156,9 +156,19 @@ impl Emails<'_> {
             .request("POST", "/api/v1/emails", Some(body), &[])
     }
 
+    pub fn send_with(&self, body: &Value, cluster_id: impl AsRef<str>) -> Result<Value, Error> {
+        let id = cluster_id.as_ref();
+        self.client.request(
+            "POST",
+            "/api/v1/emails",
+            Some(body),
+            &[("X-Capsule-Cluster-Id", id)],
+        )
+    }
+
     pub fn send_on_cluster(
         &self,
-        cluster_id: impl ToString,
+        cluster_id: impl AsRef<str>,
         body: &Value,
         idempotency_key: Option<&str>,
         sandbox: bool,
@@ -167,7 +177,7 @@ impl Emails<'_> {
         let path = format!(
             "/api/v1/teams/{}/clusters/{}/sends",
             team_id,
-            cluster_id.to_string()
+            cluster_id.as_ref()
         );
         let mut payload = body.clone();
         if sandbox {
@@ -195,8 +205,8 @@ impl Clusters<'_> {
         self.client.request("GET", &path, None, &[])
     }
 
-    pub fn get(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/clusters/{}", id.to_string());
+    pub fn get(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/clusters/{}", id.as_ref());
         self.client.request("GET", &path, None, &[])
     }
 
@@ -205,23 +215,23 @@ impl Clusters<'_> {
         self.client.request("POST", &path, Some(body), &[])
     }
 
-    pub fn update(&self, id: impl ToString, body: &Value) -> Result<Value, Error> {
-        let path = format!("/api/v1/clusters/{}", id.to_string());
+    pub fn update(&self, id: impl AsRef<str>, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/clusters/{}", id.as_ref());
         self.client.request("PATCH", &path, Some(body), &[])
     }
 
-    pub fn suspend(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/clusters/{}/suspend", id.to_string());
+    pub fn suspend(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/clusters/{}/suspend", id.as_ref());
         self.client.request("POST", &path, None, &[])
     }
 
-    pub fn resume(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/clusters/{}/resume", id.to_string());
+    pub fn resume(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/clusters/{}/resume", id.as_ref());
         self.client.request("POST", &path, None, &[])
     }
 
-    pub fn delete(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/clusters/{}", id.to_string());
+    pub fn delete(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/clusters/{}", id.as_ref());
         self.client.request("DELETE", &path, None, &[])
     }
 }
@@ -236,8 +246,8 @@ impl SendingDomains<'_> {
         self.client.request("GET", &path, None, &[])
     }
 
-    pub fn get(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/sending_domains/{}", id.to_string());
+    pub fn get(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/sending_domains/{}", id.as_ref());
         self.client.request("GET", &path, None, &[])
     }
 
@@ -246,28 +256,28 @@ impl SendingDomains<'_> {
         self.client.request("POST", &path, Some(body), &[])
     }
 
-    pub fn verify(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/sending_domains/{}/verify", id.to_string());
+    pub fn verify(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/sending_domains/{}/verify", id.as_ref());
         self.client.request("POST", &path, None, &[])
     }
 
-    pub fn suspend(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/sending_domains/{}/suspend", id.to_string());
+    pub fn suspend(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/sending_domains/{}/suspend", id.as_ref());
         self.client.request("POST", &path, None, &[])
     }
 
-    pub fn resume(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/sending_domains/{}/resume", id.to_string());
+    pub fn resume(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/sending_domains/{}/resume", id.as_ref());
         self.client.request("POST", &path, None, &[])
     }
 
-    pub fn make_primary(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/sending_domains/{}/make_primary", id.to_string());
+    pub fn make_primary(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/sending_domains/{}/make_primary", id.as_ref());
         self.client.request("POST", &path, None, &[])
     }
 
-    pub fn delete(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/sending_domains/{}", id.to_string());
+    pub fn delete(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/sending_domains/{}", id.as_ref());
         self.client.request("DELETE", &path, None, &[])
     }
 }
@@ -282,8 +292,8 @@ impl Tenants<'_> {
         self.client.request("GET", &path, None, &[])
     }
 
-    pub fn get(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/tenants/{}", id.to_string());
+    pub fn get(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/tenants/{}", id.as_ref());
         self.client.request("GET", &path, None, &[])
     }
 
@@ -292,8 +302,8 @@ impl Tenants<'_> {
         self.client.request("POST", &path, Some(body), &[])
     }
 
-    pub fn delete(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/tenants/{}", id.to_string());
+    pub fn delete(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/tenants/{}", id.as_ref());
         self.client.request("DELETE", &path, None, &[])
     }
 }
@@ -308,8 +318,8 @@ impl Inboxes<'_> {
         self.client.request("GET", &path, None, &[])
     }
 
-    pub fn get(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/inboxes/{}", id.to_string());
+    pub fn get(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/inboxes/{}", id.as_ref());
         self.client.request("GET", &path, None, &[])
     }
 
@@ -318,13 +328,13 @@ impl Inboxes<'_> {
         self.client.request("POST", &path, Some(body), &[])
     }
 
-    pub fn verify(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/inboxes/{}/verify", id.to_string());
+    pub fn verify(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/inboxes/{}/verify", id.as_ref());
         self.client.request("POST", &path, None, &[])
     }
 
-    pub fn delete(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/inboxes/{}", id.to_string());
+    pub fn delete(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/inboxes/{}", id.as_ref());
         self.client.request("DELETE", &path, None, &[])
     }
 }
@@ -334,31 +344,30 @@ pub struct Messages<'a> {
 }
 
 impl Messages<'_> {
-    pub fn list(&self, inbox_id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/inboxes/{}/inbound_messages", inbox_id.to_string());
+    pub fn list(&self, inbox_id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/inboxes/{}/inbound_messages", inbox_id.as_ref());
         self.client.request("GET", &path, None, &[])
     }
 
-    pub fn get(&self, inbox_id: impl ToString, id: impl ToString) -> Result<Value, Error> {
+    pub fn get(&self, inbox_id: impl AsRef<str>, id: impl AsRef<str>) -> Result<Value, Error> {
         let path = format!(
             "/api/v1/inboxes/{}/inbound_messages/{}",
-            inbox_id.to_string(),
-            id.to_string()
+            inbox_id.as_ref(),
+            id.as_ref()
         );
         self.client.request("GET", &path, None, &[])
     }
 
     pub fn download_attachment(
         &self,
-        inbox_id: impl ToString,
-        id: impl ToString,
-        index: impl ToString,
+        inbox_id: impl AsRef<str>,
+        id: impl AsRef<str>,
+        index: u32,
     ) -> Result<Vec<u8>, Error> {
         let path = format!(
-            "/api/v1/inboxes/{}/inbound_messages/{}/attachments/{}",
-            inbox_id.to_string(),
-            id.to_string(),
-            index.to_string()
+            "/api/v1/inboxes/{}/inbound_messages/{}/attachments/{index}",
+            inbox_id.as_ref(),
+            id.as_ref()
         );
         self.client.request_bytes("GET", &path, None, &[])
     }
@@ -369,17 +378,17 @@ pub struct Events<'a> {
 }
 
 impl Events<'_> {
-    pub fn list(&self, cluster_id: impl ToString) -> Result<Value, Error> {
+    pub fn list(&self, cluster_id: impl AsRef<str>) -> Result<Value, Error> {
         let path = format!(
             "/api/v1/teams/{}/clusters/{}/message_events",
             self.client.team()?,
-            cluster_id.to_string()
+            cluster_id.as_ref()
         );
         self.client.request("GET", &path, None, &[])
     }
 
-    pub fn get(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/message_events/{}", id.to_string());
+    pub fn get(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/message_events/{}", id.as_ref());
         self.client.request("GET", &path, None, &[])
     }
 }
@@ -389,21 +398,21 @@ pub struct SmtpCredentials<'a> {
 }
 
 impl SmtpCredentials<'_> {
-    pub fn create(&self, cluster_id: impl ToString, body: &Value) -> Result<Value, Error> {
+    pub fn create(&self, cluster_id: impl AsRef<str>, body: &Value) -> Result<Value, Error> {
         let path = format!(
             "/api/v1/teams/{}/clusters/{}/smtp_credentials",
             self.client.team()?,
-            cluster_id.to_string()
+            cluster_id.as_ref()
         );
         self.client.request("POST", &path, Some(body), &[])
     }
 
-    pub fn delete(&self, cluster_id: impl ToString, id: impl ToString) -> Result<Value, Error> {
+    pub fn delete(&self, cluster_id: impl AsRef<str>, id: impl AsRef<str>) -> Result<Value, Error> {
         let path = format!(
             "/api/v1/teams/{}/clusters/{}/smtp_credentials/{}",
             self.client.team()?,
-            cluster_id.to_string(),
-            id.to_string()
+            cluster_id.as_ref(),
+            id.as_ref()
         );
         self.client.request("DELETE", &path, None, &[])
     }
@@ -419,8 +428,8 @@ impl Webhooks<'_> {
         self.client.request("GET", &path, None, &[])
     }
 
-    pub fn get(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/webhook_endpoints/{}", id.to_string());
+    pub fn get(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/webhook_endpoints/{}", id.as_ref());
         self.client.request("GET", &path, None, &[])
     }
 
@@ -429,13 +438,13 @@ impl Webhooks<'_> {
         self.client.request("POST", &path, Some(body), &[])
     }
 
-    pub fn update(&self, id: impl ToString, body: &Value) -> Result<Value, Error> {
-        let path = format!("/api/v1/webhook_endpoints/{}", id.to_string());
+    pub fn update(&self, id: impl AsRef<str>, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/webhook_endpoints/{}", id.as_ref());
         self.client.request("PATCH", &path, Some(body), &[])
     }
 
-    pub fn delete(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/webhook_endpoints/{}", id.to_string());
+    pub fn delete(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/webhook_endpoints/{}", id.as_ref());
         self.client.request("DELETE", &path, None, &[])
     }
 }
@@ -455,8 +464,8 @@ impl Suppressions<'_> {
         self.client.request("POST", &path, Some(body), &[])
     }
 
-    pub fn delete(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/suppressions/{}", id.to_string());
+    pub fn delete(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/suppressions/{}", id.as_ref());
         self.client.request("DELETE", &path, None, &[])
     }
 }
@@ -481,8 +490,8 @@ impl Firewall<'_> {
         self.client.request("POST", &path, Some(body), &[])
     }
 
-    pub fn delete_entry(&self, id: impl ToString) -> Result<Value, Error> {
-        let path = format!("/api/v1/firewall_entries/{}", id.to_string());
+    pub fn delete_entry(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/firewall_entries/{}", id.as_ref());
         self.client.request("DELETE", &path, None, &[])
     }
 }

@@ -25,7 +25,7 @@ pip install "git+https://github.com/postshiba/postshiba-python.git#egg=postshiba
 ```python
 from postshiba import PostShiba
 
-client = PostShiba("ps_...", team_id=1)
+client = PostShiba("ps_...", team_id="KjkAJW")
 client.emails.send({
 	"from": "hello@mail.example.com",
 	"to": ["you@example.com"],
@@ -33,6 +33,12 @@ client.emails.send({
 	"text": "Hi",
 	"html": "<p>Hi</p>",
 })
+```
+
+Pass `cluster_id` to send `X-Capsule-Cluster-Id`. The path stays `POST /api/v1/emails`.
+
+```python
+client.emails.send(body, cluster_id="NmQpXr")
 ```
 
 ## Django
@@ -66,7 +72,7 @@ message.attach_alternative("<p>Hi</p>", "text/html")
 message.send()
 ```
 
-The backend calls `emails.send`. `import postshiba` does not load Django.
+The backend calls `emails.send` without a cluster id. Call the client yourself to pin a cluster. `import postshiba` does not load Django.
 
 ## API
 
@@ -80,91 +86,92 @@ client.users.me()
 
 ```python
 client.emails.send(body)
-client.emails.send_on_cluster(4, body, idempotency_key="idem-1", sandbox=True)
+client.emails.send(body, cluster_id="NmQpXr")
+client.emails.send_on_cluster("NmQpXr", body, idempotency_key="idem-1", sandbox=True)
 ```
 
 ### Clusters
 
 ```python
 client.clusters.list()
-client.clusters.get(4)
+client.clusters.get("NmQpXr")
 client.clusters.create({"cluster": {"name": "edge", "size": "small", "region": "manual", "plan": "nano"}})
-client.clusters.update(4, {"cluster": {"plan": "small"}})
-client.clusters.suspend(4)
-client.clusters.resume(4)
-client.clusters.delete(4)
+client.clusters.update("NmQpXr", {"cluster": {"plan": "small"}})
+client.clusters.suspend("NmQpXr")
+client.clusters.resume("NmQpXr")
+client.clusters.delete("NmQpXr")
 ```
 
 ### Sending domains
 
 ```python
 client.sending_domains.list()
-client.sending_domains.get(8)
-client.sending_domains.create({"sending_domain": {"name": "mail.example.com", "tenant_id": 12}})
-client.sending_domains.verify(8)
-client.sending_domains.suspend(8)
-client.sending_domains.resume(8)
-client.sending_domains.make_primary(8)
-client.sending_domains.delete(8)
+client.sending_domains.get("HsVtYk")
+client.sending_domains.create({"sending_domain": {"name": "mail.example.com", "tenant_id": "WbLcFd"}})
+client.sending_domains.verify("HsVtYk")
+client.sending_domains.suspend("HsVtYk")
+client.sending_domains.resume("HsVtYk")
+client.sending_domains.make_primary("HsVtYk")
+client.sending_domains.delete("HsVtYk")
 ```
 
 ### Tenants
 
 ```python
 client.tenants.list()
-client.tenants.get(12)
+client.tenants.get("WbLcFd")
 client.tenants.create({"tenant": {"name": "Acme Florist"}})
-client.tenants.delete(12)
+client.tenants.delete("WbLcFd")
 ```
 
 ### Inboxes
 
 ```python
 client.inboxes.list()
-client.inboxes.get(3)
+client.inboxes.get("PqRzMn")
 client.inboxes.create({"inbox": {"name": "agent", "webhook_url": "https://hooks.example.com/mail"}})
-client.inboxes.verify(3)
-client.inboxes.delete(3)
+client.inboxes.verify("PqRzMn")
+client.inboxes.delete("PqRzMn")
 ```
 
 ### Messages
 
 ```python
-client.messages.list(3)
-client.messages.get(3, 21)
-client.messages.download_attachment(3, 21, 1)
+client.messages.list("PqRzMn")
+client.messages.get("PqRzMn", "GxTyVu")
+client.messages.download_attachment("PqRzMn", "GxTyVu", 1)
 ```
 
 ### Events
 
 ```python
-client.events.list(4)
-client.events.get(44)
+client.events.list("NmQpXr")
+client.events.get("JkLmNp")
 ```
 
 ### SMTP credentials
 
 ```python
-client.smtp_credentials.create(4, {"smtp_credential": {"tenant_id": 12}})
-client.smtp_credentials.delete(4, 9)
+client.smtp_credentials.create("NmQpXr", {"smtp_credential": {"tenant_id": "WbLcFd"}})
+client.smtp_credentials.delete("NmQpXr", "RvWsXq")
 ```
 
 ### Webhooks
 
 ```python
 client.webhooks.list()
-client.webhooks.get(2)
+client.webhooks.get("CdFgHj")
 client.webhooks.create({"webhook_endpoint": {"url": "https://hooks.example.com/capsule", "event_types": ["delivered"]}})
-client.webhooks.update(2, {"webhook_endpoint": {"enabled": False, "event_types": ["delivered", "bounce"]}})
-client.webhooks.delete(2)
+client.webhooks.update("CdFgHj", {"webhook_endpoint": {"enabled": False, "event_types": ["delivered", "bounce"]}})
+client.webhooks.delete("CdFgHj")
 ```
 
 ### Suppressions
 
 ```python
 client.suppressions.list()
-client.suppressions.create({"suppression": {"email": "blocked@example.com", "tenant_id": 12}})
-client.suppressions.delete(7)
+client.suppressions.create({"suppression": {"email": "blocked@example.com", "tenant_id": "WbLcFd"}})
+client.suppressions.delete("YtReWq")
 ```
 
 ### Firewall
@@ -173,7 +180,7 @@ client.suppressions.delete(7)
 client.firewall.get()
 client.firewall.update({"firewall": {"enabled_checks": ["temp_providers"]}})
 client.firewall.add_entry({"firewall_entry": {"list": "deny", "value": "mailinator.com"}})
-client.firewall.delete_entry(3)
+client.firewall.delete_entry("BnMkLo")
 ```
 
 ## Verify webhooks

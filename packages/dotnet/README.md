@@ -19,7 +19,7 @@ Not on NuGet yet. Clone [postshiba/postshiba-dotnet](https://github.com/postshib
 ## Send an email
 
 ```csharp
-var client = new Client(apiKey, teamId: "1");
+var client = new Client(apiKey, teamId: "KjkAJW");
 
 await client.Emails.SendAsync(new Dictionary<string, object?>
 {
@@ -30,69 +30,75 @@ await client.Emails.SendAsync(new Dictionary<string, object?>
 });
 ```
 
+Pass a cluster id to pin `X-Capsule-Cluster-Id`. Omit it and the header is not sent.
+
+```csharp
+await client.Emails.SendAsync(body, clusterId: "NmQpXr");
+```
+
 ## API
 
 ```csharp
-var client = new Client(apiKey, baseUrl: null, teamId: "1", httpClient: http);
+var client = new Client(apiKey, baseUrl: null, teamId: "KjkAJW", httpClient: http);
 
 await client.Users.MeAsync();
 
-await client.Emails.SendOnClusterAsync("4", body, idempotencyKey: "idem-1", sandbox: true);
+await client.Emails.SendOnClusterAsync("NmQpXr", body, idempotencyKey: "idem-1", sandbox: true);
 
 await client.Clusters.ListAsync();
-await client.Clusters.GetAsync("4");
+await client.Clusters.GetAsync("NmQpXr");
 await client.Clusters.CreateAsync(body);
-await client.Clusters.UpdateAsync("4", body);
-await client.Clusters.SuspendAsync("4");
-await client.Clusters.ResumeAsync("4");
-await client.Clusters.DeleteAsync("4");
+await client.Clusters.UpdateAsync("NmQpXr", body);
+await client.Clusters.SuspendAsync("NmQpXr");
+await client.Clusters.ResumeAsync("NmQpXr");
+await client.Clusters.DeleteAsync("NmQpXr");
 
 await client.SendingDomains.ListAsync();
-await client.SendingDomains.GetAsync("8");
+await client.SendingDomains.GetAsync("HsVtYk");
 await client.SendingDomains.CreateAsync(body);
-await client.SendingDomains.VerifyAsync("8");
-await client.SendingDomains.SuspendAsync("8");
-await client.SendingDomains.ResumeAsync("8");
-await client.SendingDomains.MakePrimaryAsync("8");
-await client.SendingDomains.DeleteAsync("8");
+await client.SendingDomains.VerifyAsync("HsVtYk");
+await client.SendingDomains.SuspendAsync("HsVtYk");
+await client.SendingDomains.ResumeAsync("HsVtYk");
+await client.SendingDomains.MakePrimaryAsync("HsVtYk");
+await client.SendingDomains.DeleteAsync("HsVtYk");
 
 await client.Tenants.ListAsync();
-await client.Tenants.GetAsync("12");
+await client.Tenants.GetAsync("WbLcFd");
 await client.Tenants.CreateAsync(body);
-await client.Tenants.DeleteAsync("12");
+await client.Tenants.DeleteAsync("WbLcFd");
 
 await client.Inboxes.ListAsync();
-await client.Inboxes.GetAsync("3");
+await client.Inboxes.GetAsync("PqRzMn");
 await client.Inboxes.CreateAsync(body);
-await client.Inboxes.VerifyAsync("3");
-await client.Inboxes.DeleteAsync("3");
+await client.Inboxes.VerifyAsync("PqRzMn");
+await client.Inboxes.DeleteAsync("PqRzMn");
 
-await client.Messages.ListAsync("3");
-await client.Messages.GetAsync("3", "21");
-await client.Messages.DownloadAttachmentAsync("3", "21", 1);
+await client.Messages.ListAsync("PqRzMn");
+await client.Messages.GetAsync("PqRzMn", "GxTyVu");
+await client.Messages.DownloadAttachmentAsync("PqRzMn", "GxTyVu", 1);
 
-await client.Events.ListAsync("4");
-await client.Events.GetAsync("44");
+await client.Events.ListAsync("NmQpXr");
+await client.Events.GetAsync("JkLmNp");
 
-await client.SmtpCredentials.CreateAsync("4", body);
-await client.SmtpCredentials.DeleteAsync("4", "9");
+await client.SmtpCredentials.CreateAsync("NmQpXr", body);
+await client.SmtpCredentials.DeleteAsync("NmQpXr", "RvWsXq");
 
 await client.Webhooks.ListAsync();
-await client.Webhooks.GetAsync("2");
+await client.Webhooks.GetAsync("CdFgHj");
 await client.Webhooks.CreateAsync(body);
-await client.Webhooks.UpdateAsync("2", body);
-await client.Webhooks.DeleteAsync("2");
-await client.Webhooks.UpdateAsync("2", body);
-await client.Webhooks.DeleteAsync("2");
+await client.Webhooks.UpdateAsync("CdFgHj", body);
+await client.Webhooks.DeleteAsync("CdFgHj");
+await client.Webhooks.UpdateAsync("CdFgHj", body);
+await client.Webhooks.DeleteAsync("CdFgHj");
 
 await client.Suppressions.ListAsync();
 await client.Suppressions.CreateAsync(body);
-await client.Suppressions.DeleteAsync("7");
+await client.Suppressions.DeleteAsync("YtReWq");
 
 await client.Firewall.GetAsync();
 await client.Firewall.UpdateAsync(body);
 await client.Firewall.AddEntryAsync(body);
-await client.Firewall.DeleteEntryAsync("3");
+await client.Firewall.DeleteEntryAsync("BnMkLo");
 ```
 
 ## Verify webhooks

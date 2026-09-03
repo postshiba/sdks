@@ -87,4 +87,55 @@ class ActionMailerTest < Minitest::Test
     assert_equal "<p>hello from PostShiba</p>", captured["html"]
     assert_equal "photo.png", captured["attachments"][0]["filename"]
   end
+
+  def test_settings_cluster_id_sets_http_header
+    captured_headers = nil
+    captured_body = nil
+    stub_request(:post, "https://app.postshiba.com/api/v1/emails")
+      .with { |req|
+        captured_headers = req.headers
+        captured_body = JSON.parse(req.body)
+        true
+      }
+      .to_return(status: 200, body: fixture_json("email_send_response"), headers: {"Content-Type" => "application/json"})
+
+    mail = Mail.new
+    mail.from = "hello@mail.example.com"
+    mail.to = "you@example.com"
+    mail.subject = "PostShiba test"
+    mail.body = "hello from PostShiba"
+
+    delivery = PostShiba::ActionMailer::DeliveryMethod.new(api_key: "mail-key", cluster_id: "NmQpXr")
+    delivery.deliver!(mail)
+
+    assert_equal "NmQpXr", captured_headers["X-Capsule-Cluster-Id"]
+    refute captured_body.key?("X-Capsule-Cluster-Id")
+    refute((captured_body["headers"] || {}).key?("X-Capsule-Cluster-Id"))
+  end
+
+  def test_mail_header_sets_http_header_and_wins_over_settings
+    captured_headers = nil
+    captured_body = nil
+    stub_request(:post, "https://app.postshiba.com/api/v1/emails")
+      .with { |req|
+        captured_headers = req.headers
+        captured_body = JSON.parse(req.body)
+        true
+      }
+      .to_return(status: 200, body: fixture_json("email_send_response"), headers: {"Content-Type" => "application/json"})
+
+    mail = Mail.new
+    mail.from = "hello@mail.example.com"
+    mail.to = "you@example.com"
+    mail.subject = "PostShiba test"
+    mail.body = "hello from PostShiba"
+    mail["X-Capsule-Cluster-Id"] = "NmQpXr"
+
+    delivery = PostShiba::ActionMailer::DeliveryMethod.new(api_key: "mail-key", cluster_id: "ZzYyXx")
+    delivery.deliver!(mail)
+
+    assert_equal "NmQpXr", captured_headers["X-Capsule-Cluster-Id"]
+    refute captured_body.key?("X-Capsule-Cluster-Id")
+    refute((captured_body["headers"] || {}).key?("X-Capsule-Cluster-Id"))
+  end
 end

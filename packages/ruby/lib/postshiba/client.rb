@@ -23,8 +23,10 @@ module PostShiba
       request(:get, "/api/v1/users/me")
     end
 
-    def send_email(body)
-      request(:post, "/api/v1/emails", body: body)
+    def send_email(body, cluster_id: nil)
+      headers = {}
+      headers["X-Capsule-Cluster-Id"] = cluster_id.to_s unless cluster_id.nil? || cluster_id.to_s.empty?
+      request(:post, "/api/v1/emails", body: body, headers: headers)
     end
 
     def send_on_cluster(cluster_id, body, idempotency_key: nil, sandbox: false)

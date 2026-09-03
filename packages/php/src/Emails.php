@@ -8,12 +8,17 @@ class Emails
     {
     }
 
-    public function send(array $params): mixed
+    public function send(array $params, ?string $clusterId = null): mixed
     {
-        return $this->client->request('POST', '/api/v1/emails', $params);
+        $headers = [];
+        if ($clusterId !== null && $clusterId !== '') {
+            $headers['X-Capsule-Cluster-Id'] = (string) $clusterId;
+        }
+
+        return $this->client->request('POST', '/api/v1/emails', $params, $headers);
     }
 
-    public function sendOnCluster(int|string $clusterId, array $params, ?string $idempotencyKey = null, bool $sandbox = false): mixed
+    public function sendOnCluster(string $clusterId, array $params, ?string $idempotencyKey = null, bool $sandbox = false): mixed
     {
         if ($sandbox) {
             $params = array_merge($params, ['sandbox' => true]);

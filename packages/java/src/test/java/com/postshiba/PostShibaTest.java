@@ -39,7 +39,7 @@ class PostShibaTest {
         api = new MockApi();
         client = new PostShiba(
                 "test-key",
-                new PostShiba.Options().baseUrl(api.url()).teamId(1).httpClient(HttpClient.newHttpClient())
+                new PostShiba.Options().baseUrl(api.url()).teamId("KjkAJW").httpClient(HttpClient.newHttpClient())
         );
     }
 
@@ -75,6 +75,20 @@ class PostShibaTest {
         assertEquals(fixtureJson("email_send_request"), api.last.bodyJson());
         assertEquals(fixtureJson("email_send_response"), sent);
         assertTrue(sent.get("queued").asBoolean());
+        assertNull(api.last.header("X-Capsule-Cluster-Id"));
+    }
+
+    @Test
+    void emailsSendPinsCluster() {
+        api.respond(200, fixture("email_send_response"));
+        JsonNode sent = client.emails.send(
+                fixtureMap("email_send_request"),
+                new PostShiba.SendOptions().clusterId("NmQpXr")
+        );
+        assertEquals("POST", api.last.method);
+        assertEquals("/api/v1/emails", api.last.path);
+        assertEquals("NmQpXr", api.last.header("X-Capsule-Cluster-Id"));
+        assertEquals(fixtureJson("email_send_response"), sent);
     }
 
     @Test
@@ -86,7 +100,7 @@ class PostShibaTest {
                 new PostShiba.SendOnClusterOptions().idempotencyKey("idem-1").sandbox(true)
         );
         assertEquals("POST", api.last.method);
-        assertEquals("/api/v1/teams/1/clusters/4/sends", api.last.path);
+        assertEquals("/api/v1/teams/KjkAJW/clusters/NmQpXr/sends", api.last.path);
         assertEquals("idem-1", api.last.header("Idempotency-Key"));
         JsonNode body = api.last.bodyJson();
         assertTrue(body.get("sandbox").asBoolean());
@@ -102,65 +116,65 @@ class PostShibaTest {
                 new Op("GET", "/api/v1/users/me", "whoami", false, null, c -> c.users.me()),
                 new Op("POST", "/api/v1/emails", "email_send_response", false, "email_send_request",
                         c -> c.emails.send(fixtureMap("email_send_request"))),
-                new Op("POST", "/api/v1/teams/1/clusters/4/sends", "email_sandbox_response", false, null,
-                        c -> c.emails.sendOnCluster(4, fixtureMap("email_send_request"))),
-                new Op("GET", "/api/v1/teams/1/clusters", "cluster", true, null, c -> c.clusters.list()),
-                new Op("GET", "/api/v1/clusters/4", "cluster", false, null, c -> c.clusters.get(4)),
-                new Op("POST", "/api/v1/teams/1/clusters", "cluster", false, "cluster_create_request",
+                new Op("POST", "/api/v1/teams/KjkAJW/clusters/NmQpXr/sends", "email_sandbox_response", false, null,
+                        c -> c.emails.sendOnCluster("NmQpXr", fixtureMap("email_send_request"))),
+                new Op("GET", "/api/v1/teams/KjkAJW/clusters", "cluster", true, null, c -> c.clusters.list()),
+                new Op("GET", "/api/v1/clusters/NmQpXr", "cluster", false, null, c -> c.clusters.get("NmQpXr")),
+                new Op("POST", "/api/v1/teams/KjkAJW/clusters", "cluster", false, "cluster_create_request",
                         c -> c.clusters.create(fixtureMap("cluster_create_request"))),
-                new Op("PATCH", "/api/v1/clusters/4", "cluster_updated", false, "cluster_update_request",
-                        c -> c.clusters.update(4, fixtureMap("cluster_update_request"))),
-                new Op("POST", "/api/v1/clusters/4/suspend", "cluster_suspended", false, null, c -> c.clusters.suspend(4)),
-                new Op("POST", "/api/v1/clusters/4/resume", "cluster", false, null, c -> c.clusters.resume(4)),
-                new Op("DELETE", "/api/v1/clusters/4", "cluster_deprovisioned", false, null, c -> c.clusters.delete(4)),
-                new Op("GET", "/api/v1/teams/1/sending_domains", "sending_domain", true, null, c -> c.sendingDomains.list()),
-                new Op("GET", "/api/v1/sending_domains/8", "sending_domain", false, null, c -> c.sendingDomains.get(8)),
-                new Op("POST", "/api/v1/teams/1/sending_domains", "sending_domain", false, "sending_domain_create_request",
+                new Op("PATCH", "/api/v1/clusters/NmQpXr", "cluster_updated", false, "cluster_update_request",
+                        c -> c.clusters.update("NmQpXr", fixtureMap("cluster_update_request"))),
+                new Op("POST", "/api/v1/clusters/NmQpXr/suspend", "cluster_suspended", false, null, c -> c.clusters.suspend("NmQpXr")),
+                new Op("POST", "/api/v1/clusters/NmQpXr/resume", "cluster", false, null, c -> c.clusters.resume("NmQpXr")),
+                new Op("DELETE", "/api/v1/clusters/NmQpXr", "cluster_deprovisioned", false, null, c -> c.clusters.delete("NmQpXr")),
+                new Op("GET", "/api/v1/teams/KjkAJW/sending_domains", "sending_domain", true, null, c -> c.sendingDomains.list()),
+                new Op("GET", "/api/v1/sending_domains/HsVtYk", "sending_domain", false, null, c -> c.sendingDomains.get("HsVtYk")),
+                new Op("POST", "/api/v1/teams/KjkAJW/sending_domains", "sending_domain", false, "sending_domain_create_request",
                         c -> c.sendingDomains.create(fixtureMap("sending_domain_create_request"))),
-                new Op("POST", "/api/v1/sending_domains/8/verify", "sending_domain", false, null, c -> c.sendingDomains.verify(8)),
-                new Op("POST", "/api/v1/sending_domains/8/suspend", "sending_domain_suspended", false, null,
-                        c -> c.sendingDomains.suspend(8)),
-                new Op("POST", "/api/v1/sending_domains/8/resume", "sending_domain", false, null, c -> c.sendingDomains.resume(8)),
-                new Op("POST", "/api/v1/sending_domains/8/make_primary", "sending_domain_primary", false, null,
-                        c -> c.sendingDomains.makePrimary(8)),
-                new Op("DELETE", "/api/v1/sending_domains/8", "empty", false, null, c -> c.sendingDomains.delete(8)),
-                new Op("GET", "/api/v1/teams/1/tenants", "tenant", true, null, c -> c.tenants.list()),
-                new Op("GET", "/api/v1/tenants/12", "tenant", false, null, c -> c.tenants.get(12)),
-                new Op("POST", "/api/v1/teams/1/tenants", "tenant", false, "tenant_create_request",
+                new Op("POST", "/api/v1/sending_domains/HsVtYk/verify", "sending_domain", false, null, c -> c.sendingDomains.verify("HsVtYk")),
+                new Op("POST", "/api/v1/sending_domains/HsVtYk/suspend", "sending_domain_suspended", false, null,
+                        c -> c.sendingDomains.suspend("HsVtYk")),
+                new Op("POST", "/api/v1/sending_domains/HsVtYk/resume", "sending_domain", false, null, c -> c.sendingDomains.resume("HsVtYk")),
+                new Op("POST", "/api/v1/sending_domains/HsVtYk/make_primary", "sending_domain_primary", false, null,
+                        c -> c.sendingDomains.makePrimary("HsVtYk")),
+                new Op("DELETE", "/api/v1/sending_domains/HsVtYk", "empty", false, null, c -> c.sendingDomains.delete("HsVtYk")),
+                new Op("GET", "/api/v1/teams/KjkAJW/tenants", "tenant", true, null, c -> c.tenants.list()),
+                new Op("GET", "/api/v1/tenants/WbLcFd", "tenant", false, null, c -> c.tenants.get("WbLcFd")),
+                new Op("POST", "/api/v1/teams/KjkAJW/tenants", "tenant", false, "tenant_create_request",
                         c -> c.tenants.create(fixtureMap("tenant_create_request"))),
-                new Op("DELETE", "/api/v1/tenants/12", "empty", false, null, c -> c.tenants.delete(12)),
-                new Op("GET", "/api/v1/teams/1/inboxes", "inbox_index", true, null, c -> c.inboxes.list()),
-                new Op("GET", "/api/v1/inboxes/3", "inbox", false, null, c -> c.inboxes.get(3)),
-                new Op("POST", "/api/v1/teams/1/inboxes", "inbox", false, "inbox_create_request",
+                new Op("DELETE", "/api/v1/tenants/WbLcFd", "empty", false, null, c -> c.tenants.delete("WbLcFd")),
+                new Op("GET", "/api/v1/teams/KjkAJW/inboxes", "inbox_index", true, null, c -> c.inboxes.list()),
+                new Op("GET", "/api/v1/inboxes/PqRzMn", "inbox", false, null, c -> c.inboxes.get("PqRzMn")),
+                new Op("POST", "/api/v1/teams/KjkAJW/inboxes", "inbox", false, "inbox_create_request",
                         c -> c.inboxes.create(fixtureMap("inbox_create_request"))),
-                new Op("POST", "/api/v1/inboxes/3/verify", "inbox_index", false, null, c -> c.inboxes.verify(3)),
-                new Op("DELETE", "/api/v1/inboxes/3", "inbox_index", false, null, c -> c.inboxes.delete(3)),
-                new Op("GET", "/api/v1/inboxes/3/inbound_messages", "message", true, null, c -> c.messages.list(3)),
-                new Op("GET", "/api/v1/inboxes/3/inbound_messages/21", "message_show", false, null, c -> c.messages.get(3, 21)),
-                new Op("GET", "/api/v1/teams/1/clusters/4/message_events", "event", true, null, c -> c.events.list(4)),
-                new Op("GET", "/api/v1/message_events/44", "event", false, null, c -> c.events.get(44)),
-                new Op("POST", "/api/v1/teams/1/clusters/4/smtp_credentials", "smtp_credential_create", false,
+                new Op("POST", "/api/v1/inboxes/PqRzMn/verify", "inbox_index", false, null, c -> c.inboxes.verify("PqRzMn")),
+                new Op("DELETE", "/api/v1/inboxes/PqRzMn", "inbox_index", false, null, c -> c.inboxes.delete("PqRzMn")),
+                new Op("GET", "/api/v1/inboxes/PqRzMn/inbound_messages", "message", true, null, c -> c.messages.list("PqRzMn")),
+                new Op("GET", "/api/v1/inboxes/PqRzMn/inbound_messages/GxTyVu", "message_show", false, null, c -> c.messages.get("PqRzMn", "GxTyVu")),
+                new Op("GET", "/api/v1/teams/KjkAJW/clusters/NmQpXr/message_events", "event", true, null, c -> c.events.list("NmQpXr")),
+                new Op("GET", "/api/v1/message_events/JkLmNp", "event", false, null, c -> c.events.get("JkLmNp")),
+                new Op("POST", "/api/v1/teams/KjkAJW/clusters/NmQpXr/smtp_credentials", "smtp_credential_create", false,
                         "smtp_credential_create_request",
-                        c -> c.smtpCredentials.create(4, fixtureMap("smtp_credential_create_request"))),
-                new Op("DELETE", "/api/v1/teams/1/clusters/4/smtp_credentials/9", "smtp_credential_deleted", false, null,
-                        c -> c.smtpCredentials.delete(4, 9)),
-                new Op("GET", "/api/v1/teams/1/webhook_endpoints", "webhook", true, null, c -> c.webhooks.list()),
-                new Op("GET", "/api/v1/webhook_endpoints/2", "webhook_show", false, null, c -> c.webhooks.get(2)),
-                new Op("POST", "/api/v1/teams/1/webhook_endpoints", "webhook_show", false, "webhook_create_request",
+                        c -> c.smtpCredentials.create("NmQpXr", fixtureMap("smtp_credential_create_request"))),
+                new Op("DELETE", "/api/v1/teams/KjkAJW/clusters/NmQpXr/smtp_credentials/RvWsXq", "smtp_credential_deleted", false, null,
+                        c -> c.smtpCredentials.delete("NmQpXr", "RvWsXq")),
+                new Op("GET", "/api/v1/teams/KjkAJW/webhook_endpoints", "webhook", true, null, c -> c.webhooks.list()),
+                new Op("GET", "/api/v1/webhook_endpoints/CdFgHj", "webhook_show", false, null, c -> c.webhooks.get("CdFgHj")),
+                new Op("POST", "/api/v1/teams/KjkAJW/webhook_endpoints", "webhook_show", false, "webhook_create_request",
                         c -> c.webhooks.create(fixtureMap("webhook_create_request"))),
-                new Op("PATCH", "/api/v1/webhook_endpoints/2", "webhook", false, "webhook_update_request",
-                        c -> c.webhooks.update(2, fixtureMap("webhook_update_request"))),
-                new Op("DELETE", "/api/v1/webhook_endpoints/2", "empty", false, null, c -> c.webhooks.delete(2)),
-                new Op("GET", "/api/v1/teams/1/suppressions", "suppression", true, null, c -> c.suppressions.list()),
-                new Op("POST", "/api/v1/teams/1/suppressions", "suppression", false, "suppression_create_request",
+                new Op("PATCH", "/api/v1/webhook_endpoints/CdFgHj", "webhook", false, "webhook_update_request",
+                        c -> c.webhooks.update("CdFgHj", fixtureMap("webhook_update_request"))),
+                new Op("DELETE", "/api/v1/webhook_endpoints/CdFgHj", "empty", false, null, c -> c.webhooks.delete("CdFgHj")),
+                new Op("GET", "/api/v1/teams/KjkAJW/suppressions", "suppression", true, null, c -> c.suppressions.list()),
+                new Op("POST", "/api/v1/teams/KjkAJW/suppressions", "suppression", false, "suppression_create_request",
                         c -> c.suppressions.create(fixtureMap("suppression_create_request"))),
-                new Op("DELETE", "/api/v1/suppressions/7", "empty", false, null, c -> c.suppressions.delete(7)),
-                new Op("GET", "/api/v1/teams/1/firewall", "firewall", false, null, c -> c.firewall.get()),
-                new Op("PATCH", "/api/v1/teams/1/firewall", "firewall", false, "firewall_update_request",
+                new Op("DELETE", "/api/v1/suppressions/YtReWq", "empty", false, null, c -> c.suppressions.delete("YtReWq")),
+                new Op("GET", "/api/v1/teams/KjkAJW/firewall", "firewall", false, null, c -> c.firewall.get()),
+                new Op("PATCH", "/api/v1/teams/KjkAJW/firewall", "firewall", false, "firewall_update_request",
                         c -> c.firewall.update(fixtureMap("firewall_update_request"))),
-                new Op("POST", "/api/v1/teams/1/firewall_entries", "firewall_entry", false, "firewall_entry_create_request",
+                new Op("POST", "/api/v1/teams/KjkAJW/firewall_entries", "firewall_entry", false, "firewall_entry_create_request",
                         c -> c.firewall.addEntry(fixtureMap("firewall_entry_create_request"))),
-                new Op("DELETE", "/api/v1/firewall_entries/3", "empty", false, null, c -> c.firewall.deleteEntry(3))
+                new Op("DELETE", "/api/v1/firewall_entries/BnMkLo", "empty", false, null, c -> c.firewall.deleteEntry("BnMkLo"))
         );
 
         List<String> names = new ArrayList<>();
@@ -183,9 +197,9 @@ class PostShibaTest {
     @Test
     void downloadAttachmentPath() {
         api.respondBytes(200, "PNG".getBytes(StandardCharsets.UTF_8), "image/png");
-        byte[] bytes = client.messages.downloadAttachment(3, 21, 1);
+        byte[] bytes = client.messages.downloadAttachment("PqRzMn", "GxTyVu", 1);
         assertEquals("GET", api.last.method);
-        assertEquals("/api/v1/inboxes/3/inbound_messages/21/attachments/1", api.last.path);
+        assertEquals("/api/v1/inboxes/PqRzMn/inbound_messages/GxTyVu/attachments/1", api.last.path);
         assertArrayEquals("PNG".getBytes(StandardCharsets.UTF_8), bytes);
     }
 
@@ -225,11 +239,11 @@ class PostShibaTest {
     @Test
     void smtpPasswordOnCreateOnly() {
         api.respond(200, fixture("smtp_credential_create"));
-        JsonNode created = client.smtpCredentials.create(4, fixtureMap("smtp_credential_create_request"));
+        JsonNode created = client.smtpCredentials.create("NmQpXr", fixtureMap("smtp_credential_create_request"));
         assertEquals("once-only-password", created.get("password").asText());
 
         api.respond(200, fixture("smtp_credential_deleted"));
-        JsonNode deleted = client.smtpCredentials.delete(4, 9);
+        JsonNode deleted = client.smtpCredentials.delete("NmQpXr", "RvWsXq");
         assertFalse(deleted.has("password"));
         assertEquals("smtp_9", deleted.get("username").asText());
     }
@@ -241,7 +255,7 @@ class PostShibaTest {
         assertFalse(listed.get(0).has("secret"));
 
         api.respond(200, fixture("webhook_show"));
-        JsonNode shown = client.webhooks.get(2);
+        JsonNode shown = client.webhooks.get("CdFgHj");
         assertEquals("hex-secret", shown.get("secret").asText());
 
         api.respond(200, fixture("webhook_show"));
@@ -249,7 +263,7 @@ class PostShibaTest {
         assertEquals("hex-secret", created.get("secret").asText());
 
         api.respond(200, fixture("webhook"));
-        JsonNode updated = client.webhooks.update(2, fixtureMap("webhook_update_request"));
+        JsonNode updated = client.webhooks.update("CdFgHj", fixtureMap("webhook_update_request"));
         assertEquals(fixtureJson("webhook"), updated);
         assertFalse(updated.has("secret"));
     }

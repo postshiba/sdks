@@ -60,7 +60,7 @@ def set_bytes(http, payload, status=200):
     http["body"] = payload
 
 
-def client(team_id=1):
+def client(team_id="KjkAJW"):
     return PostShiba("test-key", base_url="https://api.example.test", team_id=team_id)
 
 

@@ -12,7 +12,7 @@ defmodule PostShiba do
   @type t :: %__MODULE__{
           api_key: String.t(),
           base_url: String.t(),
-          team_id: term()
+          team_id: String.t() | nil
         }
 
   @doc """
@@ -113,8 +113,15 @@ defmodule PostShiba do
   end
 
   defmodule Emails do
-    def send(client, body) do
-      PostShiba.request(client, :post, "/api/v1/emails", body: body)
+    def send(client, body, opts \\ []) do
+      headers =
+        case Keyword.get(opts, :cluster_id) do
+          nil -> []
+          "" -> []
+          id -> [{"X-Capsule-Cluster-Id", to_string(id)}]
+        end
+
+      PostShiba.request(client, :post, "/api/v1/emails", body: body, headers: headers)
     end
 
     def send_on_cluster(client, cluster_id, body, opts \\ []) do

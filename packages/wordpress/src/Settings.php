@@ -14,7 +14,7 @@ class Settings
     }
 
     /**
-     * @return array{api_key: string, from_email: string, from_name: string, base_url: string, enabled: bool}
+     * @return array{api_key: string, from_email: string, from_name: string, base_url: string, cluster_id: string, enabled: bool}
      */
     public static function get(): array
     {
@@ -27,6 +27,7 @@ class Settings
         $fromEmail = defined('POSTSHIBA_FROM_EMAIL') ? (string) constant('POSTSHIBA_FROM_EMAIL') : (string) ($stored['from_email'] ?? '');
         $fromName = defined('POSTSHIBA_FROM_NAME') ? (string) constant('POSTSHIBA_FROM_NAME') : (string) ($stored['from_name'] ?? '');
         $baseUrl = defined('POSTSHIBA_BASE_URL') ? (string) constant('POSTSHIBA_BASE_URL') : (string) ($stored['base_url'] ?? '');
+        $clusterId = defined('POSTSHIBA_CLUSTER_ID') ? (string) constant('POSTSHIBA_CLUSTER_ID') : (string) ($stored['cluster_id'] ?? '');
         if ($baseUrl === '') {
             $baseUrl = self::DEFAULT_BASE_URL;
         }
@@ -43,6 +44,7 @@ class Settings
             'from_email' => $fromEmail,
             'from_name' => $fromName,
             'base_url' => rtrim($baseUrl, '/'),
+            'cluster_id' => $clusterId,
             'enabled' => $enabled,
         ];
     }
@@ -63,7 +65,7 @@ class Settings
 
     /**
      * @param array<string, mixed> $input
-     * @return array{api_key: string, from_email: string, from_name: string, base_url: string, enabled: bool}
+     * @return array{api_key: string, from_email: string, from_name: string, base_url: string, cluster_id: string, enabled: bool}
      */
     public static function sanitize(array $input): array
     {
@@ -82,6 +84,7 @@ class Settings
             'from_email' => sanitize_email((string) ($input['from_email'] ?? '')),
             'from_name' => sanitize_text_field((string) ($input['from_name'] ?? '')),
             'base_url' => esc_url_raw((string) ($input['base_url'] ?? '')),
+            'cluster_id' => sanitize_text_field((string) ($input['cluster_id'] ?? '')),
             'enabled' => !empty($input['enabled']),
         ];
     }
@@ -108,6 +111,7 @@ class Settings
             || defined('POSTSHIBA_FROM_EMAIL')
             || defined('POSTSHIBA_FROM_NAME')
             || defined('POSTSHIBA_BASE_URL')
+            || defined('POSTSHIBA_CLUSTER_ID')
             || defined('POSTSHIBA_ENABLED');
 
         settings_errors('postshiba');
@@ -142,6 +146,13 @@ class Settings
                         <td>
                             <input type="url" class="regular-text" id="postshiba_base_url" name="<?php echo esc_attr(self::OPTION); ?>[base_url]" value="<?php echo esc_attr($settings['base_url'] === self::DEFAULT_BASE_URL ? '' : $settings['base_url']); ?>" placeholder="<?php echo esc_attr(self::DEFAULT_BASE_URL); ?>" />
                             <p class="description">Optional. Defaults to <?php echo esc_html(self::DEFAULT_BASE_URL); ?>.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="postshiba_cluster_id">Cluster ID</label></th>
+                        <td>
+                            <input type="text" class="regular-text" id="postshiba_cluster_id" name="<?php echo esc_attr(self::OPTION); ?>[cluster_id]" value="<?php echo esc_attr($settings['cluster_id']); ?>" />
+                            <p class="description">Optional. Sends <code>X-Capsule-Cluster-Id</code> on <code>POST /api/v1/emails</code>.</p>
                         </td>
                     </tr>
                     <tr>

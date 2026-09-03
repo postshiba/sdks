@@ -25,7 +25,7 @@ class PostShiba
     public function __construct(
         private string $apiKey,
         ?string $baseUrl = null,
-        private string|int|null $teamId = null,
+        private ?string $teamId = null,
         ?Http $http = null,
     ) {
         $this->baseUrl = rtrim($baseUrl ?? self::DEFAULT_BASE_URL, '/');

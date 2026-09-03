@@ -22,7 +22,11 @@ class Plugin
         }
 
         try {
-            (new Client($settings['api_key'], $settings['base_url']))->send(Mail::payload($atts, $settings));
+            $clusterId = $settings['cluster_id'] !== '' ? $settings['cluster_id'] : null;
+            (new Client($settings['api_key'], $settings['base_url']))->send(
+                Mail::payload($atts, $settings),
+                $clusterId,
+            );
 
             return true;
         } catch (Error) {

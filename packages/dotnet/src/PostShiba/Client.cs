@@ -68,9 +68,10 @@ public sealed class Client : IDisposable
         object? body = null,
         bool sandbox = false,
         string? idempotencyKey = null,
+        string? clusterId = null,
         CancellationToken cancellationToken = default)
     {
-        var text = await SendRawAsync(method, path, body, sandbox, idempotencyKey, cancellationToken);
+        var text = await SendRawAsync(method, path, body, sandbox, idempotencyKey, clusterId, cancellationToken);
         if (string.IsNullOrWhiteSpace(text))
             text = "{}";
         using var doc = JsonDocument.Parse(text);
@@ -82,7 +83,7 @@ public sealed class Client : IDisposable
         string path,
         CancellationToken cancellationToken = default)
     {
-        using var request = BuildRequest(method, path, body: null, sandbox: false, idempotencyKey: null);
+        using var request = BuildRequest(method, path, body: null, sandbox: false, idempotencyKey: null, clusterId: null);
         using var response = await _http.SendAsync(request, cancellationToken);
         var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
         if (!response.IsSuccessStatusCode)
@@ -96,9 +97,10 @@ public sealed class Client : IDisposable
         object? body,
         bool sandbox,
         string? idempotencyKey,
+        string? clusterId,
         CancellationToken cancellationToken)
     {
-        using var request = BuildRequest(method, path, body, sandbox, idempotencyKey);
+        using var request = BuildRequest(method, path, body, sandbox, idempotencyKey, clusterId);
         using var response = await _http.SendAsync(request, cancellationToken);
         var text = await response.Content.ReadAsStringAsync(cancellationToken);
         if (!response.IsSuccessStatusCode)
@@ -111,12 +113,15 @@ public sealed class Client : IDisposable
         string path,
         object? body,
         bool sandbox,
-        string? idempotencyKey)
+        string? idempotencyKey,
+        string? clusterId)
     {
         var request = new HttpRequestMessage(method, _baseUrl + path);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
         if (idempotencyKey is not null)
             request.Headers.TryAddWithoutValidation("Idempotency-Key", idempotencyKey);
+        if (!string.IsNullOrEmpty(clusterId))
+            request.Headers.TryAddWithoutValidation("X-Capsule-Cluster-Id", clusterId);
 
         if (body is not null || sandbox)
         {

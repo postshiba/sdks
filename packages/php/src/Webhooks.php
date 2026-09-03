@@ -13,7 +13,7 @@ class Webhooks
         return $this->client->request('GET', '/api/v1/teams/'.$this->client->teamId().'/webhook_endpoints');
     }
 
-    public function get(int|string $id): mixed
+    public function get(string $id): mixed
     {
         return $this->client->request('GET', '/api/v1/webhook_endpoints/'.$id);
     }
@@ -23,12 +23,12 @@ class Webhooks
         return $this->client->request('POST', '/api/v1/teams/'.$this->client->teamId().'/webhook_endpoints', $params);
     }
 
-    public function update(int|string $id, array $params): mixed
+    public function update(string $id, array $params): mixed
     {
         return $this->client->request('PATCH', '/api/v1/webhook_endpoints/'.$id, $params);
     }
 
-    public function delete(int|string $id): mixed
+    public function delete(string $id): mixed
     {
         return $this->client->request('DELETE', '/api/v1/webhook_endpoints/'.$id);
     }

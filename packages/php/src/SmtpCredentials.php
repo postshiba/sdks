@@ -8,7 +8,7 @@ class SmtpCredentials
     {
     }
 
-    public function create(int|string $clusterId, array $params): mixed
+    public function create(string $clusterId, array $params): mixed
     {
         return $this->client->request(
             'POST',
@@ -17,7 +17,7 @@ class SmtpCredentials
         );
     }
 
-    public function delete(int|string $clusterId, int|string $id): mixed
+    public function delete(string $clusterId, string $id): mixed
     {
         return $this->client->request(
             'DELETE',

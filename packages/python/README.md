@@ -18,7 +18,7 @@ pip install "git+https://github.com/postshiba/postshiba-python.git#egg=postshiba
 
 ## How It Works
 
-`PostShiba` sends JSON to `https://postshiba.com/api/v1` with a Bearer token. Pass `team_id` for team-scoped calls. `users.me` does not return a team id, so the client will not guess one.
+`PostShiba` sends JSON to `https://app.postshiba.com/api/v1` with a Bearer token. Pass `team_id` for team-scoped calls. `users.me` does not return a team id, so the client will not guess one.
 
 ## Send an email
 

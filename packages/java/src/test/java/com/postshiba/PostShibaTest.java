@@ -52,7 +52,7 @@ class PostShibaTest {
     void defaultBaseUrl() throws Exception {
         var field = PostShiba.class.getDeclaredField("baseUrl");
         field.setAccessible(true);
-        assertEquals("https://postshiba.com", field.get(new PostShiba("key")));
+        assertEquals("https://app.postshiba.com", field.get(new PostShiba("key")));
     }
 
     @Test

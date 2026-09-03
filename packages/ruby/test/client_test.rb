@@ -24,7 +24,7 @@ class ClientTest < Minitest::Test
   def test_new_returns_client
     client = PostShiba.new(api_key: "k")
     assert_instance_of PostShiba::Client, client
-    assert_equal "https://postshiba.com", client.base_url
+    assert_equal "https://app.postshiba.com", client.base_url
   end
 
   def test_client_alias
@@ -141,7 +141,7 @@ class ClientTest < Minitest::Test
   end
 
   def test_users_me_does_not_require_team_id
-    stub_request(:get, "https://postshiba.com/api/v1/users/me")
+    stub_request(:get, "https://app.postshiba.com/api/v1/users/me")
       .to_return(status: 200, body: fixture_json("whoami"), headers: {"Content-Type" => "application/json"})
 
     client = PostShiba.new(api_key: "test-key")

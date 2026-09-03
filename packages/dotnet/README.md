@@ -14,7 +14,7 @@ Not on NuGet yet. Clone [postshiba/postshiba-dotnet](https://github.com/postshib
 
 ## How It Works
 
-`Client` sends JSON to `https://postshiba.com` with a Bearer token. Pass `teamId` for team-scoped routes. `GET /users/me` does not return a team id.
+`Client` sends JSON to `https://app.postshiba.com` with a Bearer token. Pass `teamId` for team-scoped routes. `GET /users/me` does not return a team id.
 
 ## Send an email
 

@@ -16,7 +16,7 @@ class Error(Exception):
 class PostShiba:
     def __init__(self, api_key, base_url=None, team_id=None):
         self.api_key = api_key
-        self.base_url = (base_url or "https://postshiba.com").rstrip("/")
+        self.base_url = (base_url or "https://app.postshiba.com").rstrip("/")
         self.team_id = team_id
         self.users = _Users(self)
         self.emails = _Emails(self)

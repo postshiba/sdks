@@ -7,7 +7,7 @@ namespace PostShiba;
 
 public sealed class Client : IDisposable
 {
-    public const string DefaultBaseUrl = "https://postshiba.com";
+    public const string DefaultBaseUrl = "https://app.postshiba.com";
 
     static readonly JsonSerializerOptions JsonOptions = new()
     {

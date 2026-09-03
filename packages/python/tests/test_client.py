@@ -17,7 +17,7 @@ def test_bearer_header_and_base_url(http):
 def test_default_base_url(http):
     set_json(http, load_fixture("whoami"))
     PostShiba("test-key").users.me()
-    assert last_request(http).full_url == "https://postshiba.com/api/v1/users/me"
+    assert last_request(http).full_url == "https://app.postshiba.com/api/v1/users/me"
 
 
 def test_emails_send(http):

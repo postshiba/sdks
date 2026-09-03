@@ -15,7 +15,7 @@ Open pull requests on [postshiba/sdks](https://github.com/postshiba/sdks).
 
 ## How It Works
 
-`PostShiba` is a thin HTTPS client. It sends `Authorization: Bearer <apiKey>` to `https://postshiba.com/api/v1`. Pass `teamId` for team-scoped routes. `GET /users/me` does not return a team id.
+`PostShiba` is a thin HTTPS client. It sends `Authorization: Bearer <apiKey>` to `https://app.postshiba.com/api/v1`. Pass `teamId` for team-scoped routes. `GET /users/me` does not return a team id.
 
 ## Send an email
 
@@ -52,7 +52,7 @@ await client.emails.sendOnCluster(
 ```dart
 final client = PostShiba(
   "ps_xxx",
-  baseUrl: "https://postshiba.com",
+  baseUrl: "https://app.postshiba.com",
   teamId: 1,
 );
 ```

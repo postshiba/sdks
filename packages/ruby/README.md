@@ -14,7 +14,7 @@ Open pull requests on [postshiba/sdks](https://github.com/postshiba/sdks).
 
 ## How It Works
 
-`PostShiba.new` returns a client that sends JSON to `/api/v1`. Every request uses `Authorization: Bearer`. The default host is `https://postshiba.com`. Team-scoped calls need `team_id` on the client. `GET /users/me` does not return one.
+`PostShiba.new` returns a client that sends JSON to `/api/v1`. Every request uses `Authorization: Bearer`. The default host is `https://app.postshiba.com`. Team-scoped calls need `team_id` on the client. `GET /users/me` does not return one.
 
 ## Send an email
 
@@ -62,7 +62,7 @@ require "postshiba/action_mailer"
 ## API
 
 ```ruby
-postshiba = PostShiba.new(api_key: "ps_...", team_id: 1, base_url: "https://postshiba.com")
+postshiba = PostShiba.new(api_key: "ps_...", team_id: 1, base_url: "https://app.postshiba.com")
 ```
 
 Users

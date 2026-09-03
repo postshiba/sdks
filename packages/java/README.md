@@ -16,7 +16,7 @@ Not on Maven Central yet. Clone [postshiba/postshiba-java](https://github.com/po
 
 ## How It Works
 
-`PostShiba` is a thin HTTPS client. Pass a platform application token. Calls go to `https://postshiba.com/api/v1` unless you set `baseUrl`. Team-scoped paths need `teamId`. `GET /users/me` does not return one.
+`PostShiba` is a thin HTTPS client. Pass a platform application token. Calls go to `https://app.postshiba.com/api/v1` unless you set `baseUrl`. Team-scoped paths need `teamId`. `GET /users/me` does not return one.
 
 ## Send an email
 

@@ -2,7 +2,7 @@
 
 Language packages implement this file. Do not edit `CONTRACT.md`, `fixtures/`, the root `README.md`, `LICENSE`, or `script/test`.
 
-Default base URL: `https://postshiba.com`.
+Default base URL: `https://app.postshiba.com`.
 Auth: `Authorization: Bearer <apiKey>`.
 API prefix: `/api/v1`.
 JSON only. No `provision!`.

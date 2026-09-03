@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class PostShiba {
-    public static final String DEFAULT_BASE_URL = "https://postshiba.com";
+    public static final String DEFAULT_BASE_URL = "https://app.postshiba.com";
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final String apiKey;

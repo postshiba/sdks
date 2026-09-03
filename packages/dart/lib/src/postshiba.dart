@@ -69,7 +69,7 @@ class PostShiba {
     String? baseUrl,
     this.teamId,
     http.Client? httpClient,
-  })  : baseUrl = _trimSlash(baseUrl ?? 'https://postshiba.com'),
+  })  : baseUrl = _trimSlash(baseUrl ?? 'https://app.postshiba.com'),
         _http = httpClient ?? http.Client();
 
   final String apiKey;

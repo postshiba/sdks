@@ -53,7 +53,7 @@ describe("PostShiba", () => {
     const body = fixture("email_send_request");
     const result = await client().emails.send(body);
     const { url, init, headers } = lastCall();
-    expect(url).toBe("https://postshiba.com/api/v1/emails");
+    expect(url).toBe("https://app.postshiba.com/api/v1/emails");
     expect(init.method).toBe("POST");
     expect(headers.get("Content-Type")).toBe("application/json");
     expect(JSON.parse(String(init.body))).toEqual(body);
@@ -68,7 +68,7 @@ describe("PostShiba", () => {
       sandbox: true,
     });
     const { url, init, headers } = lastCall();
-    expect(url).toBe("https://postshiba.com/api/v1/teams/1/clusters/4/sends");
+    expect(url).toBe("https://app.postshiba.com/api/v1/teams/1/clusters/4/sends");
     expect(headers.get("Idempotency-Key")).toBe("ikey-1");
     expect(JSON.parse(String(init.body))).toEqual({ ...body, sandbox: true });
     expect(result).toEqual(fixture("email_sandbox_response"));
@@ -222,7 +222,7 @@ describe("PostShiba", () => {
       fetchMock.mockResolvedValueOnce(jsonResponse(row.response));
       const result = await row.call(client());
       const { url, init } = lastCall();
-      expect(url, row.name).toBe(`https://postshiba.com${row.path}`);
+      expect(url, row.name).toBe(`https://app.postshiba.com${row.path}`);
       expect(init.method, row.name).toBe(row.method);
       if (row.request) expect(JSON.parse(String(init.body)), row.name).toEqual(fixture(row.request));
       expect(result, row.name).toEqual(row.response);
@@ -231,7 +231,7 @@ describe("PostShiba", () => {
     fetchMock.mockResolvedValueOnce(new Response(Buffer.from("png"), { status: 200 }));
     const bytes = await client().messages.downloadAttachment(3, 21, 1);
     const { url, init } = lastCall();
-    expect(url).toBe("https://postshiba.com/api/v1/inboxes/3/inbound_messages/21/attachments/1");
+    expect(url).toBe("https://app.postshiba.com/api/v1/inboxes/3/inbound_messages/21/attachments/1");
     expect(init.method).toBe("GET");
     expect(bytes).toBeInstanceOf(ArrayBuffer);
   });

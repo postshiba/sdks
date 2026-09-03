@@ -46,7 +46,7 @@ export class PostShiba {
 
   constructor(apiKey: string, options: PostShibaOptions = {}) {
     this.apiKey = apiKey;
-    this.baseUrl = (options.baseUrl ?? "https://postshiba.com").replace(/\/$/, "");
+    this.baseUrl = (options.baseUrl ?? "https://app.postshiba.com").replace(/\/$/, "");
     this.teamId = options.teamId;
   }
 

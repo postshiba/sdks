@@ -4,7 +4,7 @@ namespace PostShiba;
 
 class PostShiba
 {
-    public const DEFAULT_BASE_URL = 'https://postshiba.com';
+    public const DEFAULT_BASE_URL = 'https://app.postshiba.com';
 
     public Users $users;
     public Emails $emails;

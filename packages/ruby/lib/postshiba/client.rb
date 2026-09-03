@@ -8,7 +8,7 @@ require "postshiba/error"
 
 module PostShiba
   class Client
-    DEFAULT_BASE_URL = "https://postshiba.com"
+    DEFAULT_BASE_URL = "https://app.postshiba.com"
 
     attr_reader :api_key, :base_url, :team_id, :http
 

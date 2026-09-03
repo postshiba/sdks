@@ -14,7 +14,7 @@ Not on Hex yet. Open pull requests on [postshiba/sdks](https://github.com/postsh
 
 ## How It Works
 
-`PostShiba.new/3` sends JSON to `https://postshiba.com/api/v1` with a Bearer token. Team-scoped paths use the `team_id` argument. `GET /users/me` does not return a team id, so the client will not guess one.
+`PostShiba.new/3` sends JSON to `https://app.postshiba.com/api/v1` with a Bearer token. Team-scoped paths use the `team_id` argument. `GET /users/me` does not return a team id, so the client will not guess one.
 
 ## Send an email
 

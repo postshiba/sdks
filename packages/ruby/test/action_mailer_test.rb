@@ -15,7 +15,7 @@ class ActionMailerTest < Minitest::Test
 
   def test_maps_mail_fields_to_send_email
     captured = nil
-    stub_request(:post, "https://postshiba.com/api/v1/emails")
+    stub_request(:post, "https://app.postshiba.com/api/v1/emails")
       .with { |req|
         captured = JSON.parse(req.body)
         req.headers["Authorization"] == "Bearer mail-key"

@@ -27,7 +27,7 @@ public class ClientTest
 
         await harness.Client.Users.MeAsync();
 
-        Assert.Equal("https://postshiba.com/api/v1/users/me", harness.Handler.Uri!.ToString());
+        Assert.Equal("https://app.postshiba.com/api/v1/users/me", harness.Handler.Uri!.ToString());
     }
 
     [Fact]

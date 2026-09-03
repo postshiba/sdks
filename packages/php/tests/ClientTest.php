@@ -33,7 +33,7 @@ final class ClientTest extends TestCase
 
         $client->users->me();
 
-        $this->assertSame('https://postshiba.com/api/v1/users/me', $http->last()['url']);
+        $this->assertSame('https://app.postshiba.com/api/v1/users/me', $http->last()['url']);
     }
 
     public function testEmailsSendHappyPath(): void

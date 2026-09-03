@@ -57,7 +57,12 @@ push_package() {
   echo "==> $repo ($prefix)"
   git branch -D "$branch" >/dev/null 2>&1 || true
   git subtree split --prefix="$prefix" -b "$branch"
-  git push --force "git@github.com:$ORG/$repo.git" "$branch:main"
+  # HTTPS: this machine has gh credentials, not an SSH key.
+  # Called from `if`, so set -e will not abort a failed push.
+  if ! git push --force "https://github.com/$ORG/$repo.git" "$branch:main"; then
+    git branch -D "$branch" >/dev/null 2>&1 || true
+    return 1
+  fi
   git branch -D "$branch" >/dev/null 2>&1 || true
   echo "ok $repo"
 }

@@ -5,7 +5,7 @@ defmodule PostShiba do
 
   alias PostShiba.Error
 
-  @default_base_url "https://postshiba.com"
+  @default_base_url "https://app.postshiba.com"
 
   defstruct api_key: nil, base_url: @default_base_url, team_id: nil
 

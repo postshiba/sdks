@@ -2,7 +2,7 @@ use crate::Error;
 use serde_json::Value;
 use std::io::Read;
 
-const DEFAULT_BASE_URL: &str = "https://postshiba.com";
+const DEFAULT_BASE_URL: &str = "https://app.postshiba.com";
 
 #[derive(Clone)]
 pub struct Client {

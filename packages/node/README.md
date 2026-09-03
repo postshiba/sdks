@@ -85,7 +85,7 @@ Override `baseUrl` when you are not on production.
 ```ts
 new PostShiba(process.env.POSTSHIBA_API_KEY, {
 	teamId: 1,
-	baseUrl: "https://postshiba.com",
+	baseUrl: "https://app.postshiba.com",
 })
 ```
 

@@ -13,7 +13,7 @@ Not on crates.io yet. Open pull requests on [postshiba/sdks](https://github.com/
 
 ## How It Works
 
-Create a client with a platform application token. Calls use bearer auth against `https://postshiba.com`. Team-scoped methods need `team_id`. Request and response bodies are JSON.
+Create a client with a platform application token. Calls use bearer auth against `https://app.postshiba.com`. Team-scoped methods need `team_id`. Request and response bodies are JSON.
 
 ## Send an email
 

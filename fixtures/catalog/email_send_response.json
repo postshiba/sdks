@@ -1,0 +1,13 @@
+{
+  "queued": true,
+  "message_id": "abc@capsule.test",
+  "from": "hello@mail.example.com",
+  "to": [
+    "you@example.com"
+  ],
+  "subject": "PostShiba test",
+  "unique_args": {
+    "campaign_id": "cmp_123",
+    "site": "docs"
+  }
+}

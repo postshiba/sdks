@@ -1,0 +1,19 @@
+{
+  "enabled_checks": [
+    "temp_providers",
+    "plus_addressing"
+  ],
+  "available_checks": [
+    "temp_providers",
+    "free_providers",
+    "plus_addressing"
+  ],
+  "entries": [
+    {
+      "id": 3,
+      "list": "deny",
+      "value": "mailinator.com",
+      "created_at": "2026-08-31T00:00:00Z"
+    }
+  ]
+}

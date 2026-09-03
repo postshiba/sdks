@@ -1,0 +1,6 @@
+{
+  "sending_domain": {
+    "name": "mail.example.com",
+    "tenant_id": 12
+  }
+}

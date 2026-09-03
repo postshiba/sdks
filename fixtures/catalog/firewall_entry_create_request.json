@@ -1,0 +1,6 @@
+{
+  "firewall_entry": {
+    "list": "deny",
+    "value": "mailinator.com"
+  }
+}

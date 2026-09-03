@@ -1,0 +1,15 @@
+{
+  "id": 44,
+  "event_type": "delivered",
+  "recipient": "dest@example.com",
+  "sender": "hello@mail.example.com",
+  "message_id": "abc",
+  "occurred_at": "2026-08-29T00:00:00Z",
+  "drain_status": "pending",
+  "tenant_id": 12,
+  "sending_domain_id": 8,
+  "node_id": 3,
+  "payload": {
+    "event": "delivered"
+  }
+}

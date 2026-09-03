@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+export PATH="${HOME}/.rbenv/shims:${HOME}/.rbenv/bin:${HOME}/.dotnet:${PATH}"
+if [[ -x "${HOME}/.rbenv/bin/rbenv" ]]; then
+  eval "$("${HOME}/.rbenv/bin/rbenv" init - bash)" 2>/dev/null || true
+fi
+
+failed=0
+
+run() {
+  local name="$1"
+  shift
+  echo "==> $name"
+  if (cd "$root/packages/$name" && "$@"); then
+    echo "ok $name"
+  else
+    echo "fail $name"
+    failed=1
+  fi
+}
+
+missing() {
+  echo "fail $1 (missing package or toolchain)"
+  failed=1
+}
+
+if [[ -d "$root/packages/node" ]]; then run node npm test; else missing node; fi
+if [[ -d "$root/packages/python" ]]; then run python python3 -m pytest; else missing python; fi
+if [[ -d "$root/packages/php" ]]; then run php composer test; else missing php; fi
+if [[ -d "$root/packages/ruby" ]]; then run ruby bundle exec rake test; else missing ruby; fi
+if [[ -d "$root/packages/go" ]]; then run go go test ./...; else missing go; fi
+if [[ -d "$root/packages/java" ]]; then
+  if [[ -x "$root/packages/java/mvnw" ]] && command -v java >/dev/null && java -version >/dev/null 2>&1; then
+    run java ./mvnw -q test
+  else
+    echo "skip java (no JDK on PATH)"
+    failed=1
+  fi
+else
+  missing java
+fi
+if [[ -d "$root/packages/rust" ]]; then run rust cargo test; else missing rust; fi
+if [[ -d "$root/packages/dotnet" ]]; then run dotnet dotnet test --nologo; else missing dotnet; fi
+if [[ -d "$root/packages/elixir" ]]; then run elixir mix test; else missing elixir; fi
+if [[ -d "$root/packages/dart" ]]; then
+  if command -v dart >/dev/null; then
+    run dart dart test
+  else
+    echo "skip dart (no Dart SDK on PATH)"
+    failed=1
+  fi
+else
+  missing dart
+fi
+
+if [[ "$failed" -ne 0 ]]; then
+  echo "SDK test sweep failed"
+  exit 1
+fi
+
+echo "SDK test sweep passed"

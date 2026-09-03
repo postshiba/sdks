@@ -1,0 +1,17 @@
+{
+  "id": 8,
+  "name": "mail.example.com",
+  "tenant_id": 12,
+  "tenant": "default",
+  "dkim_status": "pending",
+  "return_path_status": "pending",
+  "dmarc_status": "pending",
+  "dkim_cname_host": "s1._domainkey.mail.example.com",
+  "dkim_cname_target": "8.customers.capsule.test",
+  "dmarc_host": "_dmarc.mail.example.com",
+  "dmarc_record": "v=DMARC1; p=none;",
+  "return_path_host": "rp.mail.example.com",
+  "return_path_target": "rp.capsule.test",
+  "suspended": false,
+  "primary": true
+}

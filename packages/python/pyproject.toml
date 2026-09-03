@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "postshiba"
+version = "0.1.0"
+description = "Python client for the PostShiba API"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{name = "PostShiba"}]
+license = {text = "MIT"}
+
+[project.optional-dependencies]
+django = ["django"]
+dev = ["pytest", "django"]
+
+[project.urls]
+Homepage = "https://postshiba.com"
+
+[tool.setuptools.packages.find]
+include = ["postshiba"]

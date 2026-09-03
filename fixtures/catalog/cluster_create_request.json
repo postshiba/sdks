@@ -1,0 +1,8 @@
+{
+  "cluster": {
+    "name": "edge",
+    "size": "small",
+    "region": "manual",
+    "plan": "nano"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "error": "invalid",
+  "field": "from",
+  "message": "From domain is not verified"
+}

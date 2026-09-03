@@ -1,0 +1,6 @@
+{
+  "inbox": {
+    "name": "agent",
+    "webhook_url": "https://hooks.example.com/mail"
+  }
+}

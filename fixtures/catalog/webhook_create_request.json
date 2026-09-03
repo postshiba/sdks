@@ -1,0 +1,10 @@
+{
+  "webhook_endpoint": {
+    "url": "https://hooks.example.com/capsule",
+    "event_types": [
+      "delivered",
+      "bounce"
+    ],
+    "cluster_id": 4
+  }
+}

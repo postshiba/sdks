@@ -1,0 +1,20 @@
+{
+  "id": 21,
+  "inbox_id": 3,
+  "to": "inbabc123@inbound.capsule.test",
+  "from": "sender@example.com",
+  "subject": "Hello",
+  "text": "Hi",
+  "html": "<p>Hi</p>",
+  "headers": {},
+  "envelope": {},
+  "attachments": [
+    {
+      "filename": "photo.png",
+      "content_type": "image/png",
+      "size": 70
+    }
+  ],
+  "expires_at": "2026-08-30T00:00:00Z",
+  "drain_status": "stored"
+}

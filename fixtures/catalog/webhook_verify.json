@@ -1,0 +1,6 @@
+{
+  "secret": "hex-secret",
+  "timestamp": "1710000000",
+  "body": "[{\"event\":\"delivered\"}]",
+  "signature": "sha256=3417573cd592bd88f560e3528d0a6a00f86d8076c170eac6361938099f8547fa"
+}

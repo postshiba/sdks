@@ -1,0 +1,12 @@
+{
+  "id": 3,
+  "name": "agent",
+  "address": "inbabc123@inbound.capsule.test",
+  "local_part": "inbabc123",
+  "host": "inbound.capsule.test",
+  "tenant_id": 12,
+  "webhook_url": "https://hooks.example.com/mail",
+  "webhook_format": "json",
+  "mx_status": "not_required",
+  "retention_hours": 168
+}

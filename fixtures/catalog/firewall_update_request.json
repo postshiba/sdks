@@ -1,0 +1,8 @@
+{
+  "firewall": {
+    "enabled_checks": [
+      "temp_providers",
+      "plus_addressing"
+    ]
+  }
+}

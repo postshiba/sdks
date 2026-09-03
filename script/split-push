@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# One-way fan-out. The monorepo is the write target. Language repos are mirrors.
+# Safe to rerun. Each package subtree is force-pushed to that language repo's main.
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$root"
+
+if [[ ! -d .git ]]; then
+  echo "split-push needs a git repo. Run from a committed postshiba/sdks clone."
+  exit 1
+fi
+
+if ! git rev-parse HEAD >/dev/null 2>&1; then
+  echo "split-push needs at least one commit."
+  exit 1
+fi
+
+ORG="${POSTSHIBA_GH_ORG:-postshiba}"
+create="${CREATE_REPOS:-0}"
+
+packages=(
+  "node:postshiba-node"
+  "python:postshiba-python"
+  "php:postshiba-php"
+  "ruby:postshiba-ruby"
+  "go:postshiba-go"
+  "java:postshiba-java"
+  "rust:postshiba-rust"
+  "dotnet:postshiba-dotnet"
+  "elixir:postshiba-elixir"
+  "dart:postshiba-dart"
+)
+
+ensure_repo() {
+  local name="$1"
+  local desc="$2"
+  if gh repo view "$ORG/$name" >/dev/null 2>&1; then
+    return 0
+  fi
+  if [[ "$create" != "1" ]]; then
+    echo "missing $ORG/$name (set CREATE_REPOS=1 to create)"
+    return 1
+  fi
+  gh repo create "$ORG/$name" --public --description "$desc" --disable-issues
+  gh api -X PATCH "repos/$ORG/$name" -f has_issues=false >/dev/null
+}
+
+push_package() {
+  local dir="$1"
+  local repo="$2"
+  local prefix="packages/$dir"
+  local branch="split-$dir"
+
+  [[ -d "$prefix" ]] || { echo "missing $prefix"; return 1; }
+
+  echo "==> $repo ($prefix)"
+  git branch -D "$branch" >/dev/null 2>&1 || true
+  git subtree split --prefix="$prefix" -b "$branch"
+  git push --force "git@github.com:$ORG/$repo.git" "$branch:main"
+  git branch -D "$branch" >/dev/null 2>&1 || true
+  echo "ok $repo"
+}
+
+failed=0
+
+if [[ "$create" == "1" ]]; then
+  ensure_repo "sdks" "PostShiba SDK monorepo. Write here. Language repos are one-way mirrors." || failed=1
+fi
+
+for pair in "${packages[@]}"; do
+  dir="${pair%%:*}"
+  repo="${pair##*:}"
+  if ! ensure_repo "$repo" "PostShiba $dir SDK. Mirror of $ORG/sdks packages/$dir. Open PRs on $ORG/sdks."; then
+    failed=1
+    continue
+  fi
+  if ! push_package "$dir" "$repo"; then
+    failed=1
+  fi
+done
+
+if [[ "$failed" -ne 0 ]]; then
+  echo "split-push failed"
+  exit 1
+fi
+
+echo "split-push passed"

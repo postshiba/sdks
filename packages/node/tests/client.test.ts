@@ -188,6 +188,15 @@ describe("PostShiba", () => {
         request: "webhook_create_request",
         response: fixture("webhook_show"),
       },
+      {
+        name: "webhooks.update",
+        call: (c) => c.webhooks.update(2, fixture("webhook_update_request")),
+        method: "PATCH",
+        path: "/api/v1/webhook_endpoints/2",
+        request: "webhook_update_request",
+        response: fixture("webhook"),
+      },
+      { name: "webhooks.delete", call: (c) => c.webhooks.delete(2), method: "DELETE", path: "/api/v1/webhook_endpoints/2", response: fixture("empty") },
       { name: "suppressions.list", call: (c) => c.suppressions.list(), method: "GET", path: "/api/v1/teams/1/suppressions", response: [fixture("suppression")] },
       {
         name: "suppressions.create",
@@ -270,7 +279,7 @@ describe("PostShiba", () => {
     expect(deleted).not.toHaveProperty("password");
   });
 
-  it("omits webhook secret on list and returns it on get and create", async () => {
+  it("omits webhook secret on list and update and returns it on get and create", async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse([fixture("webhook")]));
     const listed = (await client().webhooks.list()) as Array<Record<string, unknown>>;
     expect(listed[0]).not.toHaveProperty("secret");
@@ -282,6 +291,11 @@ describe("PostShiba", () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(fixture("webhook_show")));
     const created = (await client().webhooks.create(fixture("webhook_create_request"))) as Record<string, unknown>;
     expect(created.secret).toBe("hex-secret");
+
+    fetchMock.mockResolvedValueOnce(jsonResponse(fixture("webhook")));
+    const updated = (await client().webhooks.update(2, fixture("webhook_update_request"))) as Record<string, unknown>;
+    expect(updated).toEqual(fixture("webhook"));
+    expect(updated).not.toHaveProperty("secret");
   });
 
   it("raises when teamId is missing on a team-scoped call", async () => {

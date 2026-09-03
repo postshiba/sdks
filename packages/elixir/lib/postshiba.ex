@@ -318,6 +318,12 @@ defmodule PostShiba do
       )
     end
 
+    def update(client, id, body) do
+      PostShiba.request(client, :patch, "/api/v1/webhook_endpoints/#{id}", body: body)
+    end
+
+    def delete(client, id), do: PostShiba.request(client, :delete, "/api/v1/webhook_endpoints/#{id}")
+
     def verify(raw_body, timestamp, signature, secret) do
       given = signature |> to_string() |> String.replace_prefix("sha256=", "")
 

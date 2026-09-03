@@ -171,6 +171,14 @@ module PostShiba
       request(:post, "/api/v1/teams/#{require_team_id}/webhook_endpoints", body: body)
     end
 
+    def update_webhook(id, body)
+      request(:patch, "/api/v1/webhook_endpoints/#{id}", body: body)
+    end
+
+    def delete_webhook(id)
+      request(:delete, "/api/v1/webhook_endpoints/#{id}")
+    end
+
     def list_suppressions
       request(:get, "/api/v1/teams/#{require_team_id}/suppressions")
     end

@@ -139,7 +139,7 @@ defmodule PostShibaTest do
     refute Map.has_key?(deleted, "password")
   end
 
-  test "omits webhook secret on list and returns it on get and create", %{
+  test "omits webhook secret on list and update and returns it on get and create", %{
     bypass: bypass,
     client: client
   } do
@@ -163,6 +163,14 @@ defmodule PostShibaTest do
 
     created = PostShiba.Webhooks.create(client, Catalog.fixture("webhook_create_request"))
     assert created["secret"] == "hex-secret"
+
+    Bypass.expect(bypass, "PATCH", "/api/v1/webhook_endpoints/2", fn conn ->
+      json_resp(conn, Catalog.fixture("webhook"))
+    end)
+
+    updated = PostShiba.Webhooks.update(client, 2, Catalog.fixture("webhook_update_request"))
+    assert updated == Catalog.fixture("webhook")
+    refute Map.has_key?(updated, "secret")
   end
 
   test "raises when team_id is missing on a team-scoped call" do
@@ -266,6 +274,11 @@ defmodule PostShibaTest do
        &PostShiba.Webhooks.create(&1, Catalog.fixture("webhook_create_request")), "POST",
        "/api/v1/teams/1/webhook_endpoints", "webhook_create_request",
        Catalog.fixture("webhook_show")},
+      {"webhooks.update",
+       &PostShiba.Webhooks.update(&1, 2, Catalog.fixture("webhook_update_request")), "PATCH",
+       "/api/v1/webhook_endpoints/2", "webhook_update_request", Catalog.fixture("webhook")},
+      {"webhooks.delete", &PostShiba.Webhooks.delete(&1, 2), "DELETE",
+       "/api/v1/webhook_endpoints/2", nil, Catalog.fixture("empty")},
       {"suppressions.list", &PostShiba.Suppressions.list/1, "GET", "/api/v1/teams/1/suppressions",
        nil, [Catalog.fixture("suppression")]},
       {"suppressions.create",

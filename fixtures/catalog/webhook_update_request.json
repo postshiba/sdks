@@ -1,0 +1,6 @@
+{
+  "webhook_endpoint": {
+    "enabled": false,
+    "event_types": ["delivered", "bounce"]
+  }
+}

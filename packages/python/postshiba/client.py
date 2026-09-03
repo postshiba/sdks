@@ -271,6 +271,12 @@ class _Webhooks:
             body=body,
         )
 
+    def update(self, id, body):
+        return self._client.request("PATCH", "/api/v1/webhook_endpoints/%s" % id, body=body)
+
+    def delete(self, id):
+        return self._client.request("DELETE", "/api/v1/webhook_endpoints/%s" % id)
+
     def verify(self, raw_body, signature, timestamp, secret):
         if signature is None or timestamp is None or secret is None:
             return False

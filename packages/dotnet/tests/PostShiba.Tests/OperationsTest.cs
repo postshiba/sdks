@@ -10,7 +10,7 @@ public class OperationsTest
     public async Task Every_contract_operation()
     {
         var ops = All().ToList();
-        Assert.Equal(44, ops.Count);
+        Assert.Equal(46, ops.Count);
 
         foreach (var op in ops)
         {
@@ -93,6 +93,8 @@ public class OperationsTest
         yield return JsonOp("webhooks.list", HttpMethod.Get, "/api/v1/teams/1/webhook_endpoints", c => c.Webhooks.ListAsync(), Catalog.Array("webhook"));
         yield return JsonOp("webhooks.get", HttpMethod.Get, "/api/v1/webhook_endpoints/2", c => c.Webhooks.GetAsync("2"), "webhook_show");
         yield return JsonOp("webhooks.create", HttpMethod.Post, "/api/v1/teams/1/webhook_endpoints", c => c.Webhooks.CreateAsync(Catalog.Json("webhook_create_request")), "webhook_show", "webhook_create_request");
+        yield return JsonOp("webhooks.update", HttpMethod.Patch, "/api/v1/webhook_endpoints/2", c => c.Webhooks.UpdateAsync("2", Catalog.Json("webhook_update_request")), "webhook", "webhook_update_request");
+        yield return JsonOp("webhooks.delete", HttpMethod.Delete, "/api/v1/webhook_endpoints/2", c => c.Webhooks.DeleteAsync("2"), "empty");
         yield return JsonOp("suppressions.list", HttpMethod.Get, "/api/v1/teams/1/suppressions", c => c.Suppressions.ListAsync(), Catalog.Array("suppression"));
         yield return JsonOp("suppressions.create", HttpMethod.Post, "/api/v1/teams/1/suppressions", c => c.Suppressions.CreateAsync(Catalog.Json("suppression_create_request")), "suppression", "suppression_create_request");
         yield return JsonOp("suppressions.delete", HttpMethod.Delete, "/api/v1/suppressions/7", c => c.Suppressions.DeleteAsync("7"), "empty");

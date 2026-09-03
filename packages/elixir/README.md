@@ -146,9 +146,13 @@ PostShiba.Webhooks.create(client, %{
     "cluster_id" => 4
   }
 })
+PostShiba.Webhooks.update(client, 2, %{
+  "webhook_endpoint" => %{"enabled" => false, "event_types" => ["delivered", "bounce"]}
+})
+PostShiba.Webhooks.delete(client, 2)
 ```
 
-The secret is present on get and create. It is omitted on list. The API has no update or delete.
+The secret is present on get and create. It is omitted on list and update.
 
 ### Suppressions
 

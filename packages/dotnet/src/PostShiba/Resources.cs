@@ -182,6 +182,12 @@ public sealed class WebhooksResource
 
     public Task<JsonElement> CreateAsync(object body, CancellationToken cancellationToken = default) =>
         _client.SendAsync(HttpMethod.Post, _client.Team("/webhook_endpoints"), body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> UpdateAsync(string id, object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Patch, $"/api/v1/webhook_endpoints/{id}", body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Delete, $"/api/v1/webhook_endpoints/{id}", cancellationToken: cancellationToken);
 }
 
 public sealed class SuppressionsResource

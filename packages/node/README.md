@@ -182,9 +182,13 @@ await postshiba.webhooks.create({
 		cluster_id: 4,
 	},
 })
+await postshiba.webhooks.update(2, {
+	webhook_endpoint: { enabled: false, event_types: ["delivered", "bounce"] },
+})
+await postshiba.webhooks.delete(2)
 ```
 
-List omits `secret`. Get and create return it. There is no update or delete.
+List and update omit `secret`. Get and create return it.
 
 ### Suppressions
 

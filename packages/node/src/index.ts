@@ -162,6 +162,8 @@ export class PostShiba {
     list: () => this.request("GET", "/webhook_endpoints", { team: true }),
     get: (id: Id) => this.request("GET", `/api/v1/webhook_endpoints/${id}`),
     create: (body: Json) => this.request("POST", "/webhook_endpoints", { body, team: true }),
+    update: (id: Id, body: Json) => this.request("PATCH", `/api/v1/webhook_endpoints/${id}`, { body }),
+    delete: (id: Id) => this.request("DELETE", `/api/v1/webhook_endpoints/${id}`),
     verify: (rawBody: string, timestamp: string, signature: string, secret: string) =>
       verifySignature(rawBody, timestamp, signature, secret),
   };

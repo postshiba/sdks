@@ -176,6 +176,15 @@ OPERATIONS = [
         load_fixture("webhook_create_request"),
         load_fixture("webhook_show"),
     ),
+    (
+        "webhooks.update",
+        lambda c: c.webhooks.update(2, load_fixture("webhook_update_request")),
+        "PATCH",
+        "/api/v1/webhook_endpoints/2",
+        load_fixture("webhook_update_request"),
+        load_fixture("webhook"),
+    ),
+    ("webhooks.delete", lambda c: c.webhooks.delete(2), "DELETE", "/api/v1/webhook_endpoints/2", None, load_fixture("empty")),
     ("suppressions.list", lambda c: c.suppressions.list(), "GET", "/api/v1/teams/1/suppressions", None, [load_fixture("suppression")]),
     (
         "suppressions.create",
@@ -261,7 +270,7 @@ def test_smtp_password_present_on_create_absent_on_delete(http):
     assert "password" not in deleted
 
 
-def test_webhook_secret_omitted_on_list_present_on_get_and_create(http):
+def test_webhook_secret_omitted_on_list_and_update_present_on_get_and_create(http):
     set_json(http, [load_fixture("webhook")])
     listed = client().webhooks.list()
     assert "secret" not in listed[0]
@@ -271,6 +280,10 @@ def test_webhook_secret_omitted_on_list_present_on_get_and_create(http):
     set_json(http, load_fixture("webhook_show"))
     created = client().webhooks.create(load_fixture("webhook_create_request"))
     assert created["secret"] == "hex-secret"
+    set_json(http, load_fixture("webhook"))
+    updated = client().webhooks.update(2, load_fixture("webhook_update_request"))
+    assert updated == load_fixture("webhook")
+    assert "secret" not in updated
 
 
 def test_missing_team_id_raises(http):

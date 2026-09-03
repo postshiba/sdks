@@ -155,9 +155,9 @@ client.smtp_credentials.delete(4, 9)
 client.webhooks.list()
 client.webhooks.get(2)
 client.webhooks.create({"webhook_endpoint": {"url": "https://hooks.example.com/capsule", "event_types": ["delivered"]}})
+client.webhooks.update(2, {"webhook_endpoint": {"enabled": False, "event_types": ["delivered", "bounce"]}})
+client.webhooks.delete(2)
 ```
-
-The API has no webhook update or delete.
 
 ### Suppressions
 

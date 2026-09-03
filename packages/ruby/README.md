@@ -150,6 +150,8 @@ Webhooks
 postshiba.list_webhooks
 postshiba.get_webhook(2)
 postshiba.create_webhook(webhook_endpoint: {url: "https://hooks.example.com/capsule", event_types: ["delivered"], cluster_id: 4})
+postshiba.update_webhook(2, webhook_endpoint: {enabled: false, event_types: ["delivered", "bounce"]})
+postshiba.delete_webhook(2)
 ```
 
 Suppressions

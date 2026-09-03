@@ -80,6 +80,10 @@ await client.SmtpCredentials.DeleteAsync("4", "9");
 await client.Webhooks.ListAsync();
 await client.Webhooks.GetAsync("2");
 await client.Webhooks.CreateAsync(body);
+await client.Webhooks.UpdateAsync("2", body);
+await client.Webhooks.DeleteAsync("2");
+await client.Webhooks.UpdateAsync("2", body);
+await client.Webhooks.DeleteAsync("2");
 
 await client.Suppressions.ListAsync();
 await client.Suppressions.CreateAsync(body);

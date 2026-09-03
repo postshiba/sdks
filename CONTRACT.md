@@ -80,6 +80,8 @@ Load request and response bodies from `fixtures/catalog/<file>.json`. Do not inv
 | `webhooks.list` | | GET | `/api/v1/teams/:teamId/webhook_endpoints` | | `[webhook]` |
 | `webhooks.get` | | GET | `/api/v1/webhook_endpoints/:id` | | `webhook_show` |
 | `webhooks.create` | | POST | `/api/v1/teams/:teamId/webhook_endpoints` | `webhook_create_request` | `webhook_show` |
+| `webhooks.update` | | PATCH | `/api/v1/webhook_endpoints/:id` | `webhook_update_request` | `webhook` |
+| `webhooks.delete` | | DELETE | `/api/v1/webhook_endpoints/:id` | | empty object |
 | `suppressions.list` | | GET | `/api/v1/teams/:teamId/suppressions` | | `[suppression]` |
 | `suppressions.create` | | POST | `/api/v1/teams/:teamId/suppressions` | `suppression_create_request` | `suppression` |
 | `suppressions.delete` | | DELETE | `/api/v1/suppressions/:id` | | empty object |
@@ -90,8 +92,6 @@ Load request and response bodies from `fixtures/catalog/<file>.json`. Do not inv
 
 `emails.sendOnCluster` also sends header `Idempotency-Key` when the caller passes one.
 Sandbox send adds `"sandbox": true` on the JSON body. Response is `email_sandbox_response` (`queued` false).
-
-The API has no webhook update or delete. Do not invent those methods.
 
 `can_i_send_this` and tenant suspend/resume exist on the server. Leave them out. Stay on the table above.
 
@@ -109,7 +109,7 @@ Cover:
 - `403` from `error_403.json` and `422` from `error_422.json` raise
 - `webhooks.verify` accept and reject
 - SMTP password present on create, absent on delete
-- webhook `secret` omitted on list, present on get/create
+- webhook `secret` omitted on list and update, present on get/create
 - missing `teamId` raises on a team-scoped call
 - mail adapter maps to/from/subject/html/text/attachments when this package has one
 

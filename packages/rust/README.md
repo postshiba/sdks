@@ -106,6 +106,8 @@ client.smtp_credentials().delete(4, 9)?;
 let hooks = client.webhooks().list()?;
 let hook = client.webhooks().get(2)?;
 client.webhooks().create(&json!({"webhook_endpoint": {"url": "https://hooks.example.com/capsule"}}))?;
+client.webhooks().update(2, &json!({"webhook_endpoint": {"enabled": false, "event_types": ["delivered", "bounce"]}}))?;
+client.webhooks().delete(2)?;
 ```
 
 ```rust

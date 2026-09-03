@@ -419,6 +419,18 @@ class WebhookEndpoints {
       body: params,
     ));
   }
+
+  Future<Map<String, dynamic>> update(Object id, Map<String, dynamic> params) async {
+    return _map(await _client._request(
+      'PATCH',
+      '/api/v1/webhook_endpoints/$id',
+      body: params,
+    ));
+  }
+
+  Future<Map<String, dynamic>> delete(Object id) async {
+    return _map(await _client._request('DELETE', '/api/v1/webhook_endpoints/$id'));
+  }
 }
 
 class Suppressions {

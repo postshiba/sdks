@@ -183,6 +183,11 @@ $client->webhooks->create(['webhook_endpoint' => [
     'event_types' => ['delivered', 'bounce'],
     'cluster_id' => 4,
 ]]);
+$client->webhooks->update(2, ['webhook_endpoint' => [
+    'enabled' => false,
+    'event_types' => ['delivered', 'bounce'],
+]]);
+$client->webhooks->delete(2);
 ```
 
 ```php

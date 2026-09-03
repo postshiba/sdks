@@ -207,6 +207,7 @@ fn every_catalog_method() {
     let inbox_create = fixture("inbox_create_request");
     let smtp_create = fixture("smtp_credential_create_request");
     let webhook_create = fixture("webhook_create_request");
+    let webhook_update = fixture("webhook_update_request");
     let suppression_create = fixture("suppression_create_request");
     let firewall_update = fixture("firewall_update_request");
     let firewall_entry = fixture("firewall_entry_create_request");
@@ -461,6 +462,21 @@ fn every_catalog_method() {
             }),
         ),
         (
+            "PATCH",
+            "/api/v1/webhook_endpoints/2",
+            fixture("webhook"),
+            Box::new({
+                let webhook_update = webhook_update.clone();
+                move |c| c.webhooks().update(WEBHOOK, &webhook_update)
+            }),
+        ),
+        (
+            "DELETE",
+            "/api/v1/webhook_endpoints/2",
+            fixture("empty"),
+            Box::new(|c| c.webhooks().delete(WEBHOOK)),
+        ),
+        (
             "GET",
             "/api/v1/teams/1/suppressions",
             array("suppression"),
@@ -601,7 +617,7 @@ fn smtp_password_present_on_create_absent_on_delete() {
 }
 
 #[test]
-fn webhook_secret_omitted_on_list_present_on_get_and_create() {
+fn webhook_secret_omitted_on_list_and_update_present_on_get_and_create() {
     let (listed, _) = ok(&array("webhook"), |c| c.webhooks().list());
     assert!(listed[0].get("secret").is_none());
 
@@ -611,6 +627,11 @@ fn webhook_secret_omitted_on_list_present_on_get_and_create() {
     let body = fixture("webhook_create_request");
     let (created, _) = ok(&fixture("webhook_show"), |c| c.webhooks().create(&body));
     assert_eq!(created["secret"], "hex-secret");
+
+    let update = fixture("webhook_update_request");
+    let (updated, _) = ok(&fixture("webhook"), |c| c.webhooks().update(WEBHOOK, &update));
+    assert_eq!(updated, fixture("webhook"));
+    assert!(updated.get("secret").is_none());
 }
 
 #[test]

@@ -428,6 +428,16 @@ impl Webhooks<'_> {
         let path = format!("/api/v1/teams/{}/webhook_endpoints", self.client.team()?);
         self.client.request("POST", &path, Some(body), &[])
     }
+
+    pub fn update(&self, id: impl ToString, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/webhook_endpoints/{}", id.to_string());
+        self.client.request("PATCH", &path, Some(body), &[])
+    }
+
+    pub fn delete(&self, id: impl ToString) -> Result<Value, Error> {
+        let path = format!("/api/v1/webhook_endpoints/{}", id.to_string());
+        self.client.request("DELETE", &path, None, &[])
+    }
 }
 
 pub struct Suppressions<'a> {

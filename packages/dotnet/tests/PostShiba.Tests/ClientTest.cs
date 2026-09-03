@@ -129,7 +129,7 @@ public class ClientTest
     }
 
     [Fact]
-    public async Task Webhook_secret_omitted_on_list_present_on_get_and_create()
+    public async Task Webhook_secret_omitted_on_list_and_update_present_on_get_and_create()
     {
         using var harness = new Harness();
         harness.Handler.Respond = () => MockHandler.Json(HttpStatusCode.OK, Catalog.Array("webhook"));
@@ -143,6 +143,11 @@ public class ClientTest
         harness.Handler.Respond = () => MockHandler.Json(HttpStatusCode.OK, Catalog.Text("webhook_show"));
         var created = await harness.Client.Webhooks.CreateAsync(Catalog.Json("webhook_create_request"));
         Assert.Equal("hex-secret", created.GetProperty("secret").GetString());
+
+        harness.Handler.Respond = () => MockHandler.Json(HttpStatusCode.OK, Catalog.Text("webhook"));
+        var updated = await harness.Client.Webhooks.UpdateAsync("2", Catalog.Json("webhook_update_request"));
+        Assert.Equal(Catalog.Json("webhook").ToString(), updated.ToString());
+        Assert.False(updated.TryGetProperty("secret", out _));
     }
 
     [Fact]

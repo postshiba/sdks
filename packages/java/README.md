@@ -95,6 +95,11 @@ client.webhooks.create(Map.of(
 	"webhook_endpoint",
 	Map.of("url", "https://hooks.example.com/capsule", "event_types", List.of("delivered", "bounce"), "cluster_id", 4)
 ));
+client.webhooks.update(2, Map.of(
+	"webhook_endpoint",
+	Map.of("enabled", false, "event_types", List.of("delivered", "bounce"))
+));
+client.webhooks.delete(2);
 
 client.suppressions.list();
 client.suppressions.create(Map.of("suppression", Map.of("email", "blocked@example.com", "tenant_id", 12)));

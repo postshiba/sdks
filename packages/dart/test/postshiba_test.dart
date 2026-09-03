@@ -195,6 +195,17 @@ final operations = <Call>[
     response: 'webhook_show',
   ),
   Call(
+    'webhooks.update',
+    'PATCH',
+    '/api/v1/webhook_endpoints/2',
+    (c) => c.webhooks.update(2, fixtureMap('webhook_update_request')),
+    body: 'webhook_update_request',
+    response: 'webhook',
+  ),
+  Call('webhooks.delete', 'DELETE', '/api/v1/webhook_endpoints/2',
+      (c) => c.webhooks.delete(2),
+      response: 'empty'),
+  Call(
     'suppressions.list',
     'GET',
     '/api/v1/teams/1/suppressions',
@@ -426,7 +437,7 @@ void main() {
     expect(deleted.containsKey('password'), isFalse);
   });
 
-  test('webhook secret omitted on list, present on get/create', () async {
+  test('webhook secret omitted on list and update, present on get/create', () async {
     final listClient = MockClient((request) async {
       return http.Response(
         jsonEncode([fixture('webhook')]),
@@ -458,6 +469,20 @@ void main() {
       fixtureMap('webhook_create_request'),
     );
     expect(created['secret'], 'hex-secret');
+
+    final updateClient = MockClient((request) async {
+      return http.Response(
+        jsonEncode(fixture('webhook')),
+        200,
+        request: request,
+      );
+    });
+    final updated = await clientFor(updateClient).webhooks.update(
+      2,
+      fixtureMap('webhook_update_request'),
+    );
+    expect(updated, fixture('webhook'));
+    expect(updated.containsKey('secret'), isFalse);
   });
 
   test('missing teamId raises on a team-scoped call', () async {

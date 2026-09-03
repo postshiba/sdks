@@ -148,6 +148,9 @@ class PostShibaTest {
                 new Op("GET", "/api/v1/webhook_endpoints/2", "webhook_show", false, null, c -> c.webhooks.get(2)),
                 new Op("POST", "/api/v1/teams/1/webhook_endpoints", "webhook_show", false, "webhook_create_request",
                         c -> c.webhooks.create(fixtureMap("webhook_create_request"))),
+                new Op("PATCH", "/api/v1/webhook_endpoints/2", "webhook", false, "webhook_update_request",
+                        c -> c.webhooks.update(2, fixtureMap("webhook_update_request"))),
+                new Op("DELETE", "/api/v1/webhook_endpoints/2", "empty", false, null, c -> c.webhooks.delete(2)),
                 new Op("GET", "/api/v1/teams/1/suppressions", "suppression", true, null, c -> c.suppressions.list()),
                 new Op("POST", "/api/v1/teams/1/suppressions", "suppression", false, "suppression_create_request",
                         c -> c.suppressions.create(fixtureMap("suppression_create_request"))),
@@ -174,7 +177,7 @@ class PostShibaTest {
                 assertEquals(fixtureJson(op.request), api.last.bodyJson(), op.path);
             }
         }
-        assertEquals(43, names.size());
+        assertEquals(45, names.size());
     }
 
     @Test
@@ -244,6 +247,11 @@ class PostShibaTest {
         api.respond(200, fixture("webhook_show"));
         JsonNode created = client.webhooks.create(fixtureMap("webhook_create_request"));
         assertEquals("hex-secret", created.get("secret").asText());
+
+        api.respond(200, fixture("webhook"));
+        JsonNode updated = client.webhooks.update(2, fixtureMap("webhook_update_request"));
+        assertEquals(fixtureJson("webhook"), updated);
+        assertFalse(updated.has("secret"));
     }
 
     @Test

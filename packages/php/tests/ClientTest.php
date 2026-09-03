@@ -128,6 +128,8 @@ final class ClientTest extends TestCase
             'webhooks.list' => ['webhooks.list', 'GET', '/api/v1/teams/1/webhook_endpoints', null, 'webhook', true, fn ($c) => $c->webhooks->list()],
             'webhooks.get' => ['webhooks.get', 'GET', '/api/v1/webhook_endpoints/2', null, 'webhook_show', false, fn ($c) => $c->webhooks->get(2)],
             'webhooks.create' => ['webhooks.create', 'POST', '/api/v1/teams/1/webhook_endpoints', 'webhook_create_request', 'webhook_show', false, fn ($c) => $c->webhooks->create(self::load('webhook_create_request'))],
+            'webhooks.update' => ['webhooks.update', 'PATCH', '/api/v1/webhook_endpoints/2', 'webhook_update_request', 'webhook', false, fn ($c) => $c->webhooks->update(2, self::load('webhook_update_request'))],
+            'webhooks.delete' => ['webhooks.delete', 'DELETE', '/api/v1/webhook_endpoints/2', null, 'empty', false, fn ($c) => $c->webhooks->delete(2)],
             'suppressions.list' => ['suppressions.list', 'GET', '/api/v1/teams/1/suppressions', null, 'suppression', true, fn ($c) => $c->suppressions->list()],
             'suppressions.create' => ['suppressions.create', 'POST', '/api/v1/teams/1/suppressions', 'suppression_create_request', 'suppression', false, fn ($c) => $c->suppressions->create(self::load('suppression_create_request'))],
             'suppressions.delete' => ['suppressions.delete', 'DELETE', '/api/v1/suppressions/7', null, 'empty', false, fn ($c) => $c->suppressions->delete(7)],
@@ -208,21 +210,25 @@ final class ClientTest extends TestCase
         $this->assertArrayNotHasKey('password', $deleted);
     }
 
-    public function testWebhookSecretOmittedOnListPresentOnGetCreate(): void
+    public function testWebhookSecretOmittedOnListAndUpdatePresentOnGetCreate(): void
     {
         $http = new FakeHttp();
         $http->enqueueJson(200, [$this->fixture('webhook')]);
         $http->enqueueJson(200, $this->fixture('webhook_show'));
         $http->enqueueJson(200, $this->fixture('webhook_show'));
+        $http->enqueueJson(200, $this->fixture('webhook'));
         $client = $this->client($http);
 
         $listed = $client->webhooks->list();
         $shown = $client->webhooks->get(2);
         $created = $client->webhooks->create($this->fixture('webhook_create_request'));
+        $updated = $client->webhooks->update(2, $this->fixture('webhook_update_request'));
 
         $this->assertArrayNotHasKey('secret', $listed[0]);
         $this->assertSame('hex-secret', $shown['secret']);
         $this->assertSame('hex-secret', $created['secret']);
+        $this->assertSame($this->fixture('webhook'), $updated);
+        $this->assertArrayNotHasKey('secret', $updated);
     }
 
     public function testMissingTeamIdRaises(): void

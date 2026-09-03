@@ -119,7 +119,7 @@ class ClientTest < Minitest::Test
     refute deleted.key?("password")
   end
 
-  def test_webhook_secret_omitted_on_list_present_on_get_and_create
+  def test_webhook_secret_omitted_on_list_and_update_present_on_get_and_create
     stub_request(:get, "https://api.example.test/api/v1/teams/#{TEAM}/webhook_endpoints")
       .to_return(status: 200, body: JSON.generate([fixture("webhook")]), headers: {"Content-Type" => "application/json"})
     listed = @client.list_webhooks
@@ -132,6 +132,11 @@ class ClientTest < Minitest::Test
     stub_json(:post, "/api/v1/teams/#{TEAM}/webhook_endpoints", "webhook_show", request: fixture("webhook_create_request"))
     created = @client.create_webhook(fixture("webhook_create_request"))
     assert_equal "hex-secret", created["secret"]
+
+    stub_json(:patch, "/api/v1/webhook_endpoints/#{WEBHOOK}", "webhook", request: fixture("webhook_update_request"))
+    updated = @client.update_webhook(WEBHOOK, fixture("webhook_update_request"))
+    assert_equal fixture("webhook"), updated
+    refute updated.key?("secret")
   end
 
   def test_missing_team_id_raises_on_team_scoped_call
@@ -201,6 +206,8 @@ class ClientTest < Minitest::Test
       {method: :list_webhooks, args: [], http: :get, path: "/api/v1/teams/#{TEAM}/webhook_endpoints", response: "webhook", list: true},
       {method: :get_webhook, args: [WEBHOOK], http: :get, path: "/api/v1/webhook_endpoints/#{WEBHOOK}", response: "webhook_show"},
       {method: :create_webhook, args: [fixture("webhook_create_request")], http: :post, path: "/api/v1/teams/#{TEAM}/webhook_endpoints", request: "webhook_create_request", response: "webhook_show"},
+      {method: :update_webhook, args: [WEBHOOK, fixture("webhook_update_request")], http: :patch, path: "/api/v1/webhook_endpoints/#{WEBHOOK}", request: "webhook_update_request", response: "webhook"},
+      {method: :delete_webhook, args: [WEBHOOK], http: :delete, path: "/api/v1/webhook_endpoints/#{WEBHOOK}", response: "empty"},
       {method: :list_suppressions, args: [], http: :get, path: "/api/v1/teams/#{TEAM}/suppressions", response: "suppression", list: true},
       {method: :create_suppression, args: [fixture("suppression_create_request")], http: :post, path: "/api/v1/teams/#{TEAM}/suppressions", request: "suppression_create_request", response: "suppression"},
       {method: :delete_suppression, args: [SUPPRESSION], http: :delete, path: "/api/v1/suppressions/#{SUPPRESSION}", response: "empty"},

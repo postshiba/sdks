@@ -166,6 +166,10 @@ await client.webhooks.create({
     "cluster_id": 4,
   },
 });
+await client.webhooks.update(2, {
+  "webhook_endpoint": {"enabled": false, "event_types": ["delivered", "bounce"]},
+});
+await client.webhooks.delete(2);
 ```
 
 ### Suppressions

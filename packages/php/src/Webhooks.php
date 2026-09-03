@@ -23,6 +23,16 @@ class Webhooks
         return $this->client->request('POST', '/api/v1/teams/'.$this->client->teamId().'/webhook_endpoints', $params);
     }
 
+    public function update(int|string $id, array $params): mixed
+    {
+        return $this->client->request('PATCH', '/api/v1/webhook_endpoints/'.$id, $params);
+    }
+
+    public function delete(int|string $id): mixed
+    {
+        return $this->client->request('DELETE', '/api/v1/webhook_endpoints/'.$id);
+    }
+
     public static function verify(string $secret, string $timestamp, string $rawBody, string $signature): bool
     {
         if (str_starts_with($signature, 'sha256=')) {

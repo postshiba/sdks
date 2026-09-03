@@ -280,6 +280,14 @@ public final class PostShiba {
             return request("POST", teamsPath("/webhook_endpoints"), body, null);
         }
 
+        public JsonNode update(Object id, Object body) {
+            return request("PATCH", "/api/v1/webhook_endpoints/" + id(id), body, null);
+        }
+
+        public JsonNode delete(Object id) {
+            return request("DELETE", "/api/v1/webhook_endpoints/" + id(id), null, null);
+        }
+
         public boolean verify(String secret, String timestamp, String rawBody, String signature) {
             String provided = signature == null ? "" : signature;
             if (provided.startsWith("sha256=")) {

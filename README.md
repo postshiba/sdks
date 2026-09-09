@@ -13,6 +13,7 @@ Creates missing repos when `CREATE_REPOS=1` and `gh` can write to the `postshiba
 ## Libraries
 
 - [Node.js](https://github.com/postshiba/postshiba-node) ([source](packages/node/README.md), NestJS included)
+- [Convex](https://github.com/postshiba/postshiba-convex) ([source](packages/convex/README.md)) component. Durable send plus webhooks.
 - [Python](https://github.com/postshiba/postshiba-python) ([source](packages/python/README.md), Django included)
 - [PHP](https://github.com/postshiba/postshiba-php) ([source](packages/php/README.md), Laravel and Symfony included)
 - [Ruby](https://github.com/postshiba/postshiba-ruby) ([source](packages/ruby/README.md), ActionMailer included)
@@ -27,6 +28,8 @@ Creates missing repos when `CREATE_REPOS=1` and `gh` can write to the `postshiba
 ## How It Works
 
 Each package is a thin HTTPS client. Authenticate with a platform application token. Send through `POST /api/v1/emails`. Manage clusters, domains, inboxes, and the rest of the catalog from the same client.
+
+The Convex package is a component. It enqueues mail from a mutation and delivers through `POST /api/v1/teams/:teamId/clusters/:clusterId/sends`.
 
 Failed REST calls raise a typed error with `error`, `field`, and `message`. A `429` with `error` `throttled` is the cluster hourly send limit. Do not retry that send immediately. Wait until the next hour. Each language README has the catch shape.
 

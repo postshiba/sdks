@@ -27,6 +27,7 @@ missing() {
 }
 
 if [[ -d "$root/packages/node" ]]; then run node npm test; else missing node; fi
+if [[ -d "$root/packages/convex" ]]; then run convex npm test; else missing convex; fi
 if [[ -d "$root/packages/python" ]]; then run python python3 -m pytest; else missing python; fi
 if [[ -d "$root/packages/php" ]]; then run php composer test; else missing php; fi
 if [[ -d "$root/packages/ruby" ]]; then run ruby bundle exec rake test; else missing ruby; fi

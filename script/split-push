@@ -21,6 +21,7 @@ create="${CREATE_REPOS:-0}"
 
 packages=(
   "convex:postshiba-convex"
+  "skills:postshiba-skills"
   "node:postshiba-node"
   "python:postshiba-python"
   "php:postshiba-php"
@@ -78,7 +79,9 @@ fi
 for pair in "${packages[@]}"; do
   dir="${pair%%:*}"
   repo="${pair##*:}"
-  if [[ "$dir" == "wordpress" ]]; then
+  if [[ "$dir" == "skills" ]]; then
+    desc="PostShiba Cursor plugin. MCP plus agent skills. Mirror of $ORG/sdks packages/skills. Open PRs on $ORG/sdks."
+  elif [[ "$dir" == "wordpress" ]]; then
     desc="PostShiba WordPress plugin. Mirror of $ORG/sdks packages/wordpress. Open PRs on $ORG/sdks."
   elif [[ "$dir" == "convex" ]]; then
     desc="PostShiba Convex component. Mirror of $ORG/sdks packages/convex. Open PRs on $ORG/sdks."

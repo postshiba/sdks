@@ -1,0 +1,39 @@
+{
+  "name": "postshiba",
+  "displayName": "PostShiba",
+  "version": "0.1.0",
+  "description": "Manage PostShiba email infrastructure and transactional sending through the PostShiba MCP server.",
+  "author": {
+    "name": "PostShiba"
+  },
+  "homepage": "https://postshiba.com",
+  "repository": "https://github.com/postshiba/sdks",
+  "license": "MIT",
+  "keywords": [
+    "postshiba",
+    "email",
+    "transactional-email",
+    "mcp"
+  ],
+  "category": "integrations",
+  "tags": [
+    "email",
+    "mcp",
+    "developer-tools"
+  ],
+  "variables": {
+    "type": "object",
+    "properties": {
+      "POSTSHIBA_API_KEY": {
+        "type": "string",
+        "title": "PostShiba API key",
+        "description": "Platform application access token from Developers -> Platform applications."
+      }
+    },
+    "required": [
+      "POSTSHIBA_API_KEY"
+    ]
+  },
+  "mcpServers": "./mcp.json",
+  "skills": "./skills/"
+}

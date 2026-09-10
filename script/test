@@ -26,6 +26,7 @@ missing() {
   failed=1
 }
 
+if [[ -d "$root/packages/skills" ]]; then run skills bash script/check; else missing skills; fi
 if [[ -d "$root/packages/node" ]]; then run node npm test; else missing node; fi
 if [[ -d "$root/packages/convex" ]]; then run convex npm test; else missing convex; fi
 if [[ -d "$root/packages/python" ]]; then run python python3 -m pytest; else missing python; fi

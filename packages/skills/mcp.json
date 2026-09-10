@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "postshiba": {
+      "type": "http",
+      "url": "https://app.postshiba.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${POSTSHIBA_API_KEY}"
+      }
+    }
+  }
+}

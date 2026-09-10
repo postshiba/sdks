@@ -1,0 +1,60 @@
+# PostShiba MCP tool registry
+
+This registry mirrors `CapsuleMcp::Operations.all`. It contains 54 tools. The MCP server fills `:obfuscated_team_id` from the platform application token.
+
+| MCP tool | REST method | REST path |
+| --- | --- | --- |
+| `whoami` | `GET` | `/api/v1/users/me` |
+| `send_email` | `POST` | `/api/v1/emails` |
+| `send_on_cluster` | `POST` | `/api/v1/teams/:obfuscated_team_id/clusters/:obfuscated_cluster_id/sends` |
+| `list_clusters` | `GET` | `/api/v1/teams/:obfuscated_team_id/clusters` |
+| `get_cluster` | `GET` | `/api/v1/clusters/:id` |
+| `create_cluster` | `POST` | `/api/v1/teams/:obfuscated_team_id/clusters` |
+| `update_cluster` | `PATCH` | `/api/v1/clusters/:id` |
+| `suspend_cluster` | `POST` | `/api/v1/clusters/:id/suspend` |
+| `resume_cluster` | `POST` | `/api/v1/clusters/:id/resume` |
+| `destroy_cluster` | `DELETE` | `/api/v1/clusters/:id` |
+| `list_sending_domains` | `GET` | `/api/v1/teams/:obfuscated_team_id/sending_domains` |
+| `get_sending_domain` | `GET` | `/api/v1/sending_domains/:id` |
+| `create_sending_domain` | `POST` | `/api/v1/teams/:obfuscated_team_id/sending_domains` |
+| `update_sending_domain` | `PATCH` | `/api/v1/sending_domains/:id` |
+| `refresh_sending_domain` | `POST` | `/api/v1/sending_domains/:id/refresh` |
+| `verify_sending_domain` | `POST` | `/api/v1/sending_domains/:id/verify` |
+| `suspend_sending_domain` | `POST` | `/api/v1/sending_domains/:id/suspend` |
+| `resume_sending_domain` | `POST` | `/api/v1/sending_domains/:id/resume` |
+| `make_primary_sending_domain` | `POST` | `/api/v1/sending_domains/:id/make_primary` |
+| `can_i_send_this_sending_domain` | `POST` | `/api/v1/sending_domains/:id/can_i_send_this` |
+| `can_i_send_this_poll_sending_domain` | `GET` | `/api/v1/sending_domains/:id/can_i_send_this` |
+| `destroy_sending_domain` | `DELETE` | `/api/v1/sending_domains/:id` |
+| `list_tenants` | `GET` | `/api/v1/teams/:obfuscated_team_id/tenants` |
+| `create_tenant` | `POST` | `/api/v1/teams/:obfuscated_team_id/tenants` |
+| `get_tenant` | `GET` | `/api/v1/tenants/:id` |
+| `suspend_tenant` | `POST` | `/api/v1/tenants/:id/suspend` |
+| `resume_tenant` | `POST` | `/api/v1/tenants/:id/resume` |
+| `destroy_tenant` | `DELETE` | `/api/v1/tenants/:id` |
+| `list_inboxes` | `GET` | `/api/v1/teams/:obfuscated_team_id/inboxes` |
+| `get_inbox` | `GET` | `/api/v1/inboxes/:id` |
+| `create_inbox` | `POST` | `/api/v1/teams/:obfuscated_team_id/inboxes` |
+| `destroy_inbox` | `DELETE` | `/api/v1/inboxes/:id` |
+| `verify_inbox` | `POST` | `/api/v1/inboxes/:id/verify` |
+| `list_inbound_messages` | `GET` | `/api/v1/inboxes/:inbox_id/inbound_messages` |
+| `get_inbound_message` | `GET` | `/api/v1/inboxes/:inbox_id/inbound_messages/:id` |
+| `download_attachment_inbound_message` | `GET` | `/api/v1/inboxes/:inbox_id/inbound_messages/:id/attachments/:index` |
+| `list_team_message_events` | `GET` | `/api/v1/teams/:obfuscated_team_id/message_events` |
+| `list_message_events` | `GET` | `/api/v1/teams/:obfuscated_team_id/clusters/:obfuscated_cluster_id/message_events` |
+| `get_message_event` | `GET` | `/api/v1/message_events/:id` |
+| `create_smtp_credential` | `POST` | `/api/v1/teams/:obfuscated_team_id/clusters/:obfuscated_cluster_id/smtp_credentials` |
+| `destroy_smtp_credential` | `DELETE` | `/api/v1/teams/:obfuscated_team_id/clusters/:obfuscated_cluster_id/smtp_credentials/:id` |
+| `list_webhook_endpoints` | `GET` | `/api/v1/teams/:obfuscated_team_id/webhook_endpoints` |
+| `get_webhook_endpoint` | `GET` | `/api/v1/webhook_endpoints/:id` |
+| `create_webhook_endpoint` | `POST` | `/api/v1/teams/:obfuscated_team_id/webhook_endpoints` |
+| `update_webhook_endpoint` | `PATCH` | `/api/v1/webhook_endpoints/:id` |
+| `destroy_webhook_endpoint` | `DELETE` | `/api/v1/webhook_endpoints/:id` |
+| `list_suppressions` | `GET` | `/api/v1/teams/:obfuscated_team_id/suppressions` |
+| `create_suppression` | `POST` | `/api/v1/teams/:obfuscated_team_id/suppressions` |
+| `import_suppression` | `POST` | `/api/v1/teams/:obfuscated_team_id/suppressions/import` |
+| `destroy_suppression` | `DELETE` | `/api/v1/suppressions/:id` |
+| `get_firewall` | `GET` | `/api/v1/teams/:obfuscated_team_id/firewall` |
+| `update_firewall` | `PATCH` | `/api/v1/teams/:obfuscated_team_id/firewall` |
+| `create_firewall_entry` | `POST` | `/api/v1/teams/:obfuscated_team_id/firewall_entries` |
+| `destroy_firewall_entry` | `DELETE` | `/api/v1/firewall_entries/:id` |

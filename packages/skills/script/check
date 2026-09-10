@@ -1,0 +1,188 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$root"
+
+failed=0
+
+fail() {
+  echo "fail skills: $*" >&2
+  failed=1
+}
+
+require_file() {
+  if [[ ! -f "$1" ]]; then
+    fail "missing $1"
+    return 1
+  fi
+}
+
+require_match() {
+  local file="$1"
+  local pattern="$2"
+  local message="$3"
+  local contents
+
+  [[ -f "$file" ]] || return
+  contents="$(LC_ALL=C tr '\n\r' '  ' < "$file")"
+  if ! printf '%s\n' "$contents" | LC_ALL=C grep -Eq "$pattern"; then
+    fail "$message"
+  fi
+}
+
+validate_skill() {
+  local skill="$1"
+  local expected_name
+
+  expected_name="$(basename "$(dirname "$skill")")"
+  if ! LC_ALL=C awk -v file="$skill" -v expected_name="$expected_name" '
+    function trim(value) {
+      sub(/^[[:space:]]+/, "", value)
+      sub(/[[:space:]]+$/, "", value)
+      return value
+    }
+    function unquote(value, first, last, single_quote) {
+      value = trim(value)
+      first = substr(value, 1, 1)
+      last = substr(value, length(value), 1)
+      single_quote = sprintf("%c", 39)
+      if ((first == "\"" && last == "\"") || (first == single_quote && last == single_quote)) {
+        value = substr(value, 2, length(value) - 2)
+      }
+      return trim(value)
+    }
+    function report(message) {
+      print "fail skills: " file " " message > "/dev/stderr"
+      bad = 1
+    }
+    NR == 1 {
+      if ($0 != "---") {
+        report("must start with YAML frontmatter delimiter ---")
+        bad_start = 1
+      }
+      next
+    }
+    bad_start { next }
+    !closed && description_block {
+      if ($0 ~ /^[[:space:]]+/) {
+        value = trim($0)
+        if (value != "" && value !~ /^#/) {
+          description_found = 1
+        }
+        next
+      }
+      description_block = 0
+    }
+    !closed && $0 == "---" {
+      closed = 1
+      next
+    }
+    !closed && /^[[:space:]]*name[[:space:]]*:/ {
+      value = $0
+      sub(/^[[:space:]]*name[[:space:]]*:[[:space:]]*/, "", value)
+      name = unquote(value)
+      if (name ~ /^#/) {
+        name = ""
+      }
+      next
+    }
+    !closed && /^[[:space:]]*description[[:space:]]*:/ {
+      value = $0
+      sub(/^[[:space:]]*description[[:space:]]*:[[:space:]]*/, "", value)
+      value = trim(value)
+      if (value ~ /^[|>][-+]?[[:space:]]*(#.*)?$/) {
+        description_block = 1
+      } else if (unquote(value) != "" && value !~ /^#/) {
+        description_found = 1
+      }
+      next
+    }
+    END {
+      if (NR > 500) {
+        report("has " NR " lines; maximum is 500")
+      }
+      if (!bad_start) {
+        if (!closed) {
+          report("is missing its closing YAML frontmatter delimiter ---")
+        }
+        if (name == "") {
+          report("has an empty or missing frontmatter name")
+        } else if (name != expected_name) {
+          report("frontmatter name must be " expected_name ", found " name)
+        }
+        if (!description_found) {
+          report("has an empty or missing frontmatter description")
+        }
+      }
+      exit(bad ? 1 : 0)
+    }
+  ' "$skill"; then
+    failed=1
+  fi
+}
+
+expected_skills=(
+  "skills/postshiba/SKILL.md"
+  "skills/postshiba-first-send/SKILL.md"
+  "skills/postshiba-create-cluster/SKILL.md"
+  "skills/postshiba-create-credentials/SKILL.md"
+  "skills/postshiba-send-test-email/SKILL.md"
+  "skills/postshiba-create-mailbox/SKILL.md"
+  "skills/postshiba-send-from-domain/SKILL.md"
+  "skills/postshiba-import-dkim/SKILL.md"
+)
+
+require_file ".cursor-plugin/plugin.json"
+require_file "mcp.json"
+require_file ".github/workflows/close-mirror-prs.yml"
+
+require_match ".cursor-plugin/plugin.json" '"name"[[:space:]]*:[[:space:]]*"postshiba"' \
+  ".cursor-plugin/plugin.json must set name to postshiba"
+require_match ".cursor-plugin/plugin.json" '"mcpServers"[[:space:]]*:[[:space:]]*"[.]/mcp[.]json"' \
+  ".cursor-plugin/plugin.json must set mcpServers to ./mcp.json"
+require_match ".cursor-plugin/plugin.json" '"skills"[[:space:]]*:[[:space:]]*"[.]/skills/"' \
+  ".cursor-plugin/plugin.json must set skills to ./skills/"
+require_match ".cursor-plugin/plugin.json" '"POSTSHIBA_API_KEY"[[:space:]]*:' \
+  ".cursor-plugin/plugin.json must declare POSTSHIBA_API_KEY"
+require_match "mcp.json" '"url"[[:space:]]*:[[:space:]]*"https://app[.]postshiba[.]com/mcp"' \
+  "mcp.json must use https://app.postshiba.com/mcp"
+require_match "mcp.json" '"Authorization"[[:space:]]*:[[:space:]]*"Bearer [$][{]POSTSHIBA_API_KEY[}]"' \
+  "mcp.json must set Authorization to Bearer \${POSTSHIBA_API_KEY}"
+
+if [[ ! -d skills ]]; then
+  fail "missing skills directory"
+else
+  skill_count="$(find skills -type f -name SKILL.md -print | LC_ALL=C wc -l | tr -d '[:space:]')"
+  if [[ "$skill_count" -ne "${#expected_skills[@]}" ]]; then
+    fail "expected exactly ${#expected_skills[@]} SKILL.md files, found $skill_count"
+  fi
+
+  while IFS= read -r skill; do
+    expected=0
+    for expected_skill in "${expected_skills[@]}"; do
+      if [[ "$skill" == "$expected_skill" ]]; then
+        expected=1
+        break
+      fi
+    done
+    if [[ "$expected" -eq 0 ]]; then
+      fail "unexpected SKILL.md file $skill"
+    fi
+  done < <(find skills -type f -name SKILL.md -print)
+fi
+
+for skill in "${expected_skills[@]}"; do
+  if [[ ! -f "$skill" ]]; then
+    fail "missing expected $skill"
+    continue
+  fi
+  validate_skill "$skill"
+done
+
+if [[ "$failed" -ne 0 ]]; then
+  echo "skills checks failed" >&2
+  exit 1
+fi
+
+echo "skills checks passed"

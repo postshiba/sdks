@@ -1,5 +1,8 @@
 # PostShiba Java
 
+> [!NOTE]
+> [PostShiba skills](https://github.com/postshiba/postshiba-skills) connect agents to MCP for first send, domains, inboxes, and sandbox mail.
+
 Java client for the PostShiba API.
 
 ## Installation

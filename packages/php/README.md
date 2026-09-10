@@ -1,5 +1,8 @@
 # PostShiba PHP
 
+> [!NOTE]
+> [PostShiba skills](https://github.com/postshiba/postshiba-skills) connect agents to MCP for first send, domains, inboxes, and sandbox mail.
+
 PHP client for the PostShiba API.
 
 Install from GitHub. Open pull requests on [postshiba/sdks](https://github.com/postshiba/sdks).

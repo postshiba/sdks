@@ -1,5 +1,8 @@
 # PostShiba Convex
 
+> [!NOTE]
+> [PostShiba skills](https://github.com/postshiba/postshiba-skills) connect agents to MCP for first send, domains, inboxes, and sandbox mail.
+
 PostShiba email delivery as a Convex component.
 
 ## Installation

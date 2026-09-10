@@ -1,5 +1,8 @@
 # PostShiba SDKs
 
+> [!NOTE]
+> [PostShiba skills](https://github.com/postshiba/postshiba-skills) connect agents to MCP for first send, domains, inboxes, and sandbox mail.
+
 HTTP clients and mail adapters for the PostShiba API.
 
 This repo is the write target. Language repos under [postshiba](https://github.com/orgs/postshiba/repositories) are one-way mirrors. Install from those GitHub URLs. Nothing is on npm, PyPI, or RubyGems yet.
@@ -12,6 +15,7 @@ Creates missing repos when `CREATE_REPOS=1` and `gh` can write to the `postshiba
 
 ## Libraries
 
+- [Skills](https://github.com/postshiba/postshiba-skills) ([source](packages/skills/README.md)) Cursor plugin. MCP plus agent skills.
 - [Node.js](https://github.com/postshiba/postshiba-node) ([source](packages/node/README.md), NestJS included)
 - [Convex](https://github.com/postshiba/postshiba-convex) ([source](packages/convex/README.md)) component. Durable send plus webhooks.
 - [Python](https://github.com/postshiba/postshiba-python) ([source](packages/python/README.md), Django included)

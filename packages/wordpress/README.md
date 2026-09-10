@@ -1,5 +1,8 @@
 # PostShiba
 
+> [!NOTE]
+> [PostShiba skills](https://github.com/postshiba/postshiba-skills) connect agents to MCP for first send, domains, inboxes, and sandbox mail.
+
 WordPress plugin that sends `wp_mail` through PostShiba.
 
 Not on WordPress.org yet.

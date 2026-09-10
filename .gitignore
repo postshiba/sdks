@@ -13,6 +13,12 @@ packages/node/dist/
 packages/convex/node_modules/
 packages/convex/dist/
 
+packages/inngest/node_modules/
+packages/inngest/dist/
+
+packages/trigger/node_modules/
+packages/trigger/dist/
+
 packages/python/**/__pycache__/
 packages/python/.pytest_cache/
 packages/python/*.egg-info/

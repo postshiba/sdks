@@ -1,0 +1,42 @@
+{
+  "name": "@postshiba/inngest",
+  "version": "0.1.0",
+  "description": "PostShiba Inngest adapter",
+  "license": "MIT",
+  "author": "PostShiba",
+  "homepage": "https://github.com/postshiba/postshiba-inngest",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/postshiba/postshiba-inngest.git"
+  },
+  "bugs": {
+    "url": "https://github.com/postshiba/postshiba-inngest/issues"
+  },
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./http": "./src/http.ts"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "inngest": "^3.0.0 || ^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "inngest": "^3.48.1",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

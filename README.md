@@ -18,6 +18,8 @@ Creates missing repos when `CREATE_REPOS=1` and `gh` can write to the `postshiba
 - [Skills](https://github.com/postshiba/postshiba-skills) ([source](packages/skills/README.md)) Cursor plugin. MCP plus agent skills.
 - [Node.js](https://github.com/postshiba/postshiba-node) ([source](packages/node/README.md), NestJS included)
 - [Convex](https://github.com/postshiba/postshiba-convex) ([source](packages/convex/README.md)) component. Durable send plus webhooks.
+- [Inngest](https://github.com/postshiba/postshiba-inngest) ([source](packages/inngest/README.md)) adapter. Send inside `step.run`.
+- [Trigger.dev](https://github.com/postshiba/postshiba-trigger) ([source](packages/trigger/README.md)) adapter. Send inside a task.
 - [Python](https://github.com/postshiba/postshiba-python) ([source](packages/python/README.md), Django included)
 - [PHP](https://github.com/postshiba/postshiba-php) ([source](packages/php/README.md), Laravel and Symfony included)
 - [Ruby](https://github.com/postshiba/postshiba-ruby) ([source](packages/ruby/README.md), ActionMailer included)
@@ -34,6 +36,8 @@ Creates missing repos when `CREATE_REPOS=1` and `gh` can write to the `postshiba
 Each package is a thin HTTPS client. Authenticate with a platform application token. Send through `POST /api/v1/emails`. Manage clusters, domains, inboxes, and the rest of the catalog from the same client.
 
 The Convex package is a component. It enqueues mail from a mutation and delivers through `POST /api/v1/teams/:teamId/clusters/:clusterId/sends`.
+
+The Inngest and Trigger.dev packages wrap that same cluster send. Inngest uses `step.run`. Trigger.dev uses a task. A `429` with `error` `throttled` waits until the next hour. Permanent errors do not retry.
 
 Failed REST calls raise a typed error with `error`, `field`, and `message`. A `429` with `error` `throttled` is the cluster hourly send limit. Do not retry that send immediately. Wait until the next hour. Each language README has the catch shape.
 

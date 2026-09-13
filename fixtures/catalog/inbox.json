@@ -9,5 +9,6 @@
   "webhook_format": "json",
   "webhook_secret": "hex-secret",
   "mx_status": "not_required",
+  "inbound_emails_per_hour": 25,
   "retention_hours": 168
 }

@@ -48,6 +48,17 @@ export const sendWelcome = inngest.createFunction(
 )
 ```
 
+Template send. Pass `template` and skip `html` and `text`. `from` and `subject` override the template when you set them.
+
+```ts
+await sendEmail(step, config, {
+  from: "hello@mail.example.com",
+  to: [event.data.email],
+  template: { id: "welcome", variables: { name: event.data.name } },
+  idempotencyKey: event.id,
+})
+```
+
 ## Webhooks
 
 ```ts

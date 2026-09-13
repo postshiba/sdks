@@ -67,6 +67,39 @@ public sealed class ClustersResource
 
     public Task<JsonElement> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
         _client.SendAsync(HttpMethod.Delete, $"/api/v1/clusters/{id}", cancellationToken: cancellationToken);
+
+    public Task<JsonElement> BoostAsync(string id, object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, $"/api/v1/clusters/{id}/boost", body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> ExtendBoostAsync(string id, object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, $"/api/v1/clusters/{id}/extend_boost", body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> CancelBoostAsync(string id, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, $"/api/v1/clusters/{id}/cancel_boost", cancellationToken: cancellationToken);
+}
+
+public sealed class NetworkResource
+{
+    readonly Client _client;
+    internal NetworkResource(Client client) => _client = client;
+
+    public Task<JsonElement> ListAsync(CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Get, _client.Team("/network"), cancellationToken: cancellationToken);
+
+    public Task<JsonElement> CreateAsync(object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, _client.Team("/network"), body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> AssignAsync(object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, _client.Team("/network/assign"), body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> UnassignAsync(object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, _client.Team("/network/unassign"), body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> SwitchAsync(object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, _client.Team("/network/switch"), body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> ReleaseAsync(object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, _client.Team("/network/release"), body, cancellationToken: cancellationToken);
 }
 
 public sealed class SendingDomainsResource
@@ -82,6 +115,12 @@ public sealed class SendingDomainsResource
 
     public Task<JsonElement> CreateAsync(object body, CancellationToken cancellationToken = default) =>
         _client.SendAsync(HttpMethod.Post, _client.Team("/sending_domains"), body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> UpdateAsync(string id, object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Patch, $"/api/v1/sending_domains/{id}", body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> RefreshAsync(string id, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, $"/api/v1/sending_domains/{id}/refresh", cancellationToken: cancellationToken);
 
     public Task<JsonElement> VerifyAsync(string id, CancellationToken cancellationToken = default) =>
         _client.SendAsync(HttpMethod.Post, $"/api/v1/sending_domains/{id}/verify", cancellationToken: cancellationToken);
@@ -158,6 +197,9 @@ public sealed class EventsResource
     readonly Client _client;
     internal EventsResource(Client client) => _client = client;
 
+    public Task<JsonElement> ListTeamAsync(CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Get, _client.Team("/message_events"), cancellationToken: cancellationToken);
+
     public Task<JsonElement> ListAsync(string clusterId, CancellationToken cancellationToken = default) =>
         _client.SendAsync(HttpMethod.Get, _client.Team($"/clusters/{clusterId}/message_events"), cancellationToken: cancellationToken);
 
@@ -209,8 +251,38 @@ public sealed class SuppressionsResource
     public Task<JsonElement> CreateAsync(object body, CancellationToken cancellationToken = default) =>
         _client.SendAsync(HttpMethod.Post, _client.Team("/suppressions"), body, cancellationToken: cancellationToken);
 
+    public Task<JsonElement> ImportAsync(object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, _client.Team("/suppressions/import"), body, cancellationToken: cancellationToken);
+
     public Task<JsonElement> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
         _client.SendAsync(HttpMethod.Delete, $"/api/v1/suppressions/{id}", cancellationToken: cancellationToken);
+}
+
+public sealed class TemplatesResource
+{
+    readonly Client _client;
+    internal TemplatesResource(Client client) => _client = client;
+
+    public Task<JsonElement> ListAsync(CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Get, _client.Team("/templates"), cancellationToken: cancellationToken);
+
+    public Task<JsonElement> GetAsync(string id, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Get, $"/api/v1/templates/{id}", cancellationToken: cancellationToken);
+
+    public Task<JsonElement> CreateAsync(object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, _client.Team("/templates"), body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> UpdateAsync(string id, object body, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Patch, $"/api/v1/templates/{id}", body, cancellationToken: cancellationToken);
+
+    public Task<JsonElement> PublishAsync(string id, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, $"/api/v1/templates/{id}/publish", cancellationToken: cancellationToken);
+
+    public Task<JsonElement> DuplicateAsync(string id, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Post, $"/api/v1/templates/{id}/duplicate", cancellationToken: cancellationToken);
+
+    public Task<JsonElement> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
+        _client.SendAsync(HttpMethod.Delete, $"/api/v1/templates/{id}", cancellationToken: cancellationToken);
 }
 
 public sealed class FirewallResource

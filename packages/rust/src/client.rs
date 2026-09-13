@@ -47,6 +47,10 @@ impl Client {
         SendingDomains { client: self }
     }
 
+    pub fn network(&self) -> Network<'_> {
+        Network { client: self }
+    }
+
     pub fn tenants(&self) -> Tenants<'_> {
         Tenants { client: self }
     }
@@ -73,6 +77,10 @@ impl Client {
 
     pub fn suppressions(&self) -> Suppressions<'_> {
         Suppressions { client: self }
+    }
+
+    pub fn templates(&self) -> Templates<'_> {
+        Templates { client: self }
     }
 
     pub fn firewall(&self) -> Firewall<'_> {
@@ -234,6 +242,21 @@ impl Clusters<'_> {
         let path = format!("/api/v1/clusters/{}", id.as_ref());
         self.client.request("DELETE", &path, None, &[])
     }
+
+    pub fn boost(&self, id: impl AsRef<str>, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/clusters/{}/boost", id.as_ref());
+        self.client.request("POST", &path, Some(body), &[])
+    }
+
+    pub fn extend_boost(&self, id: impl AsRef<str>, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/clusters/{}/extend_boost", id.as_ref());
+        self.client.request("POST", &path, Some(body), &[])
+    }
+
+    pub fn cancel_boost(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/clusters/{}/cancel_boost", id.as_ref());
+        self.client.request("POST", &path, None, &[])
+    }
 }
 
 pub struct SendingDomains<'a> {
@@ -254,6 +277,16 @@ impl SendingDomains<'_> {
     pub fn create(&self, body: &Value) -> Result<Value, Error> {
         let path = format!("/api/v1/teams/{}/sending_domains", self.client.team()?);
         self.client.request("POST", &path, Some(body), &[])
+    }
+
+    pub fn update(&self, id: impl AsRef<str>, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/sending_domains/{}", id.as_ref());
+        self.client.request("PATCH", &path, Some(body), &[])
+    }
+
+    pub fn refresh(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/sending_domains/{}/refresh", id.as_ref());
+        self.client.request("POST", &path, None, &[])
     }
 
     pub fn verify(&self, id: impl AsRef<str>) -> Result<Value, Error> {
@@ -378,6 +411,11 @@ pub struct Events<'a> {
 }
 
 impl Events<'_> {
+    pub fn list_team(&self) -> Result<Value, Error> {
+        let path = format!("/api/v1/teams/{}/message_events", self.client.team()?);
+        self.client.request("GET", &path, None, &[])
+    }
+
     pub fn list(&self, cluster_id: impl AsRef<str>) -> Result<Value, Error> {
         let path = format!(
             "/api/v1/teams/{}/clusters/{}/message_events",
@@ -464,6 +502,11 @@ impl Suppressions<'_> {
         self.client.request("POST", &path, Some(body), &[])
     }
 
+    pub fn import(&self, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/teams/{}/suppressions/import", self.client.team()?);
+        self.client.request("POST", &path, Some(body), &[])
+    }
+
     pub fn delete(&self, id: impl AsRef<str>) -> Result<Value, Error> {
         let path = format!("/api/v1/suppressions/{}", id.as_ref());
         self.client.request("DELETE", &path, None, &[])
@@ -492,6 +535,83 @@ impl Firewall<'_> {
 
     pub fn delete_entry(&self, id: impl AsRef<str>) -> Result<Value, Error> {
         let path = format!("/api/v1/firewall_entries/{}", id.as_ref());
+        self.client.request("DELETE", &path, None, &[])
+    }
+}
+
+pub struct Network<'a> {
+    client: &'a Client,
+}
+
+impl Network<'_> {
+    pub fn list(&self) -> Result<Value, Error> {
+        let path = format!("/api/v1/teams/{}/network", self.client.team()?);
+        self.client.request("GET", &path, None, &[])
+    }
+
+    pub fn create(&self, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/teams/{}/network", self.client.team()?);
+        self.client.request("POST", &path, Some(body), &[])
+    }
+
+    pub fn assign(&self, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/teams/{}/network/assign", self.client.team()?);
+        self.client.request("POST", &path, Some(body), &[])
+    }
+
+    pub fn unassign(&self, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/teams/{}/network/unassign", self.client.team()?);
+        self.client.request("POST", &path, Some(body), &[])
+    }
+
+    pub fn switch(&self, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/teams/{}/network/switch", self.client.team()?);
+        self.client.request("POST", &path, Some(body), &[])
+    }
+
+    pub fn release(&self, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/teams/{}/network/release", self.client.team()?);
+        self.client.request("POST", &path, Some(body), &[])
+    }
+}
+
+pub struct Templates<'a> {
+    client: &'a Client,
+}
+
+impl Templates<'_> {
+    pub fn list(&self) -> Result<Value, Error> {
+        let path = format!("/api/v1/teams/{}/templates", self.client.team()?);
+        self.client.request("GET", &path, None, &[])
+    }
+
+    pub fn get(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/templates/{}", id.as_ref());
+        self.client.request("GET", &path, None, &[])
+    }
+
+    pub fn create(&self, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/teams/{}/templates", self.client.team()?);
+        self.client.request("POST", &path, Some(body), &[])
+    }
+
+    pub fn update(&self, id: impl AsRef<str>, body: &Value) -> Result<Value, Error> {
+        let path = format!("/api/v1/templates/{}", id.as_ref());
+        self.client.request("PATCH", &path, Some(body), &[])
+    }
+
+    pub fn publish(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/templates/{}/publish", id.as_ref());
+        self.client.request("POST", &path, None, &[])
+    }
+
+    pub fn duplicate(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/templates/{}/duplicate", id.as_ref());
+        self.client.request("POST", &path, None, &[])
+    }
+
+    pub fn delete(&self, id: impl AsRef<str>) -> Result<Value, Error> {
+        let path = format!("/api/v1/templates/{}", id.as_ref());
         self.client.request("DELETE", &path, None, &[])
     }
 }

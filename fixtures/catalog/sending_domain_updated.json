@@ -1,0 +1,21 @@
+{
+  "id": "HsVtYk",
+  "name": "mail.example.com",
+  "tenant_id": "WbLcFd",
+  "tenant": "default",
+  "dkim_status": "pending",
+  "return_path_status": "pending",
+  "dmarc_status": "pending",
+  "dkim_selector": "s1",
+  "dkim_manual": true,
+  "dkim_txt": "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA",
+  "dkim_cname_host": "ps1._domainkey.mail.example.com",
+  "dkim_cname_target": null,
+  "dmarc_host": "_dmarc.mail.example.com",
+  "dmarc_record": "v=DMARC1; p=none;",
+  "return_path_host": "rp.mail.example.com",
+  "return_path_target": "rp.capsule.test",
+  "last_verification_error": null,
+  "suspended": false,
+  "primary": false
+}

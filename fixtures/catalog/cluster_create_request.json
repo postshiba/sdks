@@ -3,6 +3,7 @@
     "name": "edge",
     "size": "small",
     "region": "manual",
-    "plan": "nano"
+    "plan": "nano",
+    "classification": "transactional"
   }
 }

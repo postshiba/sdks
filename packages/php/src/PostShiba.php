@@ -9,6 +9,7 @@ class PostShiba
     public Users $users;
     public Emails $emails;
     public Clusters $clusters;
+    public Network $network;
     public SendingDomains $sendingDomains;
     public Tenants $tenants;
     public Inboxes $inboxes;
@@ -16,6 +17,7 @@ class PostShiba
     public Events $events;
     public SmtpCredentials $smtpCredentials;
     public Webhooks $webhooks;
+    public Templates $templates;
     public Suppressions $suppressions;
     public Firewall $firewall;
 
@@ -33,6 +35,7 @@ class PostShiba
         $this->users = new Users($this);
         $this->emails = new Emails($this);
         $this->clusters = new Clusters($this);
+        $this->network = new Network($this);
         $this->sendingDomains = new SendingDomains($this);
         $this->tenants = new Tenants($this);
         $this->inboxes = new Inboxes($this);
@@ -40,6 +43,7 @@ class PostShiba
         $this->events = new Events($this);
         $this->smtpCredentials = new SmtpCredentials($this);
         $this->webhooks = new Webhooks($this);
+        $this->templates = new Templates($this);
         $this->suppressions = new Suppressions($this);
         $this->firewall = new Firewall($this);
     }

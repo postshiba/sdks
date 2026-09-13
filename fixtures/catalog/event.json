@@ -4,11 +4,13 @@
   "recipient": "dest@example.com",
   "sender": "hello@mail.example.com",
   "message_id": "abc",
+  "mx_provider": "gmail",
+  "sending_ip": "203.0.113.10",
   "occurred_at": "2026-08-29T00:00:00Z",
   "drain_status": "pending",
   "tenant_id": "WbLcFd",
   "sending_domain_id": "HsVtYk",
-  "node_id": "NdHpQr",
+  "node_id": "ZxHvTb",
   "payload": {
     "event": "delivered"
   }

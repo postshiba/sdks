@@ -65,6 +65,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           from: string;
           headers?: Array<{ name: string; value: string }>;
           html?: string;
+          template?: { id: string; variables?: Record<string, any> };
           attachments?: Array<{
             filename: string;
             contentType: string;
@@ -140,6 +141,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           from: string;
           headers?: Array<{ name: string; value: string }>;
           html?: string;
+          template?: { id: string; variables?: Record<string, any> };
           attachments?: Array<{
             filename: string;
             contentType: string;

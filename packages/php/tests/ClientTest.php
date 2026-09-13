@@ -52,6 +52,21 @@ final class ClientTest extends TestCase
         $this->assertArrayNotHasKey('X-Capsule-Cluster-Id', $http->last()['headers']);
     }
 
+    public function testEmailsSendTemplate(): void
+    {
+        $http = new FakeHttp();
+        $http->enqueueJson(200, $this->fixture('email_send_template_response'));
+        $client = $this->client($http);
+
+        $got = $client->emails->send($this->fixture('email_send_template_request'));
+
+        $this->assertSame('POST', $http->last()['method']);
+        $this->assertSame('https://api.example.test/api/v1/emails', $http->last()['url']);
+        $this->assertSame($this->fixture('email_send_template_request'), json_decode($http->last()['body'], true));
+        $this->assertSame($this->fixture('email_send_template_response'), $got);
+        $this->assertArrayNotHasKey('X-Capsule-Cluster-Id', $http->last()['headers']);
+    }
+
     public function testEmailsSendWithClusterId(): void
     {
         $http = new FakeHttp();
@@ -118,9 +133,20 @@ final class ClientTest extends TestCase
             'clusters.suspend' => ['clusters.suspend', 'POST', '/api/v1/clusters/NmQpXr/suspend', null, 'cluster_suspended', false, fn ($c) => $c->clusters->suspend("NmQpXr")],
             'clusters.resume' => ['clusters.resume', 'POST', '/api/v1/clusters/NmQpXr/resume', null, 'cluster', false, fn ($c) => $c->clusters->resume("NmQpXr")],
             'clusters.delete' => ['clusters.delete', 'DELETE', '/api/v1/clusters/NmQpXr', null, 'cluster_deprovisioned', false, fn ($c) => $c->clusters->delete("NmQpXr")],
+            'clusters.boost' => ['clusters.boost', 'POST', '/api/v1/clusters/NmQpXr/boost', 'cluster_boost_request', 'cluster_boosted', false, fn ($c) => $c->clusters->boost("NmQpXr", self::load('cluster_boost_request'))],
+            'clusters.extendBoost' => ['clusters.extendBoost', 'POST', '/api/v1/clusters/NmQpXr/extend_boost', 'cluster_extend_boost_request', 'cluster_boosted', false, fn ($c) => $c->clusters->extendBoost("NmQpXr", self::load('cluster_extend_boost_request'))],
+            'clusters.cancelBoost' => ['clusters.cancelBoost', 'POST', '/api/v1/clusters/NmQpXr/cancel_boost', null, 'cluster', false, fn ($c) => $c->clusters->cancelBoost("NmQpXr")],
+            'network.list' => ['network.list', 'GET', '/api/v1/teams/KjkAJW/network', null, 'network', true, fn ($c) => $c->network->list()],
+            'network.create' => ['network.create', 'POST', '/api/v1/teams/KjkAJW/network', 'network_create_request', 'network_assigned', false, fn ($c) => $c->network->create(self::load('network_create_request'))],
+            'network.assign' => ['network.assign', 'POST', '/api/v1/teams/KjkAJW/network/assign', 'network_create_request', 'network_dedicated', false, fn ($c) => $c->network->assign(self::load('network_create_request'))],
+            'network.unassign' => ['network.unassign', 'POST', '/api/v1/teams/KjkAJW/network/unassign', 'network_create_request', 'network', false, fn ($c) => $c->network->unassign(self::load('network_create_request'))],
+            'network.switch' => ['network.switch', 'POST', '/api/v1/teams/KjkAJW/network/switch', 'network_create_request', 'network_assigned', false, fn ($c) => $c->network->switch(self::load('network_create_request'))],
+            'network.release' => ['network.release', 'POST', '/api/v1/teams/KjkAJW/network/release', 'network_release_request', 'network_released', false, fn ($c) => $c->network->release(self::load('network_release_request'))],
             'sendingDomains.list' => ['sendingDomains.list', 'GET', '/api/v1/teams/KjkAJW/sending_domains', null, 'sending_domain', true, fn ($c) => $c->sendingDomains->list()],
             'sendingDomains.get' => ['sendingDomains.get', 'GET', '/api/v1/sending_domains/HsVtYk', null, 'sending_domain', false, fn ($c) => $c->sendingDomains->get("HsVtYk")],
             'sendingDomains.create' => ['sendingDomains.create', 'POST', '/api/v1/teams/KjkAJW/sending_domains', 'sending_domain_create_request', 'sending_domain', false, fn ($c) => $c->sendingDomains->create(self::load('sending_domain_create_request'))],
+            'sendingDomains.update' => ['sendingDomains.update', 'PATCH', '/api/v1/sending_domains/HsVtYk', 'sending_domain_update_request', 'sending_domain_updated', false, fn ($c) => $c->sendingDomains->update("HsVtYk", self::load('sending_domain_update_request'))],
+            'sendingDomains.refresh' => ['sendingDomains.refresh', 'POST', '/api/v1/sending_domains/HsVtYk/refresh', null, 'sending_domain', false, fn ($c) => $c->sendingDomains->refresh("HsVtYk")],
             'sendingDomains.verify' => ['sendingDomains.verify', 'POST', '/api/v1/sending_domains/HsVtYk/verify', null, 'sending_domain', false, fn ($c) => $c->sendingDomains->verify("HsVtYk")],
             'sendingDomains.suspend' => ['sendingDomains.suspend', 'POST', '/api/v1/sending_domains/HsVtYk/suspend', null, 'sending_domain_suspended', false, fn ($c) => $c->sendingDomains->suspend("HsVtYk")],
             'sendingDomains.resume' => ['sendingDomains.resume', 'POST', '/api/v1/sending_domains/HsVtYk/resume', null, 'sending_domain', false, fn ($c) => $c->sendingDomains->resume("HsVtYk")],
@@ -137,6 +163,7 @@ final class ClientTest extends TestCase
             'inboxes.delete' => ['inboxes.delete', 'DELETE', '/api/v1/inboxes/PqRzMn', null, 'inbox_index', false, fn ($c) => $c->inboxes->delete("PqRzMn")],
             'messages.list' => ['messages.list', 'GET', '/api/v1/inboxes/PqRzMn/inbound_messages', null, 'message', true, fn ($c) => $c->messages->list("PqRzMn")],
             'messages.get' => ['messages.get', 'GET', '/api/v1/inboxes/PqRzMn/inbound_messages/GxTyVu', null, 'message_show', false, fn ($c) => $c->messages->get("PqRzMn", "GxTyVu")],
+            'events.listTeam' => ['events.listTeam', 'GET', '/api/v1/teams/KjkAJW/message_events', null, 'event', true, fn ($c) => $c->events->listTeam()],
             'events.list' => ['events.list', 'GET', '/api/v1/teams/KjkAJW/clusters/NmQpXr/message_events', null, 'event', true, fn ($c) => $c->events->list("NmQpXr")],
             'events.get' => ['events.get', 'GET', '/api/v1/message_events/JkLmNp', null, 'event', false, fn ($c) => $c->events->get("JkLmNp")],
             'smtpCredentials.create' => ['smtpCredentials.create', 'POST', '/api/v1/teams/KjkAJW/clusters/NmQpXr/smtp_credentials', 'smtp_credential_create_request', 'smtp_credential_create', false, fn ($c) => $c->smtpCredentials->create("NmQpXr", self::load('smtp_credential_create_request'))],
@@ -146,8 +173,16 @@ final class ClientTest extends TestCase
             'webhooks.create' => ['webhooks.create', 'POST', '/api/v1/teams/KjkAJW/webhook_endpoints', 'webhook_create_request', 'webhook_show', false, fn ($c) => $c->webhooks->create(self::load('webhook_create_request'))],
             'webhooks.update' => ['webhooks.update', 'PATCH', '/api/v1/webhook_endpoints/CdFgHj', 'webhook_update_request', 'webhook', false, fn ($c) => $c->webhooks->update("CdFgHj", self::load('webhook_update_request'))],
             'webhooks.delete' => ['webhooks.delete', 'DELETE', '/api/v1/webhook_endpoints/CdFgHj', null, 'empty', false, fn ($c) => $c->webhooks->delete("CdFgHj")],
+            'templates.list' => ['templates.list', 'GET', '/api/v1/teams/KjkAJW/templates', null, 'template', true, fn ($c) => $c->templates->list()],
+            'templates.get' => ['templates.get', 'GET', '/api/v1/templates/TpLmQr', null, 'template', false, fn ($c) => $c->templates->get("TpLmQr")],
+            'templates.create' => ['templates.create', 'POST', '/api/v1/teams/KjkAJW/templates', 'template_create_request', 'template', false, fn ($c) => $c->templates->create(self::load('template_create_request'))],
+            'templates.update' => ['templates.update', 'PATCH', '/api/v1/templates/TpLmQr', 'template_update_request', 'template_updated', false, fn ($c) => $c->templates->update("TpLmQr", self::load('template_update_request'))],
+            'templates.publish' => ['templates.publish', 'POST', '/api/v1/templates/TpLmQr/publish', null, 'template', false, fn ($c) => $c->templates->publish("TpLmQr")],
+            'templates.duplicate' => ['templates.duplicate', 'POST', '/api/v1/templates/TpLmQr/duplicate', null, 'template_duplicated', false, fn ($c) => $c->templates->duplicate("TpLmQr")],
+            'templates.delete' => ['templates.delete', 'DELETE', '/api/v1/templates/TpLmQr', null, 'empty', false, fn ($c) => $c->templates->delete("TpLmQr")],
             'suppressions.list' => ['suppressions.list', 'GET', '/api/v1/teams/KjkAJW/suppressions', null, 'suppression', true, fn ($c) => $c->suppressions->list()],
             'suppressions.create' => ['suppressions.create', 'POST', '/api/v1/teams/KjkAJW/suppressions', 'suppression_create_request', 'suppression', false, fn ($c) => $c->suppressions->create(self::load('suppression_create_request'))],
+            'suppressions.import' => ['suppressions.import', 'POST', '/api/v1/teams/KjkAJW/suppressions/import', 'suppression_import_request', 'suppression_import', false, fn ($c) => $c->suppressions->import(self::load('suppression_import_request'))],
             'suppressions.delete' => ['suppressions.delete', 'DELETE', '/api/v1/suppressions/YtReWq', null, 'empty', false, fn ($c) => $c->suppressions->delete("YtReWq")],
             'firewall.get' => ['firewall.get', 'GET', '/api/v1/teams/KjkAJW/firewall', null, 'firewall', false, fn ($c) => $c->firewall->get()],
             'firewall.update' => ['firewall.update', 'PATCH', '/api/v1/teams/KjkAJW/firewall', 'firewall_update_request', 'firewall', false, fn ($c) => $c->firewall->update(self::load('firewall_update_request'))],

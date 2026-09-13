@@ -28,6 +28,7 @@ import {
   vOptions,
   vPriority,
   vStatus,
+  vTemplate,
   vUniqueArgs,
 } from './shared.js';
 import {
@@ -144,6 +145,7 @@ export const sendEmail = mutation({
     subject: v.string(),
     html: v.optional(v.string()),
     text: v.optional(v.string()),
+    template: v.optional(vTemplate),
     replyTo: v.optional(v.array(v.string())),
     headers: v.optional(vHeaders),
     uniqueArgs: v.optional(vUniqueArgs),
@@ -172,10 +174,14 @@ export const sendEmail = mutation({
     if (args.to.length === 0) {
       throw new Error('At least one recipient is required');
     }
-    if (args.html === undefined && args.text === undefined) {
-      throw new Error('Either html or text must be provided');
+    if (
+      args.template === undefined &&
+      args.html === undefined &&
+      args.text === undefined
+    ) {
+      throw new Error('Either html, text, or template must be provided');
     }
-    if (args.subject.trim() === '') {
+    if (args.template === undefined && args.subject.trim() === '') {
       throw new Error('Subject is required');
     }
 
@@ -208,6 +214,7 @@ export const sendEmail = mutation({
       priority,
       html: htmlContentId,
       text: textContentId,
+      template: args.template,
       status: 'queued',
       bounced: false,
       complained: false,
@@ -259,6 +266,7 @@ const vDeliveryPayload = v.union(
     attachments: v.optional(vAttachments),
     html: v.optional(v.string()),
     text: v.optional(v.string()),
+    template: v.optional(vTemplate),
     options: vOptions,
   }),
 );
@@ -291,6 +299,7 @@ export const getDeliveryPayload = internalQuery({
       attachments: email.attachments,
       html: html ? new TextDecoder().decode(html.content) : undefined,
       text: text ? new TextDecoder().decode(text.content) : undefined,
+      template: email.template,
       options,
     };
   },
@@ -347,6 +356,7 @@ export const deliver = internalAction({
           subject: payload.subject,
           html: payload.html,
           text: payload.text,
+          template: payload.template,
           headers: payload.headers
             ? Object.fromEntries(payload.headers.map((h) => [h.name, h.value]))
             : undefined,

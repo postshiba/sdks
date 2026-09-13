@@ -112,7 +112,9 @@ describe('sendEmail', () => {
   });
 
   it('rejects an email with neither html nor text', async () => {
-    await expect(send({ html: undefined })).rejects.toThrow(/html or text/i);
+    await expect(send({ html: undefined })).rejects.toThrow(
+      /html, text, or template/i,
+    );
   });
 
   it('rejects a blank subject', async () => {
@@ -158,6 +160,20 @@ describe('sendEmail', () => {
 
     const email = await getEmail(emailId);
     expect(email.status).toBe('queued');
+  });
+
+  it('accepts a template without html or text', async () => {
+    const emailId = await send({
+      html: undefined,
+      template: { id: 'welcome', variables: { name: 'Ada' } },
+    });
+    const email = await getEmail(emailId);
+    expect(email.template).toEqual({
+      id: 'welcome',
+      variables: { name: 'Ada' },
+    });
+    expect(email.html).toBeUndefined();
+    expect(email.text).toBeUndefined();
   });
 
   it('enqueues a transactional email on the transactional pool only', async () => {
@@ -329,6 +345,25 @@ describe('deliver', () => {
     expect(body.headers).toEqual({ 'X-Entity': '42' });
     expect(body.tenant).toBe('tenant_a');
     expect('send' in body).toBe(false);
+  });
+
+  it('posts a stored template and omits html', async () => {
+    const templated = await insertTestEmail(t, {
+      status: 'queued',
+      providerMessageId: undefined,
+      template: { id: 'welcome', variables: { name: 'Ada' } },
+    });
+    const calls = stubFetch(() => new Response(okBody, { status: 201 }));
+
+    await t.action(internal.lib.deliver, { emailId: templated._id });
+
+    const body = JSON.parse(calls[0]!.init.body as string);
+    expect(body.template).toEqual({
+      id: 'welcome',
+      variables: { name: 'Ada' },
+    });
+    expect('html' in body).toBe(false);
+    expect('text' in body).toBe(false);
   });
 
   it('posts stored attachments as content_type', async () => {

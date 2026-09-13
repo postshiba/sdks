@@ -23,6 +23,16 @@ class SendingDomains
         return $this->client->request('POST', '/api/v1/teams/'.$this->client->teamId().'/sending_domains', $params);
     }
 
+    public function update(string $id, array $params): mixed
+    {
+        return $this->client->request('PATCH', '/api/v1/sending_domains/'.$id, $params);
+    }
+
+    public function refresh(string $id): mixed
+    {
+        return $this->client->request('POST', '/api/v1/sending_domains/'.$id.'/refresh');
+    }
+
     public function verify(string $id): mixed
     {
         return $this->client->request('POST', '/api/v1/sending_domains/'.$id.'/verify');

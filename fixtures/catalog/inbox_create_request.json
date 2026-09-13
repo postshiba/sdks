@@ -1,6 +1,8 @@
 {
   "inbox": {
     "name": "agent",
-    "webhook_url": "https://hooks.example.com/mail"
+    "webhook_url": "https://hooks.example.com/mail",
+    "host": "inbound.example.com",
+    "forward_to": "you@example.com"
   }
 }

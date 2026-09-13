@@ -1,0 +1,14 @@
+{
+  "email_template": {
+    "name": "Welcome",
+    "alias": "welcome",
+    "from": "hello@mail.example.com",
+    "subject": "Hi {{ name }}",
+    "html": "<p>Hi {{ name }}</p>",
+    "text": "Hi {{ name }}",
+    "css": "p { color: #18181b; }",
+    "sample_data": {
+      "name": "Ada"
+    }
+  }
+}

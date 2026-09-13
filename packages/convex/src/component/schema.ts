@@ -6,6 +6,7 @@ import {
   vOptions,
   vPriority,
   vStatus,
+  vTemplate,
   vUniqueArgs,
 } from './shared.js';
 
@@ -54,6 +55,7 @@ export default defineSchema({
     priority: vPriority,
     html: v.optional(v.id('content')),
     text: v.optional(v.id('content')),
+    template: v.optional(vTemplate),
     status: vStatus,
     errorMessage: v.optional(v.string()),
     errorCode: v.optional(v.string()),

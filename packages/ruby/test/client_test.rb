@@ -16,6 +16,7 @@ class ClientTest < Minitest::Test
   SUPPRESSION = "YtReWq"
   FIREWALL_ENTRY = "BnMkLo"
   WEBHOOK = "CdFgHj"
+  TEMPLATE = "TpLmQr"
 
   def setup
     @client = PostShiba.new(api_key: "test-key", team_id: TEAM, base_url: "https://api.example.test")
@@ -51,6 +52,18 @@ class ClientTest < Minitest::Test
       .to_return(status: 200, body: fixture_json("email_send_response"), headers: {"Content-Type" => "application/json"})
 
     assert_equal fixture("email_send_response"), @client.send_email(fixture("email_send_request"))
+  end
+
+  def test_send_email_published_template
+    stub_request(:post, "https://api.example.test/api/v1/emails")
+      .with { |req|
+        req.headers["Authorization"] == "Bearer test-key" &&
+          req.headers["X-Capsule-Cluster-Id"].nil? &&
+          JSON.parse(req.body) == fixture("email_send_template_request")
+      }
+      .to_return(status: 200, body: fixture_json("email_send_template_response"), headers: {"Content-Type" => "application/json"})
+
+    assert_equal fixture("email_send_template_response"), @client.send_email(fixture("email_send_template_request"))
   end
 
   def test_send_email_with_cluster_id
@@ -199,9 +212,20 @@ class ClientTest < Minitest::Test
       {method: :suspend_cluster, args: [CLUSTER], http: :post, path: "/api/v1/clusters/#{CLUSTER}/suspend", response: "cluster_suspended"},
       {method: :resume_cluster, args: [CLUSTER], http: :post, path: "/api/v1/clusters/#{CLUSTER}/resume", response: "cluster"},
       {method: :delete_cluster, args: [CLUSTER], http: :delete, path: "/api/v1/clusters/#{CLUSTER}", response: "cluster_deprovisioned"},
+      {method: :boost_cluster, args: [CLUSTER, fixture("cluster_boost_request")], http: :post, path: "/api/v1/clusters/#{CLUSTER}/boost", request: "cluster_boost_request", response: "cluster_boosted"},
+      {method: :extend_cluster_boost, args: [CLUSTER, fixture("cluster_extend_boost_request")], http: :post, path: "/api/v1/clusters/#{CLUSTER}/extend_boost", request: "cluster_extend_boost_request", response: "cluster_boosted"},
+      {method: :cancel_cluster_boost, args: [CLUSTER], http: :post, path: "/api/v1/clusters/#{CLUSTER}/cancel_boost", response: "cluster"},
+      {method: :list_network, args: [], http: :get, path: "/api/v1/teams/#{TEAM}/network", response: "network", list: true},
+      {method: :create_network, args: [fixture("network_create_request")], http: :post, path: "/api/v1/teams/#{TEAM}/network", request: "network_create_request", response: "network_assigned"},
+      {method: :assign_network, args: [fixture("network_create_request")], http: :post, path: "/api/v1/teams/#{TEAM}/network/assign", request: "network_create_request", response: "network_dedicated"},
+      {method: :unassign_network, args: [fixture("network_create_request")], http: :post, path: "/api/v1/teams/#{TEAM}/network/unassign", request: "network_create_request", response: "network"},
+      {method: :switch_network, args: [fixture("network_create_request")], http: :post, path: "/api/v1/teams/#{TEAM}/network/switch", request: "network_create_request", response: "network_assigned"},
+      {method: :release_network, args: [fixture("network_release_request")], http: :post, path: "/api/v1/teams/#{TEAM}/network/release", request: "network_release_request", response: "network_released"},
       {method: :list_sending_domains, args: [], http: :get, path: "/api/v1/teams/#{TEAM}/sending_domains", response: "sending_domain", list: true},
       {method: :get_sending_domain, args: [SENDING_DOMAIN], http: :get, path: "/api/v1/sending_domains/#{SENDING_DOMAIN}", response: "sending_domain"},
       {method: :create_sending_domain, args: [fixture("sending_domain_create_request")], http: :post, path: "/api/v1/teams/#{TEAM}/sending_domains", request: "sending_domain_create_request", response: "sending_domain"},
+      {method: :update_sending_domain, args: [SENDING_DOMAIN, fixture("sending_domain_update_request")], http: :patch, path: "/api/v1/sending_domains/#{SENDING_DOMAIN}", request: "sending_domain_update_request", response: "sending_domain_updated"},
+      {method: :refresh_sending_domain, args: [SENDING_DOMAIN], http: :post, path: "/api/v1/sending_domains/#{SENDING_DOMAIN}/refresh", response: "sending_domain"},
       {method: :verify_sending_domain, args: [SENDING_DOMAIN], http: :post, path: "/api/v1/sending_domains/#{SENDING_DOMAIN}/verify", response: "sending_domain"},
       {method: :suspend_sending_domain, args: [SENDING_DOMAIN], http: :post, path: "/api/v1/sending_domains/#{SENDING_DOMAIN}/suspend", response: "sending_domain_suspended"},
       {method: :resume_sending_domain, args: [SENDING_DOMAIN], http: :post, path: "/api/v1/sending_domains/#{SENDING_DOMAIN}/resume", response: "sending_domain"},
@@ -219,6 +243,7 @@ class ClientTest < Minitest::Test
       {method: :list_messages, args: [INBOX], http: :get, path: "/api/v1/inboxes/#{INBOX}/inbound_messages", response: "message", list: true},
       {method: :get_message, args: [INBOX, MESSAGE], http: :get, path: "/api/v1/inboxes/#{INBOX}/inbound_messages/#{MESSAGE}", response: "message_show"},
       {method: :download_attachment, args: [INBOX, MESSAGE, 1], http: :get, path: "/api/v1/inboxes/#{INBOX}/inbound_messages/#{MESSAGE}/attachments/1", binary: true},
+      {method: :list_team_events, args: [], http: :get, path: "/api/v1/teams/#{TEAM}/message_events", response: "event", list: true},
       {method: :list_events, args: [CLUSTER], http: :get, path: "/api/v1/teams/#{TEAM}/clusters/#{CLUSTER}/message_events", response: "event", list: true},
       {method: :get_event, args: [EVENT], http: :get, path: "/api/v1/message_events/#{EVENT}", response: "event"},
       {method: :create_smtp_credential, args: [CLUSTER, fixture("smtp_credential_create_request")], http: :post, path: "/api/v1/teams/#{TEAM}/clusters/#{CLUSTER}/smtp_credentials", request: "smtp_credential_create_request", response: "smtp_credential_create"},
@@ -228,8 +253,16 @@ class ClientTest < Minitest::Test
       {method: :create_webhook, args: [fixture("webhook_create_request")], http: :post, path: "/api/v1/teams/#{TEAM}/webhook_endpoints", request: "webhook_create_request", response: "webhook_show"},
       {method: :update_webhook, args: [WEBHOOK, fixture("webhook_update_request")], http: :patch, path: "/api/v1/webhook_endpoints/#{WEBHOOK}", request: "webhook_update_request", response: "webhook"},
       {method: :delete_webhook, args: [WEBHOOK], http: :delete, path: "/api/v1/webhook_endpoints/#{WEBHOOK}", response: "empty"},
+      {method: :list_templates, args: [], http: :get, path: "/api/v1/teams/#{TEAM}/templates", response: "template", list: true},
+      {method: :get_template, args: [TEMPLATE], http: :get, path: "/api/v1/templates/#{TEMPLATE}", response: "template"},
+      {method: :create_template, args: [fixture("template_create_request")], http: :post, path: "/api/v1/teams/#{TEAM}/templates", request: "template_create_request", response: "template"},
+      {method: :update_template, args: [TEMPLATE, fixture("template_update_request")], http: :patch, path: "/api/v1/templates/#{TEMPLATE}", request: "template_update_request", response: "template_updated"},
+      {method: :publish_template, args: [TEMPLATE], http: :post, path: "/api/v1/templates/#{TEMPLATE}/publish", response: "template"},
+      {method: :duplicate_template, args: [TEMPLATE], http: :post, path: "/api/v1/templates/#{TEMPLATE}/duplicate", response: "template_duplicated"},
+      {method: :delete_template, args: [TEMPLATE], http: :delete, path: "/api/v1/templates/#{TEMPLATE}", response: "empty"},
       {method: :list_suppressions, args: [], http: :get, path: "/api/v1/teams/#{TEAM}/suppressions", response: "suppression", list: true},
       {method: :create_suppression, args: [fixture("suppression_create_request")], http: :post, path: "/api/v1/teams/#{TEAM}/suppressions", request: "suppression_create_request", response: "suppression"},
+      {method: :import_suppressions, args: [fixture("suppression_import_request")], http: :post, path: "/api/v1/teams/#{TEAM}/suppressions/import", request: "suppression_import_request", response: "suppression_import"},
       {method: :delete_suppression, args: [SUPPRESSION], http: :delete, path: "/api/v1/suppressions/#{SUPPRESSION}", response: "empty"},
       {method: :get_firewall, args: [], http: :get, path: "/api/v1/teams/#{TEAM}/firewall", response: "firewall"},
       {method: :update_firewall, args: [fixture("firewall_update_request")], http: :patch, path: "/api/v1/teams/#{TEAM}/firewall", request: "firewall_update_request", response: "firewall"},

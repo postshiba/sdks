@@ -10,7 +10,7 @@ public class OperationsTest
     public async Task Every_contract_operation()
     {
         var ops = All().ToList();
-        Assert.Equal(46, ops.Count);
+        Assert.Equal(66, ops.Count);
 
         foreach (var op in ops)
         {
@@ -58,9 +58,20 @@ public class OperationsTest
         yield return JsonOp("clusters.suspend", HttpMethod.Post, "/api/v1/clusters/NmQpXr/suspend", c => c.Clusters.SuspendAsync("NmQpXr"), "cluster_suspended");
         yield return JsonOp("clusters.resume", HttpMethod.Post, "/api/v1/clusters/NmQpXr/resume", c => c.Clusters.ResumeAsync("NmQpXr"), "cluster");
         yield return JsonOp("clusters.delete", HttpMethod.Delete, "/api/v1/clusters/NmQpXr", c => c.Clusters.DeleteAsync("NmQpXr"), "cluster_deprovisioned");
+        yield return JsonOp("clusters.boost", HttpMethod.Post, "/api/v1/clusters/NmQpXr/boost", c => c.Clusters.BoostAsync("NmQpXr", Catalog.Json("cluster_boost_request")), "cluster_boosted", "cluster_boost_request");
+        yield return JsonOp("clusters.extendBoost", HttpMethod.Post, "/api/v1/clusters/NmQpXr/extend_boost", c => c.Clusters.ExtendBoostAsync("NmQpXr", Catalog.Json("cluster_extend_boost_request")), "cluster_boosted", "cluster_extend_boost_request");
+        yield return JsonOp("clusters.cancelBoost", HttpMethod.Post, "/api/v1/clusters/NmQpXr/cancel_boost", c => c.Clusters.CancelBoostAsync("NmQpXr"), "cluster");
+        yield return JsonOp("network.list", HttpMethod.Get, "/api/v1/teams/KjkAJW/network", c => c.Network.ListAsync(), Catalog.Array("network"));
+        yield return JsonOp("network.create", HttpMethod.Post, "/api/v1/teams/KjkAJW/network", c => c.Network.CreateAsync(Catalog.Json("network_create_request")), "network_assigned", "network_create_request");
+        yield return JsonOp("network.assign", HttpMethod.Post, "/api/v1/teams/KjkAJW/network/assign", c => c.Network.AssignAsync(Catalog.Json("network_create_request")), "network_dedicated", "network_create_request");
+        yield return JsonOp("network.unassign", HttpMethod.Post, "/api/v1/teams/KjkAJW/network/unassign", c => c.Network.UnassignAsync(Catalog.Json("network_create_request")), "network", "network_create_request");
+        yield return JsonOp("network.switch", HttpMethod.Post, "/api/v1/teams/KjkAJW/network/switch", c => c.Network.SwitchAsync(Catalog.Json("network_create_request")), "network_assigned", "network_create_request");
+        yield return JsonOp("network.release", HttpMethod.Post, "/api/v1/teams/KjkAJW/network/release", c => c.Network.ReleaseAsync(Catalog.Json("network_release_request")), "network_released", "network_release_request");
         yield return JsonOp("sendingDomains.list", HttpMethod.Get, "/api/v1/teams/KjkAJW/sending_domains", c => c.SendingDomains.ListAsync(), Catalog.Array("sending_domain"));
         yield return JsonOp("sendingDomains.get", HttpMethod.Get, "/api/v1/sending_domains/HsVtYk", c => c.SendingDomains.GetAsync("HsVtYk"), "sending_domain");
         yield return JsonOp("sendingDomains.create", HttpMethod.Post, "/api/v1/teams/KjkAJW/sending_domains", c => c.SendingDomains.CreateAsync(Catalog.Json("sending_domain_create_request")), "sending_domain", "sending_domain_create_request");
+        yield return JsonOp("sendingDomains.update", HttpMethod.Patch, "/api/v1/sending_domains/HsVtYk", c => c.SendingDomains.UpdateAsync("HsVtYk", Catalog.Json("sending_domain_update_request")), "sending_domain_updated", "sending_domain_update_request");
+        yield return JsonOp("sendingDomains.refresh", HttpMethod.Post, "/api/v1/sending_domains/HsVtYk/refresh", c => c.SendingDomains.RefreshAsync("HsVtYk"), "sending_domain");
         yield return JsonOp("sendingDomains.verify", HttpMethod.Post, "/api/v1/sending_domains/HsVtYk/verify", c => c.SendingDomains.VerifyAsync("HsVtYk"), "sending_domain");
         yield return JsonOp("sendingDomains.suspend", HttpMethod.Post, "/api/v1/sending_domains/HsVtYk/suspend", c => c.SendingDomains.SuspendAsync("HsVtYk"), "sending_domain_suspended");
         yield return JsonOp("sendingDomains.resume", HttpMethod.Post, "/api/v1/sending_domains/HsVtYk/resume", c => c.SendingDomains.ResumeAsync("HsVtYk"), "sending_domain");
@@ -86,6 +97,7 @@ public class OperationsTest
             null,
             true,
             c => c.Messages.DownloadAttachmentAsync("PqRzMn", "GxTyVu", 1));
+        yield return JsonOp("events.listTeam", HttpMethod.Get, "/api/v1/teams/KjkAJW/message_events", c => c.Events.ListTeamAsync(), Catalog.Array("event"));
         yield return JsonOp("events.list", HttpMethod.Get, "/api/v1/teams/KjkAJW/clusters/NmQpXr/message_events", c => c.Events.ListAsync("NmQpXr"), Catalog.Array("event"));
         yield return JsonOp("events.get", HttpMethod.Get, "/api/v1/message_events/JkLmNp", c => c.Events.GetAsync("JkLmNp"), "event");
         yield return JsonOp("smtpCredentials.create", HttpMethod.Post, "/api/v1/teams/KjkAJW/clusters/NmQpXr/smtp_credentials", c => c.SmtpCredentials.CreateAsync("NmQpXr", Catalog.Json("smtp_credential_create_request")), "smtp_credential_create", "smtp_credential_create_request");
@@ -95,8 +107,16 @@ public class OperationsTest
         yield return JsonOp("webhooks.create", HttpMethod.Post, "/api/v1/teams/KjkAJW/webhook_endpoints", c => c.Webhooks.CreateAsync(Catalog.Json("webhook_create_request")), "webhook_show", "webhook_create_request");
         yield return JsonOp("webhooks.update", HttpMethod.Patch, "/api/v1/webhook_endpoints/CdFgHj", c => c.Webhooks.UpdateAsync("CdFgHj", Catalog.Json("webhook_update_request")), "webhook", "webhook_update_request");
         yield return JsonOp("webhooks.delete", HttpMethod.Delete, "/api/v1/webhook_endpoints/CdFgHj", c => c.Webhooks.DeleteAsync("CdFgHj"), "empty");
+        yield return JsonOp("templates.list", HttpMethod.Get, "/api/v1/teams/KjkAJW/templates", c => c.Templates.ListAsync(), Catalog.Array("template"));
+        yield return JsonOp("templates.get", HttpMethod.Get, "/api/v1/templates/TpLmQr", c => c.Templates.GetAsync("TpLmQr"), "template");
+        yield return JsonOp("templates.create", HttpMethod.Post, "/api/v1/teams/KjkAJW/templates", c => c.Templates.CreateAsync(Catalog.Json("template_create_request")), "template", "template_create_request");
+        yield return JsonOp("templates.update", HttpMethod.Patch, "/api/v1/templates/TpLmQr", c => c.Templates.UpdateAsync("TpLmQr", Catalog.Json("template_update_request")), "template_updated", "template_update_request");
+        yield return JsonOp("templates.publish", HttpMethod.Post, "/api/v1/templates/TpLmQr/publish", c => c.Templates.PublishAsync("TpLmQr"), "template");
+        yield return JsonOp("templates.duplicate", HttpMethod.Post, "/api/v1/templates/TpLmQr/duplicate", c => c.Templates.DuplicateAsync("TpLmQr"), "template_duplicated");
+        yield return JsonOp("templates.delete", HttpMethod.Delete, "/api/v1/templates/TpLmQr", c => c.Templates.DeleteAsync("TpLmQr"), "empty");
         yield return JsonOp("suppressions.list", HttpMethod.Get, "/api/v1/teams/KjkAJW/suppressions", c => c.Suppressions.ListAsync(), Catalog.Array("suppression"));
         yield return JsonOp("suppressions.create", HttpMethod.Post, "/api/v1/teams/KjkAJW/suppressions", c => c.Suppressions.CreateAsync(Catalog.Json("suppression_create_request")), "suppression", "suppression_create_request");
+        yield return JsonOp("suppressions.import", HttpMethod.Post, "/api/v1/teams/KjkAJW/suppressions/import", c => c.Suppressions.ImportAsync(Catalog.Json("suppression_import_request")), "suppression_import", "suppression_import_request");
         yield return JsonOp("suppressions.delete", HttpMethod.Delete, "/api/v1/suppressions/YtReWq", c => c.Suppressions.DeleteAsync("YtReWq"), "empty");
         yield return JsonOp("firewall.get", HttpMethod.Get, "/api/v1/teams/KjkAJW/firewall", c => c.Firewall.GetAsync(), "firewall");
         yield return JsonOp("firewall.update", HttpMethod.Patch, "/api/v1/teams/KjkAJW/firewall", c => c.Firewall.UpdateAsync(Catalog.Json("firewall_update_request")), "firewall", "firewall_update_request");

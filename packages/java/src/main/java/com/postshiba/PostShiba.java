@@ -33,6 +33,7 @@ public final class PostShiba {
     public final Users users = new Users();
     public final Emails emails = new Emails();
     public final Clusters clusters = new Clusters();
+    public final Network network = new Network();
     public final SendingDomains sendingDomains = new SendingDomains();
     public final Tenants tenants = new Tenants();
     public final Inboxes inboxes = new Inboxes();
@@ -40,6 +41,7 @@ public final class PostShiba {
     public final Events events = new Events();
     public final SmtpCredentials smtpCredentials = new SmtpCredentials();
     public final Webhooks webhooks = new Webhooks();
+    public final Templates templates = new Templates();
     public final Suppressions suppressions = new Suppressions();
     public final Firewall firewall = new Firewall();
 
@@ -169,6 +171,44 @@ public final class PostShiba {
         public JsonNode delete(String id) {
             return request("DELETE", "/api/v1/clusters/" + id(id), null, null);
         }
+
+        public JsonNode boost(String id, Object body) {
+            return request("POST", "/api/v1/clusters/" + id(id) + "/boost", body, null);
+        }
+
+        public JsonNode extendBoost(String id, Object body) {
+            return request("POST", "/api/v1/clusters/" + id(id) + "/extend_boost", body, null);
+        }
+
+        public JsonNode cancelBoost(String id) {
+            return request("POST", "/api/v1/clusters/" + id(id) + "/cancel_boost", null, null);
+        }
+    }
+
+    public final class Network {
+        public JsonNode list() {
+            return request("GET", teamsPath("/network"), null, null);
+        }
+
+        public JsonNode create(Object body) {
+            return request("POST", teamsPath("/network"), body, null);
+        }
+
+        public JsonNode assign(Object body) {
+            return request("POST", teamsPath("/network/assign"), body, null);
+        }
+
+        public JsonNode unassign(Object body) {
+            return request("POST", teamsPath("/network/unassign"), body, null);
+        }
+
+        public JsonNode switch_(Object body) {
+            return request("POST", teamsPath("/network/switch"), body, null);
+        }
+
+        public JsonNode release(Object body) {
+            return request("POST", teamsPath("/network/release"), body, null);
+        }
     }
 
     public final class SendingDomains {
@@ -182,6 +222,14 @@ public final class PostShiba {
 
         public JsonNode create(Object body) {
             return request("POST", teamsPath("/sending_domains"), body, null);
+        }
+
+        public JsonNode update(String id, Object body) {
+            return request("PATCH", "/api/v1/sending_domains/" + id(id), body, null);
+        }
+
+        public JsonNode refresh(String id) {
+            return request("POST", "/api/v1/sending_domains/" + id(id) + "/refresh", null, null);
         }
 
         public JsonNode verify(String id) {
@@ -265,6 +313,10 @@ public final class PostShiba {
     }
 
     public final class Events {
+        public JsonNode listTeam() {
+            return request("GET", teamsPath("/message_events"), null, null);
+        }
+
         public JsonNode list(String clusterId) {
             return request("GET", teamsPath("/clusters/" + id(clusterId) + "/message_events"), null, null);
         }
@@ -321,6 +373,36 @@ public final class PostShiba {
         }
     }
 
+    public final class Templates {
+        public JsonNode list() {
+            return request("GET", teamsPath("/templates"), null, null);
+        }
+
+        public JsonNode get(String id) {
+            return request("GET", "/api/v1/templates/" + id(id), null, null);
+        }
+
+        public JsonNode create(Object body) {
+            return request("POST", teamsPath("/templates"), body, null);
+        }
+
+        public JsonNode update(String id, Object body) {
+            return request("PATCH", "/api/v1/templates/" + id(id), body, null);
+        }
+
+        public JsonNode publish(String id) {
+            return request("POST", "/api/v1/templates/" + id(id) + "/publish", null, null);
+        }
+
+        public JsonNode duplicate(String id) {
+            return request("POST", "/api/v1/templates/" + id(id) + "/duplicate", null, null);
+        }
+
+        public JsonNode delete(String id) {
+            return request("DELETE", "/api/v1/templates/" + id(id), null, null);
+        }
+    }
+
     public final class Suppressions {
         public JsonNode list() {
             return request("GET", teamsPath("/suppressions"), null, null);
@@ -328,6 +410,10 @@ public final class PostShiba {
 
         public JsonNode create(Object body) {
             return request("POST", teamsPath("/suppressions"), body, null);
+        }
+
+        public JsonNode import_(Object body) {
+            return request("POST", teamsPath("/suppressions/import"), body, null);
         }
 
         public JsonNode delete(String id) {

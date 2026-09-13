@@ -8,6 +8,12 @@
   "html": "<p>Hi</p>",
   "headers": {},
   "envelope": {},
+  "authentication": {
+    "spf": {"result": "pass", "domain": "example.com"},
+    "dkim": [{"result": "pass", "domain": "example.com", "selector": "google"}],
+    "dmarc": {"result": "pass", "policy": "none", "aligned": true},
+    "arc": {"result": "none"}
+  },
   "attachments": [
     {
       "filename": "photo.png",

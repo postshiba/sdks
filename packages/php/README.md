@@ -55,6 +55,15 @@ Cluster send with an idempotency key and sandbox:
 $client->emails->sendOnCluster("NmQpXr", $params, 'idem-1', true);
 ```
 
+Send a published template instead of html and text.
+
+```php
+$client->emails->send([
+    'to' => ['you@example.com'],
+    'template' => ['id' => 'welcome', 'variables' => ['name' => 'Ada']],
+]);
+```
+
 ## Mail adapter
 
 The HTTP client loads without Laravel or Symfony. Adapters live in optional files and call `emails.send` without a cluster id. Call `$client->emails->send($params, 'NmQpXr')` yourself to pin a cluster.
@@ -140,12 +149,26 @@ $client->clusters->update("NmQpXr", ['cluster' => ['plan' => 'small']]);
 $client->clusters->suspend("NmQpXr");
 $client->clusters->resume("NmQpXr");
 $client->clusters->delete("NmQpXr");
+$client->clusters->boost("NmQpXr", ['sku' => 'small_to_large']);
+$client->clusters->extendBoost("NmQpXr", ['idempotency_key' => 'extend-1']);
+$client->clusters->cancelBoost("NmQpXr");
+```
+
+```php
+$client->network->list();
+$client->network->create(['ip_address_id' => 'IpQwEr', 'cluster_id' => 'NmQpXr']);
+$client->network->assign(['ip_address_id' => 'IpQwEr', 'cluster_id' => 'NmQpXr']);
+$client->network->unassign(['ip_address_id' => 'IpQwEr', 'cluster_id' => 'NmQpXr']);
+$client->network->switch(['ip_address_id' => 'IpQwEr', 'cluster_id' => 'NmQpXr']);
+$client->network->release(['ip_address_id' => 'IpQwEr']);
 ```
 
 ```php
 $client->sendingDomains->list();
 $client->sendingDomains->get("HsVtYk");
 $client->sendingDomains->create(['sending_domain' => ['name' => 'mail.example.com', 'tenant_id' => 12]]);
+$client->sendingDomains->update("HsVtYk", ['sending_domain' => ['dkim_selector' => 's1', 'dkim_manual' => true]]);
+$client->sendingDomains->refresh("HsVtYk");
 $client->sendingDomains->verify("HsVtYk");
 $client->sendingDomains->suspend("HsVtYk");
 $client->sendingDomains->resume("HsVtYk");
@@ -163,7 +186,12 @@ $client->tenants->delete("WbLcFd");
 ```php
 $client->inboxes->list();
 $client->inboxes->get("PqRzMn");
-$client->inboxes->create(['inbox' => ['name' => 'agent', 'webhook_url' => 'https://hooks.example.com/mail']]);
+$client->inboxes->create(['inbox' => [
+    'name' => 'agent',
+    'webhook_url' => 'https://hooks.example.com/mail',
+    'host' => 'inbound.example.com',
+    'forward_to' => 'you@example.com',
+]]);
 $client->inboxes->verify("PqRzMn");
 $client->inboxes->delete("PqRzMn");
 ```
@@ -175,6 +203,7 @@ $client->messages->downloadAttachment('PqRzMn', 'GxTyVu', 1);
 ```
 
 ```php
+$client->events->listTeam();
 $client->events->list("NmQpXr");
 $client->events->get("JkLmNp");
 ```
@@ -200,8 +229,24 @@ $client->webhooks->delete("CdFgHj");
 ```
 
 ```php
+$client->templates->list();
+$client->templates->get("welcome");
+$client->templates->create(['email_template' => [
+    'name' => 'Welcome',
+    'alias' => 'welcome',
+    'subject' => 'Hi {{ name }}',
+    'html' => '<p>Hi {{ name }}</p>',
+]]);
+$client->templates->update("TpLmQr", ['email_template' => ['subject' => 'Welcome, {{ name }}']]);
+$client->templates->publish("TpLmQr");
+$client->templates->duplicate("TpLmQr");
+$client->templates->delete("TpLmQr");
+```
+
+```php
 $client->suppressions->list();
 $client->suppressions->create(['suppression' => ['email' => 'blocked@example.com', 'tenant_id' => 12]]);
+$client->suppressions->import(['emails' => ['blocked@example.com', 'old@example.com'], 'tenant_id' => 'WbLcFd']);
 $client->suppressions->delete("YtReWq");
 ```
 

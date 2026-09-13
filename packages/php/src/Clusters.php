@@ -42,4 +42,19 @@ class Clusters
     {
         return $this->client->request('DELETE', '/api/v1/clusters/'.$id);
     }
+
+    public function boost(string $id, array $params): mixed
+    {
+        return $this->client->request('POST', '/api/v1/clusters/'.$id.'/boost', $params);
+    }
+
+    public function extendBoost(string $id, array $params): mixed
+    {
+        return $this->client->request('POST', '/api/v1/clusters/'.$id.'/extend_boost', $params);
+    }
+
+    public function cancelBoost(string $id): mixed
+    {
+        return $this->client->request('POST', '/api/v1/clusters/'.$id.'/cancel_boost');
+    }
 }

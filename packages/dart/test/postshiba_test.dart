@@ -79,6 +79,67 @@ final operations = <Call>[
   Call('clusters.delete', 'DELETE', '/api/v1/clusters/NmQpXr', (c) => c.clusters.delete("NmQpXr"),
       response: 'cluster_deprovisioned'),
   Call(
+    'clusters.boost',
+    'POST',
+    '/api/v1/clusters/NmQpXr/boost',
+    (c) => c.clusters.boost("NmQpXr", fixtureMap('cluster_boost_request')),
+    body: 'cluster_boost_request',
+    response: 'cluster_boosted',
+  ),
+  Call(
+    'clusters.extendBoost',
+    'POST',
+    '/api/v1/clusters/NmQpXr/extend_boost',
+    (c) => c.clusters.extendBoost("NmQpXr", fixtureMap('cluster_extend_boost_request')),
+    body: 'cluster_extend_boost_request',
+    response: 'cluster_boosted',
+  ),
+  Call('clusters.cancelBoost', 'POST', '/api/v1/clusters/NmQpXr/cancel_boost',
+      (c) => c.clusters.cancelBoost("NmQpXr"),
+      response: 'cluster'),
+  Call('network.list', 'GET', '/api/v1/teams/KjkAJW/network', (c) => c.network.list(),
+      response: 'network', list: true),
+  Call(
+    'network.create',
+    'POST',
+    '/api/v1/teams/KjkAJW/network',
+    (c) => c.network.create(fixtureMap('network_create_request')),
+    body: 'network_create_request',
+    response: 'network_assigned',
+  ),
+  Call(
+    'network.assign',
+    'POST',
+    '/api/v1/teams/KjkAJW/network/assign',
+    (c) => c.network.assign(fixtureMap('network_create_request')),
+    body: 'network_create_request',
+    response: 'network_dedicated',
+  ),
+  Call(
+    'network.unassign',
+    'POST',
+    '/api/v1/teams/KjkAJW/network/unassign',
+    (c) => c.network.unassign(fixtureMap('network_create_request')),
+    body: 'network_create_request',
+    response: 'network',
+  ),
+  Call(
+    'network.switch',
+    'POST',
+    '/api/v1/teams/KjkAJW/network/switch',
+    (c) => c.network.switchTo(fixtureMap('network_create_request')),
+    body: 'network_create_request',
+    response: 'network_assigned',
+  ),
+  Call(
+    'network.release',
+    'POST',
+    '/api/v1/teams/KjkAJW/network/release',
+    (c) => c.network.release(fixtureMap('network_release_request')),
+    body: 'network_release_request',
+    response: 'network_released',
+  ),
+  Call(
     'sendingDomains.list',
     'GET',
     '/api/v1/teams/KjkAJW/sending_domains',
@@ -97,6 +158,17 @@ final operations = <Call>[
     body: 'sending_domain_create_request',
     response: 'sending_domain',
   ),
+  Call(
+    'sendingDomains.update',
+    'PATCH',
+    '/api/v1/sending_domains/HsVtYk',
+    (c) => c.sendingDomains.update("HsVtYk", fixtureMap('sending_domain_update_request')),
+    body: 'sending_domain_update_request',
+    response: 'sending_domain_updated',
+  ),
+  Call('sendingDomains.refresh', 'POST', '/api/v1/sending_domains/HsVtYk/refresh',
+      (c) => c.sendingDomains.refresh("HsVtYk"),
+      response: 'sending_domain'),
   Call('sendingDomains.verify', 'POST', '/api/v1/sending_domains/HsVtYk/verify',
       (c) => c.sendingDomains.verify("HsVtYk"),
       response: 'sending_domain'),
@@ -150,6 +222,9 @@ final operations = <Call>[
   Call('messages.get', 'GET', '/api/v1/inboxes/PqRzMn/inbound_messages/GxTyVu',
       (c) => c.messages.get("PqRzMn", "GxTyVu"),
       response: 'message_show'),
+  Call('events.listTeam', 'GET', '/api/v1/teams/KjkAJW/message_events',
+      (c) => c.events.listTeam(),
+      response: 'event', list: true),
   Call(
     'events.list',
     'GET',
@@ -205,6 +280,35 @@ final operations = <Call>[
   Call('webhooks.delete', 'DELETE', '/api/v1/webhook_endpoints/CdFgHj',
       (c) => c.webhooks.delete("CdFgHj"),
       response: 'empty'),
+  Call('templates.list', 'GET', '/api/v1/teams/KjkAJW/templates', (c) => c.templates.list(),
+      response: 'template', list: true),
+  Call('templates.get', 'GET', '/api/v1/templates/TpLmQr', (c) => c.templates.get("TpLmQr"),
+      response: 'template'),
+  Call(
+    'templates.create',
+    'POST',
+    '/api/v1/teams/KjkAJW/templates',
+    (c) => c.templates.create(fixtureMap('template_create_request')),
+    body: 'template_create_request',
+    response: 'template',
+  ),
+  Call(
+    'templates.update',
+    'PATCH',
+    '/api/v1/templates/TpLmQr',
+    (c) => c.templates.update("TpLmQr", fixtureMap('template_update_request')),
+    body: 'template_update_request',
+    response: 'template_updated',
+  ),
+  Call('templates.publish', 'POST', '/api/v1/templates/TpLmQr/publish',
+      (c) => c.templates.publish("TpLmQr"),
+      response: 'template'),
+  Call('templates.duplicate', 'POST', '/api/v1/templates/TpLmQr/duplicate',
+      (c) => c.templates.duplicate("TpLmQr"),
+      response: 'template_duplicated'),
+  Call('templates.delete', 'DELETE', '/api/v1/templates/TpLmQr',
+      (c) => c.templates.delete("TpLmQr"),
+      response: 'empty'),
   Call(
     'suppressions.list',
     'GET',
@@ -220,6 +324,14 @@ final operations = <Call>[
     (c) => c.suppressions.create(fixtureMap('suppression_create_request')),
     body: 'suppression_create_request',
     response: 'suppression',
+  ),
+  Call(
+    'suppressions.import',
+    'POST',
+    '/api/v1/teams/KjkAJW/suppressions/import',
+    (c) => c.suppressions.import(fixtureMap('suppression_import_request')),
+    body: 'suppression_import_request',
+    response: 'suppression_import',
   ),
   Call('suppressions.delete', 'DELETE', '/api/v1/suppressions/YtReWq',
       (c) => c.suppressions.delete("YtReWq"),
@@ -291,6 +403,28 @@ void main() {
     expect(seen!.headers.containsKey('x-capsule-cluster-id'), isFalse);
   });
 
+  test('emails.send posts a published template', () async {
+    http.Request? seen;
+    final httpClient = MockClient((request) async {
+      seen = request;
+      return http.Response(
+        jsonEncode(fixture('email_send_template_response')),
+        200,
+        request: request,
+      );
+    });
+
+    final result = await clientFor(httpClient).emails.send(
+      fixtureMap('email_send_template_request'),
+    );
+
+    expect(result, fixture('email_send_template_response'));
+    expect(seen!.method, 'POST');
+    expect(seen!.url.path, '/api/v1/emails');
+    expect(jsonDecode(seen!.body), fixture('email_send_template_request'));
+    expect(seen!.headers.containsKey('x-capsule-cluster-id'), isFalse);
+  });
+
   test('emails.send pins cluster', () async {
     http.Request? seen;
     final httpClient = MockClient((request) async {
@@ -310,7 +444,7 @@ void main() {
     expect(result, fixture('email_send_response'));
     expect(seen!.method, 'POST');
     expect(seen!.url.path, '/api/v1/emails');
-    expect(seen!.headers['x-capsule-cluster-id'], '4');
+    expect(seen!.headers['x-capsule-cluster-id'], 'NmQpXr');
   });
 
   test('cluster send with Idempotency-Key and sandbox', () async {
@@ -325,7 +459,7 @@ void main() {
     });
 
     final result = await clientFor(httpClient).emails.sendOnCluster(
-      4,
+      "NmQpXr",
       fixtureMap('email_send_request'),
       idempotencyKey: 'idem-1',
       sandbox: true,
@@ -444,7 +578,7 @@ void main() {
       );
     });
     final created = await clientFor(createClient).smtpCredentials.create(
-      4,
+      "NmQpXr",
       fixtureMap('smtp_credential_create_request'),
     );
     expect(created['password'], 'once-only-password');
@@ -501,7 +635,7 @@ void main() {
       );
     });
     final updated = await clientFor(updateClient).webhooks.update(
-      2,
+      "CdFgHj",
       fixtureMap('webhook_update_request'),
     );
     expect(updated, fixture('webhook'));

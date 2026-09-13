@@ -339,6 +339,33 @@ describe('sendEmail', () => {
     ]);
     expect('send' in body).toBe(false);
   });
+
+  it('posts template and omits html', async () => {
+    const { calls, impl } = captureFetch(okResponse());
+
+    await sendEmail(
+      config,
+      {
+        from: 'hello@mail.example.com',
+        to: ['you@example.com'],
+        template: {
+          id: 'welcome',
+          variables: { name: 'Ada', body: 'Your account is ready.' },
+        },
+        uniqueArgs: { campaign_id: 'cmp_123', site: 'docs' },
+        html: '<p>ignored</p>',
+      },
+      impl,
+    );
+
+    const body = JSON.parse(calls[0]!.init.body as string);
+    expect(body.template).toEqual({
+      id: 'welcome',
+      variables: { name: 'Ada', body: 'Your account is ready.' },
+    });
+    expect('html' in body).toBe(false);
+    expect('text' in body).toBe(false);
+  });
 });
 
 const SECRET = 'whsec_topsecret';

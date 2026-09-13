@@ -1,0 +1,11 @@
+{
+  "id": "IpQwEr",
+  "address": "198.51.100.x",
+  "status": "active",
+  "kind": "dedicated",
+  "classification": "transactional",
+  "provider": "aws",
+  "owned": false,
+  "available": true,
+  "cluster_ids": []
+}

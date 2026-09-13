@@ -1,0 +1,19 @@
+{
+  "id": "TpLmQr",
+  "name": "Welcome copy",
+  "alias": "welcome-copy",
+  "from": "hello@mail.example.com",
+  "reply_to": null,
+  "subject": "Hi {{ name }}",
+  "html": "<p>Hi {{ name }}</p>",
+  "text": "Hi {{ name }}",
+  "css": "p { color: #18181b; }",
+  "sample_data": {
+    "name": "Ada"
+  },
+  "published": false,
+  "published_at": null,
+  "has_unpublished_changes": false,
+  "created_at": "2026-09-11T12:00:00.000Z",
+  "updated_at": "2026-09-11T12:00:00.000Z"
+}

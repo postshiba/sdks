@@ -97,6 +97,7 @@ Emails
 postshiba.send_email(from: "hello@mail.example.com", to: ["you@example.com"], subject: "Hello", text: "Hello")
 postshiba.send_email({from: "hello@mail.example.com", to: ["you@example.com"], subject: "Hello", text: "Hello"}, cluster_id: "NmQpXr")
 postshiba.send_on_cluster("NmQpXr", {from: "hello@mail.example.com", to: ["you@example.com"], subject: "Hello", text: "Hello"}, sandbox: true)
+postshiba.send_email(to: ["you@example.com"], template: {id: "welcome", variables: {name: "Ada"}})
 ```
 
 Clusters
@@ -109,6 +110,20 @@ postshiba.update_cluster(4, cluster: {plan: "small"})
 postshiba.suspend_cluster(4)
 postshiba.resume_cluster(4)
 postshiba.delete_cluster(4)
+postshiba.boost_cluster("NmQpXr", sku: "small_to_large")
+postshiba.extend_cluster_boost("NmQpXr", idempotency_key: "extend-1")
+postshiba.cancel_cluster_boost("NmQpXr")
+```
+
+Network
+
+```ruby
+postshiba.list_network
+postshiba.create_network(ip_address_id: "IpQwEr", cluster_id: "NmQpXr")
+postshiba.assign_network(ip_address_id: "IpQwEr", cluster_id: "NmQpXr")
+postshiba.unassign_network(ip_address_id: "IpQwEr", cluster_id: "NmQpXr")
+postshiba.switch_network(ip_address_id: "IpQwEr", cluster_id: "NmQpXr")
+postshiba.release_network(ip_address_id: "IpQwEr")
 ```
 
 Sending domains
@@ -117,6 +132,8 @@ Sending domains
 postshiba.list_sending_domains
 postshiba.get_sending_domain(8)
 postshiba.create_sending_domain(sending_domain: {name: "mail.example.com", tenant_id: "WbLcFd"})
+postshiba.update_sending_domain("HsVtYk", sending_domain: {dkim_selector: "s1", dkim_manual: true})
+postshiba.refresh_sending_domain("HsVtYk")
 postshiba.verify_sending_domain(8)
 postshiba.suspend_sending_domain(8)
 postshiba.resume_sending_domain(8)
@@ -138,7 +155,7 @@ Inboxes
 ```ruby
 postshiba.list_inboxes
 postshiba.get_inbox(3)
-postshiba.create_inbox(inbox: {name: "agent", webhook_url: "https://hooks.example.com/mail"})
+postshiba.create_inbox(inbox: {name: "agent", webhook_url: "https://hooks.example.com/mail", host: "inbound.example.com", forward_to: "you@example.com"})
 postshiba.verify_inbox(3)
 postshiba.delete_inbox(3)
 ```
@@ -154,6 +171,7 @@ postshiba.download_attachment("PqRzMn", "GxTyVu", 1)
 Events
 
 ```ruby
+postshiba.list_team_events
 postshiba.list_events(4)
 postshiba.get_event(44)
 ```
@@ -175,11 +193,26 @@ postshiba.update_webhook(2, webhook_endpoint: {enabled: false, event_types: ["de
 postshiba.delete_webhook(2)
 ```
 
+Templates
+
+```ruby
+postshiba.list_templates
+postshiba.get_template("welcome")
+postshiba.create_template(email_template: {name: "Welcome", alias: "welcome", subject: "Hi {{ name }}", html: "<p>Hi {{ name }}</p>"})
+postshiba.update_template("TpLmQr", email_template: {subject: "Welcome, {{ name }}"})
+postshiba.publish_template("TpLmQr")
+postshiba.duplicate_template("TpLmQr")
+postshiba.delete_template("TpLmQr")
+```
+
+Send uses the published snapshot. `get_template` and member routes accept the public id or the alias.
+
 Suppressions
 
 ```ruby
 postshiba.list_suppressions
 postshiba.create_suppression(suppression: {email: "blocked@example.com", tenant_id: "WbLcFd"})
+postshiba.import_suppressions(emails: ["blocked@example.com", "old@example.com"], tenant_id: "WbLcFd")
 postshiba.delete_suppression(7)
 ```
 

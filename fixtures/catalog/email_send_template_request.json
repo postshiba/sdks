@@ -1,0 +1,17 @@
+{
+  "from": "hello@mail.example.com",
+  "to": [
+    "you@example.com"
+  ],
+  "template": {
+    "id": "welcome",
+    "variables": {
+      "name": "Ada",
+      "body": "Your account is ready."
+    }
+  },
+  "unique_args": {
+    "campaign_id": "cmp_123",
+    "site": "docs"
+  }
+}

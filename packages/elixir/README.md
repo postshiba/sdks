@@ -45,6 +45,15 @@ Cluster send can set `Idempotency-Key` and `"sandbox": true`.
 PostShiba.Emails.send_on_cluster(client, "NmQpXr", body, idempotency_key: "idem-1", sandbox: true)
 ```
 
+Template send posts `template` instead of `html` and `text`.
+
+```elixir
+PostShiba.Emails.send(client, %{
+  "to" => ["you@example.com"],
+  "template" => %{"id" => "welcome", "variables" => %{"name" => "Ada"}}
+})
+```
+
 ## Phoenix and Swoosh
 
 `PostShiba.Swoosh.Adapter` maps a `Swoosh.Email` to `emails.send`. Add `:swoosh` in your app. The core client compiles without it.
@@ -75,6 +84,18 @@ The mapper copies `from`, `to`, `subject`, `html`, `text`, and attachments.
 PostShiba.Users.me(client)
 ```
 
+### Emails
+
+```elixir
+PostShiba.Emails.send(client, body)
+PostShiba.Emails.send(client, body, cluster_id: "NmQpXr")
+PostShiba.Emails.send_on_cluster(client, "NmQpXr", body, sandbox: true)
+PostShiba.Emails.send(client, %{
+  "to" => ["you@example.com"],
+  "template" => %{"id" => "welcome", "variables" => %{"name" => "Ada"}}
+})
+```
+
 ### Clusters
 
 ```elixir
@@ -85,6 +106,20 @@ PostShiba.Clusters.update(client, "NmQpXr", %{"cluster" => %{"plan" => "small"}}
 PostShiba.Clusters.suspend(client, "NmQpXr")
 PostShiba.Clusters.resume(client, "NmQpXr")
 PostShiba.Clusters.delete(client, "NmQpXr")
+PostShiba.Clusters.boost(client, "NmQpXr", %{"sku" => "small_to_large"})
+PostShiba.Clusters.extend_boost(client, "NmQpXr", %{"idempotency_key" => "extend-1"})
+PostShiba.Clusters.cancel_boost(client, "NmQpXr")
+```
+
+### Network
+
+```elixir
+PostShiba.Network.list(client)
+PostShiba.Network.create(client, %{"ip_address_id" => "IpQwEr", "cluster_id" => "NmQpXr"})
+PostShiba.Network.assign(client, %{"ip_address_id" => "IpQwEr", "cluster_id" => "NmQpXr"})
+PostShiba.Network.unassign(client, %{"ip_address_id" => "IpQwEr", "cluster_id" => "NmQpXr"})
+PostShiba.Network.switch(client, %{"ip_address_id" => "IpQwEr", "cluster_id" => "NmQpXr"})
+PostShiba.Network.release(client, %{"ip_address_id" => "IpQwEr"})
 ```
 
 ### Sending domains
@@ -92,7 +127,9 @@ PostShiba.Clusters.delete(client, "NmQpXr")
 ```elixir
 PostShiba.SendingDomains.list(client)
 PostShiba.SendingDomains.get(client, "HsVtYk")
-PostShiba.SendingDomains.create(client, %{"sending_domain" => %{"name" => "mail.example.com", "tenant_id" => 12}})
+PostShiba.SendingDomains.create(client, %{"sending_domain" => %{"name" => "mail.example.com", "tenant_id" => "WbLcFd"}})
+PostShiba.SendingDomains.update(client, "HsVtYk", %{"sending_domain" => %{"dkim_selector" => "s1", "dkim_manual" => true}})
+PostShiba.SendingDomains.refresh(client, "HsVtYk")
 PostShiba.SendingDomains.verify(client, "HsVtYk")
 PostShiba.SendingDomains.suspend(client, "HsVtYk")
 PostShiba.SendingDomains.resume(client, "HsVtYk")
@@ -114,7 +151,14 @@ PostShiba.Tenants.delete(client, "WbLcFd")
 ```elixir
 PostShiba.Inboxes.list(client)
 PostShiba.Inboxes.get(client, "PqRzMn")
-PostShiba.Inboxes.create(client, %{"inbox" => %{"name" => "agent", "webhook_url" => "https://hooks.example.com/mail"}})
+PostShiba.Inboxes.create(client, %{
+  "inbox" => %{
+    "name" => "agent",
+    "webhook_url" => "https://hooks.example.com/mail",
+    "host" => "inbound.example.com",
+    "forward_to" => "you@example.com"
+  }
+})
 PostShiba.Inboxes.verify(client, "PqRzMn")
 PostShiba.Inboxes.delete(client, "PqRzMn")
 ```
@@ -130,6 +174,7 @@ PostShiba.Messages.download_attachment(client, "PqRzMn", "GxTyVu", 1)
 ### Events
 
 ```elixir
+PostShiba.Events.list_team(client)
 PostShiba.Events.list(client, "NmQpXr")
 PostShiba.Events.get(client, "JkLmNp")
 ```
@@ -163,11 +208,33 @@ PostShiba.Webhooks.delete(client, "CdFgHj")
 
 The secret is present on get and create. It is omitted on list and update.
 
+### Templates
+
+```elixir
+PostShiba.Templates.list(client)
+PostShiba.Templates.get(client, "welcome")
+PostShiba.Templates.create(client, %{
+  "email_template" => %{
+    "name" => "Welcome",
+    "alias" => "welcome",
+    "subject" => "Hi {{ name }}",
+    "html" => "<p>Hi {{ name }}</p>"
+  }
+})
+PostShiba.Templates.update(client, "TpLmQr", %{"email_template" => %{"subject" => "Welcome, {{ name }}"}})
+PostShiba.Templates.publish(client, "TpLmQr")
+PostShiba.Templates.duplicate(client, "TpLmQr")
+PostShiba.Templates.delete(client, "TpLmQr")
+```
+
+Send uses the published snapshot. `get` and member routes accept the public id or the alias.
+
 ### Suppressions
 
 ```elixir
 PostShiba.Suppressions.list(client)
-PostShiba.Suppressions.create(client, %{"suppression" => %{"email" => "blocked@example.com", "tenant_id" => 12}})
+PostShiba.Suppressions.create(client, %{"suppression" => %{"email" => "blocked@example.com", "tenant_id" => "WbLcFd"}})
+PostShiba.Suppressions.import(client, %{"emails" => ["blocked@example.com", "old@example.com"], "tenant_id" => "WbLcFd"})
 PostShiba.Suppressions.delete(client, "YtReWq")
 ```
 

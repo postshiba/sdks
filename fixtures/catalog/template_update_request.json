@@ -1,0 +1,5 @@
+{
+  "email_template": {
+    "subject": "Welcome, {{ name }}"
+  }
+}

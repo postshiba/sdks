@@ -8,6 +8,11 @@ class Events
     {
     }
 
+    public function listTeam(): mixed
+    {
+        return $this->client->request('GET', '/api/v1/teams/'.$this->client->teamId().'/message_events');
+    }
+
     public function list(string $clusterId): mixed
     {
         return $this->client->request(

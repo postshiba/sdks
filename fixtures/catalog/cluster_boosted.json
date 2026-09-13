@@ -1,0 +1,38 @@
+{
+  "id": "NmQpXr",
+  "name": "edge",
+  "region": "manual",
+  "size": "small",
+  "plan": "small",
+  "emails_per_hour": 50000,
+  "base_emails_per_hour": 10000,
+  "boost": {
+    "sku": "small_to_large",
+    "status": "active",
+    "target_plan": "large",
+    "target_emails_per_hour": 50000,
+    "starts_at": "2026-09-13T10:00:00Z",
+    "ends_at": "2026-09-14T10:00:00Z"
+  },
+  "ip_assignment": "shared",
+  "desired_status": "active",
+  "status": "active",
+  "smtp_endpoint": "smtp.capsule.test:587",
+  "http_endpoint": "smtp.capsule.test:8000",
+  "classification": "transactional",
+  "assigned_ip": {
+    "address": "203.0.113.2",
+    "status": "active"
+  },
+  "sending_ips": [
+    {
+      "address": "203.0.113.2",
+      "status": "active",
+      "kind": "shared",
+      "classification": "transactional",
+      "weight": 100,
+      "provider": null
+    }
+  ],
+  "sending_ready": true
+}

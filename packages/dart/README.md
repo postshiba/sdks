@@ -44,7 +44,7 @@ Cluster send accepts `Idempotency-Key` and `sandbox`:
 
 ```dart
 await client.emails.sendOnCluster(
-  4,
+  "NmQpXr",
   {
     "from": "hello@mail.example.com",
     "to": ["you@example.com"],
@@ -83,6 +83,10 @@ await client.users.me();
 ```dart
 await client.emails.send({...}, clusterId: "NmQpXr");
 await client.emails.sendOnCluster("NmQpXr", {...}, sandbox: true);
+await client.emails.send({
+  "to": ["you@example.com"],
+  "template": {"id": "welcome", "variables": {"name": "Ada"}},
+});
 ```
 
 ### Clusters
@@ -99,7 +103,23 @@ await client.clusters.update("NmQpXr", {
 await client.clusters.suspend("NmQpXr");
 await client.clusters.resume("NmQpXr");
 await client.clusters.delete("NmQpXr");
+await client.clusters.boost("NmQpXr", {"sku": "small_to_large"});
+await client.clusters.extendBoost("NmQpXr", {"idempotency_key": "extend-1"});
+await client.clusters.cancelBoost("NmQpXr");
 ```
+
+### Network
+
+```dart
+await client.network.list();
+await client.network.create({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"});
+await client.network.assign({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"});
+await client.network.unassign({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"});
+await client.network.switchTo({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"});
+await client.network.release({"ip_address_id": "IpQwEr"});
+```
+
+`switch` is a reserved word in Dart. The method is `switchTo`. It posts `/network/switch`.
 
 ### Sending domains
 
@@ -109,6 +129,10 @@ await client.sendingDomains.get("HsVtYk");
 await client.sendingDomains.create({
   "sending_domain": {"name": "mail.example.com", "tenant_id": "WbLcFd"},
 });
+await client.sendingDomains.update("HsVtYk", {
+  "sending_domain": {"dkim_selector": "s1", "dkim_manual": true},
+});
+await client.sendingDomains.refresh("HsVtYk");
 await client.sendingDomains.verify("HsVtYk");
 await client.sendingDomains.suspend("HsVtYk");
 await client.sendingDomains.resume("HsVtYk");
@@ -133,7 +157,12 @@ await client.tenants.delete("WbLcFd");
 await client.inboxes.list();
 await client.inboxes.get("PqRzMn");
 await client.inboxes.create({
-  "inbox": {"name": "agent", "webhook_url": "https://hooks.example.com/mail"},
+  "inbox": {
+    "name": "agent",
+    "webhook_url": "https://hooks.example.com/mail",
+    "host": "inbound.example.com",
+    "forward_to": "you@example.com",
+  },
 });
 await client.inboxes.verify("PqRzMn");
 await client.inboxes.delete("PqRzMn");
@@ -150,6 +179,7 @@ await client.messages.downloadAttachment("PqRzMn", "GxTyVu", 1);
 ### Events
 
 ```dart
+await client.events.listTeam();
 await client.events.list("NmQpXr");
 await client.events.get("JkLmNp");
 ```
@@ -181,12 +211,39 @@ await client.webhooks.update("CdFgHj", {
 await client.webhooks.delete("CdFgHj");
 ```
 
+### Templates
+
+```dart
+await client.templates.list();
+await client.templates.get("welcome");
+await client.templates.create({
+  "email_template": {
+    "name": "Welcome",
+    "alias": "welcome",
+    "subject": "Hi {{ name }}",
+    "html": "<p>Hi {{ name }}</p>",
+  },
+});
+await client.templates.update("TpLmQr", {
+  "email_template": {"subject": "Welcome, {{ name }}"},
+});
+await client.templates.publish("TpLmQr");
+await client.templates.duplicate("TpLmQr");
+await client.templates.delete("TpLmQr");
+```
+
+Send uses the published snapshot. `get` and member routes accept the public id or the alias.
+
 ### Suppressions
 
 ```dart
 await client.suppressions.list();
 await client.suppressions.create({
   "suppression": {"email": "blocked@example.com", "tenant_id": "WbLcFd"},
+});
+await client.suppressions.import({
+  "emails": ["blocked@example.com", "old@example.com"],
+  "tenant_id": "WbLcFd",
 });
 await client.suppressions.delete("YtReWq");
 ```

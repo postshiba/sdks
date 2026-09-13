@@ -80,6 +80,7 @@ class PostShiba {
   late final users = Users(this);
   late final emails = Emails(this);
   late final clusters = Clusters(this);
+  late final network = Network(this);
   late final sendingDomains = SendingDomains(this);
   late final tenants = Tenants(this);
   late final inboxes = Inboxes(this);
@@ -87,6 +88,7 @@ class PostShiba {
   late final events = Events(this);
   late final smtpCredentials = SmtpCredentials(this);
   late final webhooks = WebhookEndpoints(this);
+  late final templates = Templates(this);
   late final suppressions = Suppressions(this);
   late final firewall = Firewall(this);
 
@@ -231,6 +233,83 @@ class Clusters {
   Future<Map<String, dynamic>> delete(String id) async {
     return _map(await _client._request('DELETE', '/api/v1/clusters/$id'));
   }
+
+  Future<Map<String, dynamic>> boost(
+    String id,
+    Map<String, dynamic> params,
+  ) async {
+    return _map(await _client._request(
+      'POST',
+      '/api/v1/clusters/$id/boost',
+      body: params,
+    ));
+  }
+
+  Future<Map<String, dynamic>> extendBoost(
+    String id,
+    Map<String, dynamic> params,
+  ) async {
+    return _map(await _client._request(
+      'POST',
+      '/api/v1/clusters/$id/extend_boost',
+      body: params,
+    ));
+  }
+
+  Future<Map<String, dynamic>> cancelBoost(String id) async {
+    return _map(
+      await _client._request('POST', '/api/v1/clusters/$id/cancel_boost'),
+    );
+  }
+}
+
+class Network {
+  Network(this._client);
+  final PostShiba _client;
+
+  Future<List<dynamic>> list() async {
+    return _list(await _client._request('GET', _client._teamPath('/network')));
+  }
+
+  Future<Map<String, dynamic>> create(Map<String, dynamic> params) async {
+    return _map(await _client._request(
+      'POST',
+      _client._teamPath('/network'),
+      body: params,
+    ));
+  }
+
+  Future<Map<String, dynamic>> assign(Map<String, dynamic> params) async {
+    return _map(await _client._request(
+      'POST',
+      _client._teamPath('/network/assign'),
+      body: params,
+    ));
+  }
+
+  Future<Map<String, dynamic>> unassign(Map<String, dynamic> params) async {
+    return _map(await _client._request(
+      'POST',
+      _client._teamPath('/network/unassign'),
+      body: params,
+    ));
+  }
+
+  Future<Map<String, dynamic>> switchTo(Map<String, dynamic> params) async {
+    return _map(await _client._request(
+      'POST',
+      _client._teamPath('/network/switch'),
+      body: params,
+    ));
+  }
+
+  Future<Map<String, dynamic>> release(Map<String, dynamic> params) async {
+    return _map(await _client._request(
+      'POST',
+      _client._teamPath('/network/release'),
+      body: params,
+    ));
+  }
 }
 
 class SendingDomains {
@@ -253,6 +332,23 @@ class SendingDomains {
       _client._teamPath('/sending_domains'),
       body: params,
     ));
+  }
+
+  Future<Map<String, dynamic>> update(
+    String id,
+    Map<String, dynamic> params,
+  ) async {
+    return _map(await _client._request(
+      'PATCH',
+      '/api/v1/sending_domains/$id',
+      body: params,
+    ));
+  }
+
+  Future<Map<String, dynamic>> refresh(String id) async {
+    return _map(
+      await _client._request('POST', '/api/v1/sending_domains/$id/refresh'),
+    );
   }
 
   Future<Map<String, dynamic>> verify(String id) async {
@@ -373,6 +469,12 @@ class Events {
   Events(this._client);
   final PostShiba _client;
 
+  Future<List<dynamic>> listTeam() async {
+    return _list(
+      await _client._request('GET', _client._teamPath('/message_events')),
+    );
+  }
+
   Future<List<dynamic>> list(String clusterId) async {
     return _list(await _client._request(
       'GET',
@@ -443,6 +545,52 @@ class WebhookEndpoints {
   }
 }
 
+class Templates {
+  Templates(this._client);
+  final PostShiba _client;
+
+  Future<List<dynamic>> list() async {
+    return _list(await _client._request('GET', _client._teamPath('/templates')));
+  }
+
+  Future<Map<String, dynamic>> get(String id) async {
+    return _map(await _client._request('GET', '/api/v1/templates/$id'));
+  }
+
+  Future<Map<String, dynamic>> create(Map<String, dynamic> params) async {
+    return _map(await _client._request(
+      'POST',
+      _client._teamPath('/templates'),
+      body: params,
+    ));
+  }
+
+  Future<Map<String, dynamic>> update(
+    String id,
+    Map<String, dynamic> params,
+  ) async {
+    return _map(await _client._request(
+      'PATCH',
+      '/api/v1/templates/$id',
+      body: params,
+    ));
+  }
+
+  Future<Map<String, dynamic>> publish(String id) async {
+    return _map(await _client._request('POST', '/api/v1/templates/$id/publish'));
+  }
+
+  Future<Map<String, dynamic>> duplicate(String id) async {
+    return _map(
+      await _client._request('POST', '/api/v1/templates/$id/duplicate'),
+    );
+  }
+
+  Future<Map<String, dynamic>> delete(String id) async {
+    return _map(await _client._request('DELETE', '/api/v1/templates/$id'));
+  }
+}
+
 class Suppressions {
   Suppressions(this._client);
   final PostShiba _client;
@@ -457,6 +605,14 @@ class Suppressions {
     return _map(await _client._request(
       'POST',
       _client._teamPath('/suppressions'),
+      body: params,
+    ));
+  }
+
+  Future<Map<String, dynamic>> import(Map<String, dynamic> params) async {
+    return _map(await _client._request(
+      'POST',
+      _client._teamPath('/suppressions/import'),
       body: params,
     ));
   }

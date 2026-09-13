@@ -4,15 +4,28 @@
   "region": "manual",
   "size": "small",
   "plan": "nano",
-  "emails_per_hour": 200,
+  "emails_per_hour": 25,
+  "base_emails_per_hour": 25,
+  "boost": null,
   "ip_assignment": "shared",
   "desired_status": "active",
   "status": "active",
   "smtp_endpoint": "smtp.capsule.test:587",
   "http_endpoint": "smtp.capsule.test:8000",
+  "classification": "transactional",
   "assigned_ip": {
-    "address": "203.0.113.50",
-    "status": "assigned"
+    "address": "203.0.113.2",
+    "status": "active"
   },
+  "sending_ips": [
+    {
+      "address": "203.0.113.2",
+      "status": "active",
+      "kind": "shared",
+      "classification": "transactional",
+      "weight": 100,
+      "provider": null
+    }
+  ],
   "sending_ready": true
 }

@@ -65,6 +65,42 @@ module PostShiba
       request(:delete, "/api/v1/clusters/#{id}")
     end
 
+    def boost_cluster(id, body)
+      request(:post, "/api/v1/clusters/#{id}/boost", body: body)
+    end
+
+    def extend_cluster_boost(id, body)
+      request(:post, "/api/v1/clusters/#{id}/extend_boost", body: body)
+    end
+
+    def cancel_cluster_boost(id)
+      request(:post, "/api/v1/clusters/#{id}/cancel_boost")
+    end
+
+    def list_network
+      request(:get, "/api/v1/teams/#{require_team_id}/network")
+    end
+
+    def create_network(body)
+      request(:post, "/api/v1/teams/#{require_team_id}/network", body: body)
+    end
+
+    def assign_network(body)
+      request(:post, "/api/v1/teams/#{require_team_id}/network/assign", body: body)
+    end
+
+    def unassign_network(body)
+      request(:post, "/api/v1/teams/#{require_team_id}/network/unassign", body: body)
+    end
+
+    def switch_network(body)
+      request(:post, "/api/v1/teams/#{require_team_id}/network/switch", body: body)
+    end
+
+    def release_network(body)
+      request(:post, "/api/v1/teams/#{require_team_id}/network/release", body: body)
+    end
+
     def list_sending_domains
       request(:get, "/api/v1/teams/#{require_team_id}/sending_domains")
     end
@@ -75,6 +111,14 @@ module PostShiba
 
     def create_sending_domain(body)
       request(:post, "/api/v1/teams/#{require_team_id}/sending_domains", body: body)
+    end
+
+    def update_sending_domain(id, body)
+      request(:patch, "/api/v1/sending_domains/#{id}", body: body)
+    end
+
+    def refresh_sending_domain(id)
+      request(:post, "/api/v1/sending_domains/#{id}/refresh")
     end
 
     def verify_sending_domain(id)
@@ -145,6 +189,10 @@ module PostShiba
       request(:get, "/api/v1/inboxes/#{inbox_id}/inbound_messages/#{id}/attachments/#{index}", json: false)
     end
 
+    def list_team_events
+      request(:get, "/api/v1/teams/#{require_team_id}/message_events")
+    end
+
     def list_events(cluster_id)
       request(:get, "/api/v1/teams/#{require_team_id}/clusters/#{cluster_id}/message_events")
     end
@@ -181,12 +229,44 @@ module PostShiba
       request(:delete, "/api/v1/webhook_endpoints/#{id}")
     end
 
+    def list_templates
+      request(:get, "/api/v1/teams/#{require_team_id}/templates")
+    end
+
+    def get_template(id)
+      request(:get, "/api/v1/templates/#{id}")
+    end
+
+    def create_template(body)
+      request(:post, "/api/v1/teams/#{require_team_id}/templates", body: body)
+    end
+
+    def update_template(id, body)
+      request(:patch, "/api/v1/templates/#{id}", body: body)
+    end
+
+    def publish_template(id)
+      request(:post, "/api/v1/templates/#{id}/publish")
+    end
+
+    def duplicate_template(id)
+      request(:post, "/api/v1/templates/#{id}/duplicate")
+    end
+
+    def delete_template(id)
+      request(:delete, "/api/v1/templates/#{id}")
+    end
+
     def list_suppressions
       request(:get, "/api/v1/teams/#{require_team_id}/suppressions")
     end
 
     def create_suppression(body)
       request(:post, "/api/v1/teams/#{require_team_id}/suppressions", body: body)
+    end
+
+    def import_suppressions(body)
+      request(:post, "/api/v1/teams/#{require_team_id}/suppressions/import", body: body)
     end
 
     def delete_suppression(id)

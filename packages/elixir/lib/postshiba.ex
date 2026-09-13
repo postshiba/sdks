@@ -170,6 +170,73 @@ defmodule PostShiba do
 
     def resume(client, id), do: PostShiba.request(client, :post, "/api/v1/clusters/#{id}/resume")
     def delete(client, id), do: PostShiba.request(client, :delete, "/api/v1/clusters/#{id}")
+
+    def boost(client, id, body) do
+      PostShiba.request(client, :post, "/api/v1/clusters/#{id}/boost", body: body)
+    end
+
+    def extend_boost(client, id, body) do
+      PostShiba.request(client, :post, "/api/v1/clusters/#{id}/extend_boost", body: body)
+    end
+
+    def cancel_boost(client, id) do
+      PostShiba.request(client, :post, "/api/v1/clusters/#{id}/cancel_boost")
+    end
+  end
+
+  defmodule Network do
+    def list(client) do
+      PostShiba.request(
+        client,
+        :get,
+        "/api/v1/teams/#{PostShiba.require_team_id(client)}/network"
+      )
+    end
+
+    def create(client, body) do
+      PostShiba.request(
+        client,
+        :post,
+        "/api/v1/teams/#{PostShiba.require_team_id(client)}/network",
+        body: body
+      )
+    end
+
+    def assign(client, body) do
+      PostShiba.request(
+        client,
+        :post,
+        "/api/v1/teams/#{PostShiba.require_team_id(client)}/network/assign",
+        body: body
+      )
+    end
+
+    def unassign(client, body) do
+      PostShiba.request(
+        client,
+        :post,
+        "/api/v1/teams/#{PostShiba.require_team_id(client)}/network/unassign",
+        body: body
+      )
+    end
+
+    def switch(client, body) do
+      PostShiba.request(
+        client,
+        :post,
+        "/api/v1/teams/#{PostShiba.require_team_id(client)}/network/switch",
+        body: body
+      )
+    end
+
+    def release(client, body) do
+      PostShiba.request(
+        client,
+        :post,
+        "/api/v1/teams/#{PostShiba.require_team_id(client)}/network/release",
+        body: body
+      )
+    end
   end
 
   defmodule SendingDomains do
@@ -190,6 +257,14 @@ defmodule PostShiba do
         "/api/v1/teams/#{PostShiba.require_team_id(client)}/sending_domains",
         body: body
       )
+    end
+
+    def update(client, id, body) do
+      PostShiba.request(client, :patch, "/api/v1/sending_domains/#{id}", body: body)
+    end
+
+    def refresh(client, id) do
+      PostShiba.request(client, :post, "/api/v1/sending_domains/#{id}/refresh")
     end
 
     def verify(client, id) do
@@ -275,6 +350,14 @@ defmodule PostShiba do
   end
 
   defmodule Events do
+    def list_team(client) do
+      PostShiba.request(
+        client,
+        :get,
+        "/api/v1/teams/#{PostShiba.require_team_id(client)}/message_events"
+      )
+    end
+
     def list(client, cluster_id) do
       PostShiba.request(
         client,
@@ -348,6 +431,41 @@ defmodule PostShiba do
     defp secure_compare(_left, _right), do: false
   end
 
+  defmodule Templates do
+    def list(client) do
+      PostShiba.request(
+        client,
+        :get,
+        "/api/v1/teams/#{PostShiba.require_team_id(client)}/templates"
+      )
+    end
+
+    def get(client, id), do: PostShiba.request(client, :get, "/api/v1/templates/#{id}")
+
+    def create(client, body) do
+      PostShiba.request(
+        client,
+        :post,
+        "/api/v1/teams/#{PostShiba.require_team_id(client)}/templates",
+        body: body
+      )
+    end
+
+    def update(client, id, body) do
+      PostShiba.request(client, :patch, "/api/v1/templates/#{id}", body: body)
+    end
+
+    def publish(client, id) do
+      PostShiba.request(client, :post, "/api/v1/templates/#{id}/publish")
+    end
+
+    def duplicate(client, id) do
+      PostShiba.request(client, :post, "/api/v1/templates/#{id}/duplicate")
+    end
+
+    def delete(client, id), do: PostShiba.request(client, :delete, "/api/v1/templates/#{id}")
+  end
+
   defmodule Suppressions do
     def list(client) do
       PostShiba.request(
@@ -362,6 +480,15 @@ defmodule PostShiba do
         client,
         :post,
         "/api/v1/teams/#{PostShiba.require_team_id(client)}/suppressions",
+        body: body
+      )
+    end
+
+    def import(client, body) do
+      PostShiba.request(
+        client,
+        :post,
+        "/api/v1/teams/#{PostShiba.require_team_id(client)}/suppressions/import",
         body: body
       )
     end

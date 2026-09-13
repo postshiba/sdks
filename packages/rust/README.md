@@ -36,6 +36,15 @@ let email = client.emails().send(&json!({
 }))?;
 ```
 
+Send a published template:
+
+```rust
+client.emails().send(&json!({
+    "to": ["you@example.com"],
+    "template": { "id": "welcome", "variables": { "name": "Ada" } }
+}))?;
+```
+
 Pass a cluster id to pin `X-Capsule-Cluster-Id`. Omit it and the header is not sent.
 
 ```rust
@@ -67,12 +76,26 @@ client.clusters().update("NmQpXr", &json!({"cluster": {"plan": "small"}}))?;
 client.clusters().suspend("NmQpXr")?;
 client.clusters().resume("NmQpXr")?;
 client.clusters().delete("NmQpXr")?;
+client.clusters().boost("NmQpXr", &json!({"sku": "small_to_large"}))?;
+client.clusters().extend_boost("NmQpXr", &json!({"idempotency_key": "extend-1"}))?;
+client.clusters().cancel_boost("NmQpXr")?;
+```
+
+```rust
+client.network().list()?;
+client.network().create(&json!({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"}))?;
+client.network().assign(&json!({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"}))?;
+client.network().unassign(&json!({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"}))?;
+client.network().switch(&json!({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"}))?;
+client.network().release(&json!({"ip_address_id": "IpQwEr"}))?;
 ```
 
 ```rust
 let domains = client.sending_domains().list()?;
 let domain = client.sending_domains().get("HsVtYk")?;
 client.sending_domains().create(&json!({"sending_domain": {"name": "mail.example.com", "tenant_id": "WbLcFd"}}))?;
+client.sending_domains().update("HsVtYk", &json!({"sending_domain": {"dkim_selector": "s1", "dkim_manual": true}}))?;
+client.sending_domains().refresh("HsVtYk")?;
 client.sending_domains().verify("HsVtYk")?;
 client.sending_domains().suspend("HsVtYk")?;
 client.sending_domains().resume("HsVtYk")?;
@@ -90,7 +113,7 @@ client.tenants().delete("WbLcFd")?;
 ```rust
 let inboxes = client.inboxes().list()?;
 let inbox = client.inboxes().get("PqRzMn")?;
-client.inboxes().create(&json!({"inbox": {"name": "agent", "webhook_url": "https://hooks.example.com/mail"}}))?;
+client.inboxes().create(&json!({"inbox": {"name": "agent", "webhook_url": "https://hooks.example.com/mail", "host": "inbound.example.com", "forward_to": "you@example.com"}}))?;
 client.inboxes().verify("PqRzMn")?;
 client.inboxes().delete("PqRzMn")?;
 ```
@@ -102,6 +125,7 @@ let bytes = client.messages().download_attachment("PqRzMn", "GxTyVu", 1)?;
 ```
 
 ```rust
+let events = client.events().list_team()?;
 let events = client.events().list("NmQpXr")?;
 let event = client.events().get("JkLmNp")?;
 ```
@@ -120,8 +144,19 @@ client.webhooks().delete("CdFgHj")?;
 ```
 
 ```rust
+client.templates().list()?;
+client.templates().get("welcome")?;
+client.templates().create(&json!({"email_template": {"name": "Welcome", "alias": "welcome", "subject": "Hi {{ name }}", "html": "<p>Hi {{ name }}</p>"}}))?;
+client.templates().update("TpLmQr", &json!({"email_template": {"subject": "Welcome, {{ name }}"}}))?;
+client.templates().publish("TpLmQr")?;
+client.templates().duplicate("TpLmQr")?;
+client.templates().delete("TpLmQr")?;
+```
+
+```rust
 let suppressions = client.suppressions().list()?;
 client.suppressions().create(&json!({"suppression": {"email": "blocked@example.com", "tenant_id": "WbLcFd"}}))?;
+client.suppressions().import(&json!({"emails": ["blocked@example.com", "old@example.com"], "tenant_id": "WbLcFd"}))?;
 client.suppressions().delete("YtReWq")?;
 ```
 

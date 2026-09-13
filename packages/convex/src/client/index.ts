@@ -16,6 +16,7 @@ import {
   type QueryCtx,
   type RuntimeConfig,
   type Status,
+  type SendTemplate,
   type UniqueArgs,
   vEmailEvent,
 } from '../component/shared.js';
@@ -39,12 +40,14 @@ export {
   vOptions,
   vPriority,
   vStatus,
+  vTemplate,
   vUniqueArgs,
 } from '../component/shared.js';
 export type {
   EmailEvent,
   EventType,
   Priority,
+  SendTemplate,
   Status,
   UniqueArgs,
 } from '../component/shared.js';
@@ -151,6 +154,7 @@ export type Email = {
   createdAt: number;
   html?: string;
   text?: string;
+  template?: SendTemplate;
 };
 
 export type SendEmailOptions = {
@@ -167,6 +171,7 @@ export type SendEmailOptions = {
   tenant?: string;
   attachments?: { filename: string; contentType: string; content: string }[];
   priority?: Priority;
+  template?: SendTemplate;
 };
 
 /** `Response.json` is not available in every runtime the component targets. */
@@ -270,6 +275,7 @@ export class PostShiba {
       subject: options.subject,
       html: options.html,
       text: options.text,
+      template: options.template,
       replyTo: toArray(options.replyTo),
       headers: options.headers,
       uniqueArgs: options.uniqueArgs,

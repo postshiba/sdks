@@ -121,12 +121,26 @@ export class PostShiba {
     suspend: (id: Id) => this.request("POST", `/api/v1/clusters/${id}/suspend`),
     resume: (id: Id) => this.request("POST", `/api/v1/clusters/${id}/resume`),
     delete: (id: Id) => this.request("DELETE", `/api/v1/clusters/${id}`),
+    boost: (id: Id, body: Json) => this.request("POST", `/api/v1/clusters/${id}/boost`, { body }),
+    extendBoost: (id: Id, body: Json) => this.request("POST", `/api/v1/clusters/${id}/extend_boost`, { body }),
+    cancelBoost: (id: Id) => this.request("POST", `/api/v1/clusters/${id}/cancel_boost`),
+  };
+
+  readonly network = {
+    list: () => this.request("GET", "/network", { team: true }),
+    create: (body: Json) => this.request("POST", "/network", { body, team: true }),
+    assign: (body: Json) => this.request("POST", "/network/assign", { body, team: true }),
+    unassign: (body: Json) => this.request("POST", "/network/unassign", { body, team: true }),
+    switch: (body: Json) => this.request("POST", "/network/switch", { body, team: true }),
+    release: (body: Json) => this.request("POST", "/network/release", { body, team: true }),
   };
 
   readonly sendingDomains = {
     list: () => this.request("GET", "/sending_domains", { team: true }),
     get: (id: Id) => this.request("GET", `/api/v1/sending_domains/${id}`),
     create: (body: Json) => this.request("POST", "/sending_domains", { body, team: true }),
+    update: (id: Id, body: Json) => this.request("PATCH", `/api/v1/sending_domains/${id}`, { body }),
+    refresh: (id: Id) => this.request("POST", `/api/v1/sending_domains/${id}/refresh`),
     verify: (id: Id) => this.request("POST", `/api/v1/sending_domains/${id}/verify`),
     suspend: (id: Id) => this.request("POST", `/api/v1/sending_domains/${id}/suspend`),
     resume: (id: Id) => this.request("POST", `/api/v1/sending_domains/${id}/resume`),
@@ -157,6 +171,7 @@ export class PostShiba {
   };
 
   readonly events = {
+    listTeam: () => this.request("GET", "/message_events", { team: true }),
     list: (clusterId: Id) => this.request("GET", `/clusters/${clusterId}/message_events`, { team: true }),
     get: (id: Id) => this.request("GET", `/api/v1/message_events/${id}`),
   };
@@ -178,9 +193,20 @@ export class PostShiba {
       verifySignature(rawBody, timestamp, signature, secret),
   };
 
+  readonly templates = {
+    list: () => this.request("GET", "/templates", { team: true }),
+    get: (id: Id) => this.request("GET", `/api/v1/templates/${id}`),
+    create: (body: Json) => this.request("POST", "/templates", { body, team: true }),
+    update: (id: Id, body: Json) => this.request("PATCH", `/api/v1/templates/${id}`, { body }),
+    publish: (id: Id) => this.request("POST", `/api/v1/templates/${id}/publish`),
+    duplicate: (id: Id) => this.request("POST", `/api/v1/templates/${id}/duplicate`),
+    delete: (id: Id) => this.request("DELETE", `/api/v1/templates/${id}`),
+  };
+
   readonly suppressions = {
     list: () => this.request("GET", "/suppressions", { team: true }),
     create: (body: Json) => this.request("POST", "/suppressions", { body, team: true }),
+    import: (body: Json) => this.request("POST", "/suppressions/import", { body, team: true }),
     delete: (id: Id) => this.request("DELETE", `/api/v1/suppressions/${id}`),
   };
 

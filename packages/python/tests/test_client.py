@@ -33,6 +33,18 @@ def test_emails_send(http):
     assert req.headers.get("X-Capsule-Cluster-Id") is None
 
 
+def test_emails_send_template(http):
+    body = load_fixture("email_send_template_request")
+    set_json(http, load_fixture("email_send_template_response"))
+    result = client().emails.send(body)
+    req = last_request(http)
+    assert req.get_method() == "POST"
+    assert req.full_url == "https://api.example.test/api/v1/emails"
+    assert request_json(req) == body
+    assert result == load_fixture("email_send_template_response")
+    assert req.headers.get("X-Capsule-Cluster-Id") is None
+
+
 def test_emails_send_with_cluster_id(http):
     body = load_fixture("email_send_request")
     set_json(http, load_fixture("email_send_response"))
@@ -101,6 +113,64 @@ OPERATIONS = [
     ("clusters.resume", lambda c: c.clusters.resume("NmQpXr"), "POST", "/api/v1/clusters/NmQpXr/resume", None, load_fixture("cluster")),
     ("clusters.delete", lambda c: c.clusters.delete("NmQpXr"), "DELETE", "/api/v1/clusters/NmQpXr", None, load_fixture("cluster_deprovisioned")),
     (
+        "clusters.boost",
+        lambda c: c.clusters.boost("NmQpXr", load_fixture("cluster_boost_request")),
+        "POST",
+        "/api/v1/clusters/NmQpXr/boost",
+        load_fixture("cluster_boost_request"),
+        load_fixture("cluster_boosted"),
+    ),
+    (
+        "clusters.extend_boost",
+        lambda c: c.clusters.extend_boost("NmQpXr", load_fixture("cluster_extend_boost_request")),
+        "POST",
+        "/api/v1/clusters/NmQpXr/extend_boost",
+        load_fixture("cluster_extend_boost_request"),
+        load_fixture("cluster_boosted"),
+    ),
+    ("clusters.cancel_boost", lambda c: c.clusters.cancel_boost("NmQpXr"), "POST", "/api/v1/clusters/NmQpXr/cancel_boost", None, load_fixture("cluster")),
+    ("network.list", lambda c: c.network.list(), "GET", "/api/v1/teams/KjkAJW/network", None, [load_fixture("network")]),
+    (
+        "network.create",
+        lambda c: c.network.create(load_fixture("network_create_request")),
+        "POST",
+        "/api/v1/teams/KjkAJW/network",
+        load_fixture("network_create_request"),
+        load_fixture("network_assigned"),
+    ),
+    (
+        "network.assign",
+        lambda c: c.network.assign(load_fixture("network_create_request")),
+        "POST",
+        "/api/v1/teams/KjkAJW/network/assign",
+        load_fixture("network_create_request"),
+        load_fixture("network_dedicated"),
+    ),
+    (
+        "network.unassign",
+        lambda c: c.network.unassign(load_fixture("network_create_request")),
+        "POST",
+        "/api/v1/teams/KjkAJW/network/unassign",
+        load_fixture("network_create_request"),
+        load_fixture("network"),
+    ),
+    (
+        "network.switch",
+        lambda c: c.network.switch(load_fixture("network_create_request")),
+        "POST",
+        "/api/v1/teams/KjkAJW/network/switch",
+        load_fixture("network_create_request"),
+        load_fixture("network_assigned"),
+    ),
+    (
+        "network.release",
+        lambda c: c.network.release(load_fixture("network_release_request")),
+        "POST",
+        "/api/v1/teams/KjkAJW/network/release",
+        load_fixture("network_release_request"),
+        load_fixture("network_released"),
+    ),
+    (
         "sending_domains.list",
         lambda c: c.sending_domains.list(),
         "GET",
@@ -117,6 +187,15 @@ OPERATIONS = [
         load_fixture("sending_domain_create_request"),
         load_fixture("sending_domain"),
     ),
+    (
+        "sending_domains.update",
+        lambda c: c.sending_domains.update("HsVtYk", load_fixture("sending_domain_update_request")),
+        "PATCH",
+        "/api/v1/sending_domains/HsVtYk",
+        load_fixture("sending_domain_update_request"),
+        load_fixture("sending_domain_updated"),
+    ),
+    ("sending_domains.refresh", lambda c: c.sending_domains.refresh("HsVtYk"), "POST", "/api/v1/sending_domains/HsVtYk/refresh", None, load_fixture("sending_domain")),
     ("sending_domains.verify", lambda c: c.sending_domains.verify("HsVtYk"), "POST", "/api/v1/sending_domains/HsVtYk/verify", None, load_fixture("sending_domain")),
     (
         "sending_domains.suspend",
@@ -161,6 +240,7 @@ OPERATIONS = [
     ("inboxes.delete", lambda c: c.inboxes.delete("PqRzMn"), "DELETE", "/api/v1/inboxes/PqRzMn", None, load_fixture("inbox_index")),
     ("messages.list", lambda c: c.messages.list("PqRzMn"), "GET", "/api/v1/inboxes/PqRzMn/inbound_messages", None, [load_fixture("message")]),
     ("messages.get", lambda c: c.messages.get("PqRzMn", "GxTyVu"), "GET", "/api/v1/inboxes/PqRzMn/inbound_messages/GxTyVu", None, load_fixture("message_show")),
+    ("events.list_team", lambda c: c.events.list_team(), "GET", "/api/v1/teams/KjkAJW/message_events", None, [load_fixture("event")]),
     ("events.list", lambda c: c.events.list("NmQpXr"), "GET", "/api/v1/teams/KjkAJW/clusters/NmQpXr/message_events", None, [load_fixture("event")]),
     ("events.get", lambda c: c.events.get("JkLmNp"), "GET", "/api/v1/message_events/JkLmNp", None, load_fixture("event")),
     (
@@ -198,6 +278,27 @@ OPERATIONS = [
         load_fixture("webhook"),
     ),
     ("webhooks.delete", lambda c: c.webhooks.delete("CdFgHj"), "DELETE", "/api/v1/webhook_endpoints/CdFgHj", None, load_fixture("empty")),
+    ("templates.list", lambda c: c.templates.list(), "GET", "/api/v1/teams/KjkAJW/templates", None, [load_fixture("template")]),
+    ("templates.get", lambda c: c.templates.get("TpLmQr"), "GET", "/api/v1/templates/TpLmQr", None, load_fixture("template")),
+    (
+        "templates.create",
+        lambda c: c.templates.create(load_fixture("template_create_request")),
+        "POST",
+        "/api/v1/teams/KjkAJW/templates",
+        load_fixture("template_create_request"),
+        load_fixture("template"),
+    ),
+    (
+        "templates.update",
+        lambda c: c.templates.update("TpLmQr", load_fixture("template_update_request")),
+        "PATCH",
+        "/api/v1/templates/TpLmQr",
+        load_fixture("template_update_request"),
+        load_fixture("template_updated"),
+    ),
+    ("templates.publish", lambda c: c.templates.publish("TpLmQr"), "POST", "/api/v1/templates/TpLmQr/publish", None, load_fixture("template")),
+    ("templates.duplicate", lambda c: c.templates.duplicate("TpLmQr"), "POST", "/api/v1/templates/TpLmQr/duplicate", None, load_fixture("template_duplicated")),
+    ("templates.delete", lambda c: c.templates.delete("TpLmQr"), "DELETE", "/api/v1/templates/TpLmQr", None, load_fixture("empty")),
     ("suppressions.list", lambda c: c.suppressions.list(), "GET", "/api/v1/teams/KjkAJW/suppressions", None, [load_fixture("suppression")]),
     (
         "suppressions.create",
@@ -206,6 +307,14 @@ OPERATIONS = [
         "/api/v1/teams/KjkAJW/suppressions",
         load_fixture("suppression_create_request"),
         load_fixture("suppression"),
+    ),
+    (
+        "suppressions.import",
+        lambda c: c.suppressions.import_(load_fixture("suppression_import_request")),
+        "POST",
+        "/api/v1/teams/KjkAJW/suppressions/import",
+        load_fixture("suppression_import_request"),
+        load_fixture("suppression_import"),
     ),
     ("suppressions.delete", lambda c: c.suppressions.delete("YtReWq"), "DELETE", "/api/v1/suppressions/YtReWq", None, load_fixture("empty")),
     ("firewall.get", lambda c: c.firewall.get(), "GET", "/api/v1/teams/KjkAJW/firewall", None, load_fixture("firewall")),

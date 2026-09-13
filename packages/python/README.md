@@ -91,6 +91,10 @@ client.users.me()
 client.emails.send(body)
 client.emails.send(body, cluster_id="NmQpXr")
 client.emails.send_on_cluster("NmQpXr", body, idempotency_key="idem-1", sandbox=True)
+client.emails.send({
+	"to": ["you@example.com"],
+	"template": {"id": "welcome", "variables": {"name": "Ada"}},
+})
 ```
 
 ### Clusters
@@ -103,6 +107,20 @@ client.clusters.update("NmQpXr", {"cluster": {"plan": "small"}})
 client.clusters.suspend("NmQpXr")
 client.clusters.resume("NmQpXr")
 client.clusters.delete("NmQpXr")
+client.clusters.boost("NmQpXr", {"sku": "small_to_large"})
+client.clusters.extend_boost("NmQpXr", {"idempotency_key": "extend-1"})
+client.clusters.cancel_boost("NmQpXr")
+```
+
+### Network
+
+```python
+client.network.list()
+client.network.create({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"})
+client.network.assign({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"})
+client.network.unassign({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"})
+client.network.switch({"ip_address_id": "IpQwEr", "cluster_id": "NmQpXr"})
+client.network.release({"ip_address_id": "IpQwEr"})
 ```
 
 ### Sending domains
@@ -111,6 +129,8 @@ client.clusters.delete("NmQpXr")
 client.sending_domains.list()
 client.sending_domains.get("HsVtYk")
 client.sending_domains.create({"sending_domain": {"name": "mail.example.com", "tenant_id": "WbLcFd"}})
+client.sending_domains.update("HsVtYk", {"sending_domain": {"dkim_selector": "s1", "dkim_manual": True}})
+client.sending_domains.refresh("HsVtYk")
 client.sending_domains.verify("HsVtYk")
 client.sending_domains.suspend("HsVtYk")
 client.sending_domains.resume("HsVtYk")
@@ -132,7 +152,14 @@ client.tenants.delete("WbLcFd")
 ```python
 client.inboxes.list()
 client.inboxes.get("PqRzMn")
-client.inboxes.create({"inbox": {"name": "agent", "webhook_url": "https://hooks.example.com/mail"}})
+client.inboxes.create({
+	"inbox": {
+		"name": "agent",
+		"webhook_url": "https://hooks.example.com/mail",
+		"host": "inbound.example.com",
+		"forward_to": "you@example.com",
+	},
+})
 client.inboxes.verify("PqRzMn")
 client.inboxes.delete("PqRzMn")
 ```
@@ -148,6 +175,7 @@ client.messages.download_attachment("PqRzMn", "GxTyVu", 1)
 ### Events
 
 ```python
+client.events.list_team()
 client.events.list("NmQpXr")
 client.events.get("JkLmNp")
 ```
@@ -169,11 +197,33 @@ client.webhooks.update("CdFgHj", {"webhook_endpoint": {"enabled": False, "event_
 client.webhooks.delete("CdFgHj")
 ```
 
+### Templates
+
+```python
+client.templates.list()
+client.templates.get("welcome")
+client.templates.create({
+	"email_template": {
+		"name": "Welcome",
+		"alias": "welcome",
+		"subject": "Hi {{ name }}",
+		"html": "<p>Hi {{ name }}</p>",
+	},
+})
+client.templates.update("TpLmQr", {"email_template": {"subject": "Welcome, {{ name }}"}})
+client.templates.publish("TpLmQr")
+client.templates.duplicate("TpLmQr")
+client.templates.delete("TpLmQr")
+```
+
+Send uses the published snapshot. `get` and member routes accept the public id or the alias.
+
 ### Suppressions
 
 ```python
 client.suppressions.list()
 client.suppressions.create({"suppression": {"email": "blocked@example.com", "tenant_id": "WbLcFd"}})
+client.suppressions.import_({"emails": ["blocked@example.com", "old@example.com"], "tenant_id": "WbLcFd"})
 client.suppressions.delete("YtReWq")
 ```
 

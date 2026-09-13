@@ -339,6 +339,25 @@ describe('sendEmail', () => {
     ]);
     expect('send' in body).toBe(false);
   });
+
+  it('posts a template and omits html', async () => {
+    const { calls, impl } = captureFetch(okResponse());
+
+    await sendEmail(
+      config,
+      {
+        from: 'a@example.com',
+        to: ['b@example.com'],
+        template: { id: 'welcome', variables: { name: 'Ada' } },
+        html: '<p>ignored</p>',
+      },
+      impl,
+    );
+
+    const body = JSON.parse(calls[0]!.init.body as string);
+    expect(body.template).toEqual({ id: 'welcome', variables: { name: 'Ada' } });
+    expect(body).not.toHaveProperty('html');
+  });
 });
 
 const SECRET = 'whsec_topsecret';

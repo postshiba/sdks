@@ -86,6 +86,22 @@ await postshiba.sendEmail(ctx, {
 
 Use `priority: "bulk"` for newsletters. Default is `transactional`.
 
+Send from a published template. The POST body includes `template` and omits `html` and `text`. `subject` and `from` stay optional overrides.
+
+```ts
+await postshiba.sendEmail(ctx, {
+  from: "hello@mail.example.com",
+  to: "you@example.com",
+  subject: "Welcome",
+  template: {
+    id: "welcome",
+    variables: { name: "Ada", body: "Your account is ready." },
+  },
+});
+```
+
+The same shape works on `@postshiba/convex/http` `sendEmail`.
+
 ## Webhooks
 
 Route PostShiba webhooks to the component:

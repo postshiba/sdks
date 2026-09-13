@@ -26,9 +26,10 @@ export type SendRequest = {
   cc?: string[];
   bcc?: string[];
   replyTo?: string | string[];
-  subject: string;
+  subject?: string;
   html?: string;
   text?: string;
+  template?: { id: string; variables?: Record<string, unknown> };
   headers?: Record<string, string>;
   uniqueArgs?: Record<string, UniqueArgValue>;
   tenant?: string;
@@ -83,14 +84,18 @@ function buildSendBody(req: SendRequest): string {
   const body: Record<string, unknown> = {
     from: req.from,
     to: req.to,
-    subject: req.subject,
   };
+  if (req.subject !== undefined) body.subject = req.subject;
   if (req.cc !== undefined && req.cc.length > 0) body.cc = req.cc;
   if (req.bcc !== undefined && req.bcc.length > 0) body.bcc = req.bcc;
   const replyTo = replyToScalar(req.replyTo);
   if (replyTo !== undefined) body.reply_to = replyTo;
-  if (req.html !== undefined) body.html = req.html;
-  if (req.text !== undefined) body.text = req.text;
+  if (req.template !== undefined) {
+    body.template = req.template;
+  } else {
+    if (req.html !== undefined) body.html = req.html;
+    if (req.text !== undefined) body.text = req.text;
+  }
   if (req.headers !== undefined) body.headers = req.headers;
   if (req.uniqueArgs !== undefined) body.unique_args = req.uniqueArgs;
   body.tenant = req.tenant ?? DEFAULT_TENANT_SLUG;

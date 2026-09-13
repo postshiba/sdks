@@ -21,6 +21,7 @@ class PostShiba:
         self.users = _Users(self)
         self.emails = _Emails(self)
         self.clusters = _Clusters(self)
+        self.network = _Network(self)
         self.sending_domains = _SendingDomains(self)
         self.tenants = _Tenants(self)
         self.inboxes = _Inboxes(self)
@@ -28,6 +29,7 @@ class PostShiba:
         self.events = _Events(self)
         self.smtp_credentials = _SmtpCredentials(self)
         self.webhooks = _Webhooks(self)
+        self.templates = _Templates(self)
         self.suppressions = _Suppressions(self)
         self.firewall = _Firewall(self)
 
@@ -128,6 +130,48 @@ class _Clusters:
     def delete(self, id):
         return self._client.request("DELETE", "/api/v1/clusters/%s" % id)
 
+    def boost(self, id, body):
+        return self._client.request("POST", "/api/v1/clusters/%s/boost" % id, body=body)
+
+    def extend_boost(self, id, body):
+        return self._client.request("POST", "/api/v1/clusters/%s/extend_boost" % id, body=body)
+
+    def cancel_boost(self, id):
+        return self._client.request("POST", "/api/v1/clusters/%s/cancel_boost" % id)
+
+
+class _Network:
+    def __init__(self, client):
+        self._client = client
+
+    def list(self):
+        return self._client.request("GET", "/api/v1/teams/%s/network" % self._client._require_team_id())
+
+    def create(self, body):
+        return self._client.request(
+            "POST", "/api/v1/teams/%s/network" % self._client._require_team_id(), body=body
+        )
+
+    def assign(self, body):
+        return self._client.request(
+            "POST", "/api/v1/teams/%s/network/assign" % self._client._require_team_id(), body=body
+        )
+
+    def unassign(self, body):
+        return self._client.request(
+            "POST", "/api/v1/teams/%s/network/unassign" % self._client._require_team_id(), body=body
+        )
+
+    def switch(self, body):
+        return self._client.request(
+            "POST", "/api/v1/teams/%s/network/switch" % self._client._require_team_id(), body=body
+        )
+
+    def release(self, body):
+        return self._client.request(
+            "POST", "/api/v1/teams/%s/network/release" % self._client._require_team_id(), body=body
+        )
+
 
 class _SendingDomains:
     def __init__(self, client):
@@ -147,6 +191,12 @@ class _SendingDomains:
             "/api/v1/teams/%s/sending_domains" % self._client._require_team_id(),
             body=body,
         )
+
+    def update(self, id, body):
+        return self._client.request("PATCH", "/api/v1/sending_domains/%s" % id, body=body)
+
+    def refresh(self, id):
+        return self._client.request("POST", "/api/v1/sending_domains/%s/refresh" % id)
 
     def verify(self, id):
         return self._client.request("POST", "/api/v1/sending_domains/%s/verify" % id)
@@ -224,6 +274,11 @@ class _Events:
     def __init__(self, client):
         self._client = client
 
+    def list_team(self):
+        return self._client.request(
+            "GET", "/api/v1/teams/%s/message_events" % self._client._require_team_id()
+        )
+
     def list(self, cluster_id):
         path = "/api/v1/teams/%s/clusters/%s/message_events" % (
             self._client._require_team_id(),
@@ -297,6 +352,36 @@ class _Webhooks:
         return hmac.compare_digest(digest, provided)
 
 
+class _Templates:
+    def __init__(self, client):
+        self._client = client
+
+    def list(self):
+        return self._client.request(
+            "GET", "/api/v1/teams/%s/templates" % self._client._require_team_id()
+        )
+
+    def get(self, id):
+        return self._client.request("GET", "/api/v1/templates/%s" % id)
+
+    def create(self, body):
+        return self._client.request(
+            "POST", "/api/v1/teams/%s/templates" % self._client._require_team_id(), body=body
+        )
+
+    def update(self, id, body):
+        return self._client.request("PATCH", "/api/v1/templates/%s" % id, body=body)
+
+    def publish(self, id):
+        return self._client.request("POST", "/api/v1/templates/%s/publish" % id)
+
+    def duplicate(self, id):
+        return self._client.request("POST", "/api/v1/templates/%s/duplicate" % id)
+
+    def delete(self, id):
+        return self._client.request("DELETE", "/api/v1/templates/%s" % id)
+
+
 class _Suppressions:
     def __init__(self, client):
         self._client = client
@@ -309,6 +394,13 @@ class _Suppressions:
     def create(self, body):
         return self._client.request(
             "POST", "/api/v1/teams/%s/suppressions" % self._client._require_team_id(), body=body
+        )
+
+    def import_(self, body):
+        return self._client.request(
+            "POST",
+            "/api/v1/teams/%s/suppressions/import" % self._client._require_team_id(),
+            body=body,
         )
 
     def delete(self, id):

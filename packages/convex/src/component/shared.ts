@@ -52,6 +52,12 @@ export const vUniqueArgValue = v.union(v.string(), v.number(), v.boolean());
 export const vUniqueArgs = v.record(v.string(), vUniqueArgValue);
 export type UniqueArgs = Infer<typeof vUniqueArgs>;
 
+export const vTemplate = v.object({
+  id: v.string(),
+  variables: v.optional(v.record(v.string(), v.any())),
+});
+export type SendTemplate = Infer<typeof vTemplate>;
+
 export const vEmailEvent = v.object({
   event: vEventType,
   email: v.optional(v.string()),

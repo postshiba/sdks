@@ -1,6 +1,6 @@
 ---
 name: postshiba
-description: Manages PostShiba email infrastructure and transactional sending through MCP. Use when a user mentions PostShiba, email sending, clusters, sending domains, DNS verification, SMTP credentials, hosted inboxes, inbound messages, delivery events, webhooks, suppressions, or firewalls.
+description: Manages PostShiba email infrastructure and transactional sending through MCP. Use when a user mentions PostShiba, email sending, Liquid templates, clusters, capacity boosts, sending IPs, sending domains, DNS verification, SMTP credentials, hosted inboxes, inbound messages, delivery events, webhooks, suppressions, or firewalls.
 ---
 
 # PostShiba
@@ -19,8 +19,10 @@ Use the PostShiba MCP server for catalog API work. The platform application toke
 | Goal | MCP tools |
 | --- | --- |
 | Confirm identity | `whoami` |
-| Send a message | `send_email`, `send_on_cluster` |
-| Manage clusters | `list_clusters`, `get_cluster`, `create_cluster`, `update_cluster`, `suspend_cluster`, `resume_cluster`, `destroy_cluster` |
+| Send a message | `send_email`, `send_template_email`, `send_on_cluster` |
+| Manage Liquid templates | `list_email_templates`, `get_email_template`, `create_email_template`, `update_email_template`, `publish_email_template`, `duplicate_email_template`, `destroy_email_template` |
+| Manage clusters | `list_clusters`, `get_cluster`, `create_cluster`, `update_cluster`, `suspend_cluster`, `resume_cluster`, `destroy_cluster`, `boost_cluster`, `extend_boost_cluster`, `cancel_boost_cluster` |
+| Manage sending IPs | `list_network`, `create_network`, `assign_network`, `unassign_network`, `switch_network`, `release_network` |
 | Manage sending domains | `list_sending_domains`, `get_sending_domain`, `create_sending_domain`, `update_sending_domain`, `refresh_sending_domain`, `verify_sending_domain`, `suspend_sending_domain`, `resume_sending_domain`, `make_primary_sending_domain`, `can_i_send_this_sending_domain`, `can_i_send_this_poll_sending_domain`, `destroy_sending_domain` |
 | Manage tenants | `list_tenants`, `get_tenant`, `create_tenant`, `suspend_tenant`, `resume_tenant`, `destroy_tenant` |
 | Manage inboxes | `list_inboxes`, `get_inbox`, `create_inbox`, `verify_inbox`, `destroy_inbox` |
@@ -51,7 +53,10 @@ Use the PostShiba MCP server for catalog API work. The platform application toke
 ### Sending
 
 - `send_email` has no sandbox mode.
+- `send_template_email` posts the same `/emails` path with `template.id` (alias or public id) and Liquid `variables`. Do not pass `html` or `text`. The template must be published. `from`, `subject`, and `reply_to` on the request override the template.
+- Create a draft with `create_email_template`, edit with `update_email_template`, then `publish_email_template` before send. Drafts cannot send.
 - Use `send_on_cluster` with `sandbox: true` for a sandbox send.
 - MCP cannot set `Idempotency-Key` or `X-Capsule-Cluster-Id`.
 - Never use the email returned by `whoami` as `from`. Omit `from`, or use an address on a verified sending domain.
 - A hosted inbox is inbound only. MAIL FROM must use a verified sending domain.
+- `create_inbox` may pass `host` and `forward_to` for a domain-bound inbox. Omit `sending_domain_id` (and those fields) to keep the inbox hosted.

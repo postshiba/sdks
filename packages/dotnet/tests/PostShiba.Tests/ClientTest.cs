@@ -47,6 +47,23 @@ public class ClientTest
     }
 
     [Fact]
+    public async Task Emails_send_published_template()
+    {
+        using var harness = new Harness();
+        harness.Handler.Respond = () => MockHandler.Json(HttpStatusCode.OK, Catalog.Text("email_send_template_response"));
+
+        var result = await harness.Client.Emails.SendAsync(Catalog.Json("email_send_template_request"));
+
+        Assert.Equal(HttpMethod.Post, harness.Handler.Method);
+        Assert.Equal("https://api.example.test/api/v1/emails", harness.Handler.Uri!.ToString());
+        AssertJsonEqual(Catalog.Text("email_send_template_request"), harness.Handler.Body!);
+        Assert.True(result.GetProperty("queued").GetBoolean());
+        Assert.Equal("abc@capsule.test", result.GetProperty("message_id").GetString());
+        Assert.Equal("Hi Ada", result.GetProperty("subject").GetString());
+        Assert.Null(harness.Handler.ClusterId);
+    }
+
+    [Fact]
     public async Task Emails_send_pins_cluster()
     {
         using var harness = new Harness();

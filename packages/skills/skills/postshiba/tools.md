@@ -1,11 +1,12 @@
 # PostShiba MCP tool registry
 
-This registry mirrors `CapsuleMcp::Operations.all`. It contains 54 tools. The MCP server fills `:obfuscated_team_id` from the platform application token.
+This registry mirrors `CapsuleMcp::Operations.all`. It contains 71 tools. The MCP server fills `:obfuscated_team_id` from the platform application token.
 
 | MCP tool | REST method | REST path |
 | --- | --- | --- |
 | `whoami` | `GET` | `/api/v1/users/me` |
 | `send_email` | `POST` | `/api/v1/emails` |
+| `send_template_email` | `POST` | `/api/v1/emails` |
 | `send_on_cluster` | `POST` | `/api/v1/teams/:obfuscated_team_id/clusters/:obfuscated_cluster_id/sends` |
 | `list_clusters` | `GET` | `/api/v1/teams/:obfuscated_team_id/clusters` |
 | `get_cluster` | `GET` | `/api/v1/clusters/:id` |
@@ -14,6 +15,15 @@ This registry mirrors `CapsuleMcp::Operations.all`. It contains 54 tools. The MC
 | `suspend_cluster` | `POST` | `/api/v1/clusters/:id/suspend` |
 | `resume_cluster` | `POST` | `/api/v1/clusters/:id/resume` |
 | `destroy_cluster` | `DELETE` | `/api/v1/clusters/:id` |
+| `boost_cluster` | `POST` | `/api/v1/clusters/:id/boost` |
+| `extend_boost_cluster` | `POST` | `/api/v1/clusters/:id/extend_boost` |
+| `cancel_boost_cluster` | `POST` | `/api/v1/clusters/:id/cancel_boost` |
+| `list_network` | `GET` | `/api/v1/teams/:obfuscated_team_id/network` |
+| `create_network` | `POST` | `/api/v1/teams/:obfuscated_team_id/network` |
+| `assign_network` | `POST` | `/api/v1/teams/:obfuscated_team_id/network/assign` |
+| `unassign_network` | `POST` | `/api/v1/teams/:obfuscated_team_id/network/unassign` |
+| `switch_network` | `POST` | `/api/v1/teams/:obfuscated_team_id/network/switch` |
+| `release_network` | `POST` | `/api/v1/teams/:obfuscated_team_id/network/release` |
 | `list_sending_domains` | `GET` | `/api/v1/teams/:obfuscated_team_id/sending_domains` |
 | `get_sending_domain` | `GET` | `/api/v1/sending_domains/:id` |
 | `create_sending_domain` | `POST` | `/api/v1/teams/:obfuscated_team_id/sending_domains` |
@@ -50,6 +60,13 @@ This registry mirrors `CapsuleMcp::Operations.all`. It contains 54 tools. The MC
 | `create_webhook_endpoint` | `POST` | `/api/v1/teams/:obfuscated_team_id/webhook_endpoints` |
 | `update_webhook_endpoint` | `PATCH` | `/api/v1/webhook_endpoints/:id` |
 | `destroy_webhook_endpoint` | `DELETE` | `/api/v1/webhook_endpoints/:id` |
+| `list_email_templates` | `GET` | `/api/v1/teams/:obfuscated_team_id/templates` |
+| `get_email_template` | `GET` | `/api/v1/templates/:id` |
+| `create_email_template` | `POST` | `/api/v1/teams/:obfuscated_team_id/templates` |
+| `update_email_template` | `PATCH` | `/api/v1/templates/:id` |
+| `publish_email_template` | `POST` | `/api/v1/templates/:id/publish` |
+| `duplicate_email_template` | `POST` | `/api/v1/templates/:id/duplicate` |
+| `destroy_email_template` | `DELETE` | `/api/v1/templates/:id` |
 | `list_suppressions` | `GET` | `/api/v1/teams/:obfuscated_team_id/suppressions` |
 | `create_suppression` | `POST` | `/api/v1/teams/:obfuscated_team_id/suppressions` |
 | `import_suppression` | `POST` | `/api/v1/teams/:obfuscated_team_id/suppressions/import` |

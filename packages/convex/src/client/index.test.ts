@@ -197,6 +197,25 @@ describe('sendEmail', () => {
     expect(email?.priority).toBe('bulk');
   });
 
+  it('enqueues a template send', async () => {
+    const emailId = await t.run((ctx) =>
+      client.sendEmail(ctx, {
+        from: 'a@example.com',
+        to: 'b@example.com',
+        subject: 'Hi',
+        template: { id: 'welcome', variables: { name: 'Ada' } },
+      }),
+    );
+
+    const email = await t.run((ctx) => client.get(ctx, emailId));
+    expect(email?.template).toEqual({
+      id: 'welcome',
+      variables: { name: 'Ada' },
+    });
+    expect(email?.html).toBeUndefined();
+    expect(email?.text).toBeUndefined();
+  });
+
   it('cancels a queued email', async () => {
     const emailId = await t.run((ctx) =>
       client.sendEmail(ctx, {

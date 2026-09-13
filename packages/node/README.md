@@ -110,6 +110,10 @@ await postshiba.users.me()
 await postshiba.emails.send(body)
 await postshiba.emails.send(body, { clusterId: "NmQpXr" })
 await postshiba.emails.sendOnCluster("NmQpXr", body, { sandbox: true })
+await postshiba.emails.send({
+	to: ["you@example.com"],
+	template: { id: "welcome", variables: { name: "Ada" } },
+})
 ```
 
 ### Clusters
@@ -122,6 +126,20 @@ await postshiba.clusters.update("NmQpXr", { cluster: { plan: "small" } })
 await postshiba.clusters.suspend("NmQpXr")
 await postshiba.clusters.resume("NmQpXr")
 await postshiba.clusters.delete("NmQpXr")
+await postshiba.clusters.boost("NmQpXr", { sku: "small_to_large" })
+await postshiba.clusters.extendBoost("NmQpXr", { idempotency_key: "extend-1" })
+await postshiba.clusters.cancelBoost("NmQpXr")
+```
+
+### Network
+
+```ts
+await postshiba.network.list()
+await postshiba.network.create({ ip_address_id: "IpQwEr", cluster_id: "NmQpXr" })
+await postshiba.network.assign({ ip_address_id: "IpQwEr", cluster_id: "NmQpXr" })
+await postshiba.network.unassign({ ip_address_id: "IpQwEr", cluster_id: "NmQpXr" })
+await postshiba.network.switch({ ip_address_id: "IpQwEr", cluster_id: "NmQpXr" })
+await postshiba.network.release({ ip_address_id: "IpQwEr" })
 ```
 
 ### Sending domains
@@ -130,6 +148,8 @@ await postshiba.clusters.delete("NmQpXr")
 await postshiba.sendingDomains.list()
 await postshiba.sendingDomains.get("HsVtYk")
 await postshiba.sendingDomains.create({ sending_domain: { name: "mail.example.com", tenant_id: "WbLcFd" } })
+await postshiba.sendingDomains.update("HsVtYk", { sending_domain: { dkim_selector: "s1", dkim_manual: true } })
+await postshiba.sendingDomains.refresh("HsVtYk")
 await postshiba.sendingDomains.verify("HsVtYk")
 await postshiba.sendingDomains.suspend("HsVtYk")
 await postshiba.sendingDomains.resume("HsVtYk")
@@ -151,7 +171,14 @@ await postshiba.tenants.delete("WbLcFd")
 ```ts
 await postshiba.inboxes.list()
 await postshiba.inboxes.get("PqRzMn")
-await postshiba.inboxes.create({ inbox: { name: "agent", webhook_url: "https://hooks.example.com/mail" } })
+await postshiba.inboxes.create({
+	inbox: {
+		name: "agent",
+		webhook_url: "https://hooks.example.com/mail",
+		host: "inbound.example.com",
+		forward_to: "you@example.com",
+	},
+})
 await postshiba.inboxes.verify("PqRzMn")
 await postshiba.inboxes.delete("PqRzMn")
 ```
@@ -167,6 +194,7 @@ await postshiba.messages.downloadAttachment("PqRzMn", "GxTyVu", 1)
 ### Events
 
 ```ts
+await postshiba.events.listTeam()
 await postshiba.events.list("NmQpXr")
 await postshiba.events.get("JkLmNp")
 ```
@@ -200,11 +228,33 @@ await postshiba.webhooks.delete("CdFgHj")
 
 List and update omit `secret`. Get and create return it.
 
+### Templates
+
+```ts
+await postshiba.templates.list()
+await postshiba.templates.get("welcome")
+await postshiba.templates.create({
+	email_template: {
+		name: "Welcome",
+		alias: "welcome",
+		subject: "Hi {{ name }}",
+		html: "<p>Hi {{ name }}</p>",
+	},
+})
+await postshiba.templates.update("TpLmQr", { email_template: { subject: "Welcome, {{ name }}" } })
+await postshiba.templates.publish("TpLmQr")
+await postshiba.templates.duplicate("TpLmQr")
+await postshiba.templates.delete("TpLmQr")
+```
+
+Send uses the published snapshot. `get` and member routes accept the public id or the alias.
+
 ### Suppressions
 
 ```ts
 await postshiba.suppressions.list()
 await postshiba.suppressions.create({ suppression: { email: "blocked@example.com", tenant_id: "WbLcFd" } })
+await postshiba.suppressions.import({ emails: ["blocked@example.com", "old@example.com"], tenant_id: "WbLcFd" })
 await postshiba.suppressions.delete("YtReWq")
 ```
 

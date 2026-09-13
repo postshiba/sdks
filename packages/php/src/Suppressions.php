@@ -18,6 +18,11 @@ class Suppressions
         return $this->client->request('POST', '/api/v1/teams/'.$this->client->teamId().'/suppressions', $params);
     }
 
+    public function import(array $params): mixed
+    {
+        return $this->client->request('POST', '/api/v1/teams/'.$this->client->teamId().'/suppressions/import', $params);
+    }
+
     public function delete(string $id): mixed
     {
         return $this->client->request('DELETE', '/api/v1/suppressions/'.$id);

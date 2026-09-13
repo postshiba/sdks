@@ -1,0 +1,7 @@
+{
+  "sending_domain": {
+    "dkim_selector": "s1",
+    "dkim_manual": true,
+    "dkim_private_key": "YOUR_PEM"
+  }
+}

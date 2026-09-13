@@ -35,6 +35,17 @@ defmodule PostShibaTest do
     assert PostShiba.Emails.send(client, body) == Catalog.fixture("email_send_response")
   end
 
+  test "sends an email with a template", %{bypass: bypass, client: client} do
+    body = Catalog.fixture("email_send_template_request")
+
+    Bypass.expect(bypass, "POST", "/api/v1/emails", fn conn ->
+      assert read_json(conn) == body
+      json_resp(conn, Catalog.fixture("email_send_template_response"))
+    end)
+
+    assert PostShiba.Emails.send(client, body) == Catalog.fixture("email_send_template_response")
+  end
+
   test "pins emails.send to a cluster", %{bypass: bypass, client: client} do
     body = Catalog.fixture("email_send_request")
 
@@ -225,6 +236,35 @@ defmodule PostShibaTest do
        nil, Catalog.fixture("cluster")},
       {"clusters.delete", &PostShiba.Clusters.delete(&1, "NmQpXr"), "DELETE", "/api/v1/clusters/NmQpXr", nil,
        Catalog.fixture("cluster_deprovisioned")},
+      {"clusters.boost",
+       &PostShiba.Clusters.boost(&1, "NmQpXr", Catalog.fixture("cluster_boost_request")), "POST",
+       "/api/v1/clusters/NmQpXr/boost", "cluster_boost_request", Catalog.fixture("cluster_boosted")},
+      {"clusters.extendBoost",
+       &PostShiba.Clusters.extend_boost(&1, "NmQpXr", Catalog.fixture("cluster_extend_boost_request")),
+       "POST", "/api/v1/clusters/NmQpXr/extend_boost", "cluster_extend_boost_request",
+       Catalog.fixture("cluster_boosted")},
+      {"clusters.cancelBoost", &PostShiba.Clusters.cancel_boost(&1, "NmQpXr"), "POST",
+       "/api/v1/clusters/NmQpXr/cancel_boost", nil, Catalog.fixture("cluster")},
+      {"network.list", &PostShiba.Network.list/1, "GET", "/api/v1/teams/KjkAJW/network", nil,
+       [Catalog.fixture("network")]},
+      {"network.create",
+       &PostShiba.Network.create(&1, Catalog.fixture("network_create_request")), "POST",
+       "/api/v1/teams/KjkAJW/network", "network_create_request", Catalog.fixture("network_assigned")},
+      {"network.assign",
+       &PostShiba.Network.assign(&1, Catalog.fixture("network_create_request")), "POST",
+       "/api/v1/teams/KjkAJW/network/assign", "network_create_request",
+       Catalog.fixture("network_dedicated")},
+      {"network.unassign",
+       &PostShiba.Network.unassign(&1, Catalog.fixture("network_create_request")), "POST",
+       "/api/v1/teams/KjkAJW/network/unassign", "network_create_request", Catalog.fixture("network")},
+      {"network.switch",
+       &PostShiba.Network.switch(&1, Catalog.fixture("network_create_request")), "POST",
+       "/api/v1/teams/KjkAJW/network/switch", "network_create_request",
+       Catalog.fixture("network_assigned")},
+      {"network.release",
+       &PostShiba.Network.release(&1, Catalog.fixture("network_release_request")), "POST",
+       "/api/v1/teams/KjkAJW/network/release", "network_release_request",
+       Catalog.fixture("network_released")},
       {"sendingDomains.list", &PostShiba.SendingDomains.list/1, "GET",
        "/api/v1/teams/KjkAJW/sending_domains", nil, [Catalog.fixture("sending_domain")]},
       {"sendingDomains.get", &PostShiba.SendingDomains.get(&1, "HsVtYk"), "GET",
@@ -233,6 +273,12 @@ defmodule PostShibaTest do
        &PostShiba.SendingDomains.create(&1, Catalog.fixture("sending_domain_create_request")),
        "POST", "/api/v1/teams/KjkAJW/sending_domains", "sending_domain_create_request",
        Catalog.fixture("sending_domain")},
+      {"sendingDomains.update",
+       &PostShiba.SendingDomains.update(&1, "HsVtYk", Catalog.fixture("sending_domain_update_request")),
+       "PATCH", "/api/v1/sending_domains/HsVtYk", "sending_domain_update_request",
+       Catalog.fixture("sending_domain_updated")},
+      {"sendingDomains.refresh", &PostShiba.SendingDomains.refresh(&1, "HsVtYk"), "POST",
+       "/api/v1/sending_domains/HsVtYk/refresh", nil, Catalog.fixture("sending_domain")},
       {"sendingDomains.verify", &PostShiba.SendingDomains.verify(&1, "HsVtYk"), "POST",
        "/api/v1/sending_domains/HsVtYk/verify", nil, Catalog.fixture("sending_domain")},
       {"sendingDomains.suspend", &PostShiba.SendingDomains.suspend(&1, "HsVtYk"), "POST",
@@ -265,6 +311,8 @@ defmodule PostShibaTest do
        "/api/v1/inboxes/PqRzMn/inbound_messages", nil, [Catalog.fixture("message")]},
       {"messages.get", &PostShiba.Messages.get(&1, "PqRzMn", "GxTyVu"), "GET",
        "/api/v1/inboxes/PqRzMn/inbound_messages/GxTyVu", nil, Catalog.fixture("message_show")},
+      {"events.listTeam", &PostShiba.Events.list_team/1, "GET",
+       "/api/v1/teams/KjkAJW/message_events", nil, [Catalog.fixture("event")]},
       {"events.list", &PostShiba.Events.list(&1, "NmQpXr"), "GET",
        "/api/v1/teams/KjkAJW/clusters/NmQpXr/message_events", nil, [Catalog.fixture("event")]},
       {"events.get", &PostShiba.Events.get(&1, "JkLmNp"), "GET", "/api/v1/message_events/JkLmNp", nil,
@@ -292,12 +340,32 @@ defmodule PostShibaTest do
        "/api/v1/webhook_endpoints/CdFgHj", "webhook_update_request", Catalog.fixture("webhook")},
       {"webhooks.delete", &PostShiba.Webhooks.delete(&1, "CdFgHj"), "DELETE",
        "/api/v1/webhook_endpoints/CdFgHj", nil, Catalog.fixture("empty")},
+      {"templates.list", &PostShiba.Templates.list/1, "GET", "/api/v1/teams/KjkAJW/templates", nil,
+       [Catalog.fixture("template")]},
+      {"templates.get", &PostShiba.Templates.get(&1, "TpLmQr"), "GET", "/api/v1/templates/TpLmQr", nil,
+       Catalog.fixture("template")},
+      {"templates.create",
+       &PostShiba.Templates.create(&1, Catalog.fixture("template_create_request")), "POST",
+       "/api/v1/teams/KjkAJW/templates", "template_create_request", Catalog.fixture("template")},
+      {"templates.update",
+       &PostShiba.Templates.update(&1, "TpLmQr", Catalog.fixture("template_update_request")), "PATCH",
+       "/api/v1/templates/TpLmQr", "template_update_request", Catalog.fixture("template_updated")},
+      {"templates.publish", &PostShiba.Templates.publish(&1, "TpLmQr"), "POST",
+       "/api/v1/templates/TpLmQr/publish", nil, Catalog.fixture("template")},
+      {"templates.duplicate", &PostShiba.Templates.duplicate(&1, "TpLmQr"), "POST",
+       "/api/v1/templates/TpLmQr/duplicate", nil, Catalog.fixture("template_duplicated")},
+      {"templates.delete", &PostShiba.Templates.delete(&1, "TpLmQr"), "DELETE",
+       "/api/v1/templates/TpLmQr", nil, Catalog.fixture("empty")},
       {"suppressions.list", &PostShiba.Suppressions.list/1, "GET", "/api/v1/teams/KjkAJW/suppressions",
        nil, [Catalog.fixture("suppression")]},
       {"suppressions.create",
        &PostShiba.Suppressions.create(&1, Catalog.fixture("suppression_create_request")), "POST",
        "/api/v1/teams/KjkAJW/suppressions", "suppression_create_request",
        Catalog.fixture("suppression")},
+      {"suppressions.import",
+       &PostShiba.Suppressions.import(&1, Catalog.fixture("suppression_import_request")), "POST",
+       "/api/v1/teams/KjkAJW/suppressions/import", "suppression_import_request",
+       Catalog.fixture("suppression_import")},
       {"suppressions.delete", &PostShiba.Suppressions.delete(&1, "YtReWq"), "DELETE",
        "/api/v1/suppressions/YtReWq", nil, Catalog.fixture("empty")},
       {"firewall.get", &PostShiba.Firewall.get/1, "GET", "/api/v1/teams/KjkAJW/firewall", nil,

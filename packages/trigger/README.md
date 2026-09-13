@@ -46,6 +46,17 @@ export const sendWelcome = task({
 
 Pass a stable `idempotencyKey` so a retried task does not double-send.
 
+Template send. Pass `template` and skip `html` and `text`. `from` and `subject` override the template when you set them.
+
+```ts
+await sendEmail(config, {
+  from: "hello@mail.example.com",
+  to: [payload.to],
+  template: { id: "welcome", variables: { name: payload.name } },
+  idempotencyKey: payload.id,
+})
+```
+
 ## Webhooks
 
 ```ts

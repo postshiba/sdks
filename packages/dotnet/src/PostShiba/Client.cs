@@ -31,6 +31,7 @@ public sealed class Client : IDisposable
         Users = new UsersResource(this);
         Emails = new EmailsResource(this);
         Clusters = new ClustersResource(this);
+        Network = new NetworkResource(this);
         SendingDomains = new SendingDomainsResource(this);
         Tenants = new TenantsResource(this);
         Inboxes = new InboxesResource(this);
@@ -39,12 +40,14 @@ public sealed class Client : IDisposable
         SmtpCredentials = new SmtpCredentialsResource(this);
         Webhooks = new WebhooksResource(this);
         Suppressions = new SuppressionsResource(this);
+        Templates = new TemplatesResource(this);
         Firewall = new FirewallResource(this);
     }
 
     public UsersResource Users { get; }
     public EmailsResource Emails { get; }
     public ClustersResource Clusters { get; }
+    public NetworkResource Network { get; }
     public SendingDomainsResource SendingDomains { get; }
     public TenantsResource Tenants { get; }
     public InboxesResource Inboxes { get; }
@@ -53,6 +56,7 @@ public sealed class Client : IDisposable
     public SmtpCredentialsResource SmtpCredentials { get; }
     public WebhooksResource Webhooks { get; }
     public SuppressionsResource Suppressions { get; }
+    public TemplatesResource Templates { get; }
     public FirewallResource Firewall { get; }
 
     internal string Team(string suffix)

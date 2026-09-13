@@ -61,6 +61,18 @@ describe("PostShiba", () => {
     expect(result).toEqual(fixture("email_send_response"));
   });
 
+  it("sends a published template", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(fixture("email_send_template_response")));
+    const body = fixture("email_send_template_request");
+    const result = await client().emails.send(body);
+    const { url, init, headers } = lastCall();
+    expect(url).toBe("https://app.postshiba.com/api/v1/emails");
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(String(init.body))).toEqual(body);
+    expect(headers.get("X-Capsule-Cluster-Id")).toBeNull();
+    expect(result).toEqual(fixture("email_send_template_response"));
+  });
+
   it("sends an email with X-Capsule-Cluster-Id", async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(fixture("email_send_response")));
     const body = fixture("email_send_request");
@@ -134,6 +146,64 @@ describe("PostShiba", () => {
       { name: "clusters.suspend", call: (c) => c.clusters.suspend("NmQpXr"), method: "POST", path: "/api/v1/clusters/NmQpXr/suspend", response: fixture("cluster_suspended") },
       { name: "clusters.resume", call: (c) => c.clusters.resume("NmQpXr"), method: "POST", path: "/api/v1/clusters/NmQpXr/resume", response: fixture("cluster") },
       { name: "clusters.delete", call: (c) => c.clusters.delete("NmQpXr"), method: "DELETE", path: "/api/v1/clusters/NmQpXr", response: fixture("cluster_deprovisioned") },
+      {
+        name: "clusters.boost",
+        call: (c) => c.clusters.boost("NmQpXr", fixture("cluster_boost_request")),
+        method: "POST",
+        path: "/api/v1/clusters/NmQpXr/boost",
+        request: "cluster_boost_request",
+        response: fixture("cluster_boosted"),
+      },
+      {
+        name: "clusters.extendBoost",
+        call: (c) => c.clusters.extendBoost("NmQpXr", fixture("cluster_extend_boost_request")),
+        method: "POST",
+        path: "/api/v1/clusters/NmQpXr/extend_boost",
+        request: "cluster_extend_boost_request",
+        response: fixture("cluster_boosted"),
+      },
+      { name: "clusters.cancelBoost", call: (c) => c.clusters.cancelBoost("NmQpXr"), method: "POST", path: "/api/v1/clusters/NmQpXr/cancel_boost", response: fixture("cluster") },
+      { name: "network.list", call: (c) => c.network.list(), method: "GET", path: "/api/v1/teams/KjkAJW/network", response: [fixture("network")] },
+      {
+        name: "network.create",
+        call: (c) => c.network.create(fixture("network_create_request")),
+        method: "POST",
+        path: "/api/v1/teams/KjkAJW/network",
+        request: "network_create_request",
+        response: fixture("network_assigned"),
+      },
+      {
+        name: "network.assign",
+        call: (c) => c.network.assign(fixture("network_create_request")),
+        method: "POST",
+        path: "/api/v1/teams/KjkAJW/network/assign",
+        request: "network_create_request",
+        response: fixture("network_dedicated"),
+      },
+      {
+        name: "network.unassign",
+        call: (c) => c.network.unassign(fixture("network_create_request")),
+        method: "POST",
+        path: "/api/v1/teams/KjkAJW/network/unassign",
+        request: "network_create_request",
+        response: fixture("network"),
+      },
+      {
+        name: "network.switch",
+        call: (c) => c.network.switch(fixture("network_create_request")),
+        method: "POST",
+        path: "/api/v1/teams/KjkAJW/network/switch",
+        request: "network_create_request",
+        response: fixture("network_assigned"),
+      },
+      {
+        name: "network.release",
+        call: (c) => c.network.release(fixture("network_release_request")),
+        method: "POST",
+        path: "/api/v1/teams/KjkAJW/network/release",
+        request: "network_release_request",
+        response: fixture("network_released"),
+      },
       { name: "sendingDomains.list", call: (c) => c.sendingDomains.list(), method: "GET", path: "/api/v1/teams/KjkAJW/sending_domains", response: [fixture("sending_domain")] },
       { name: "sendingDomains.get", call: (c) => c.sendingDomains.get("HsVtYk"), method: "GET", path: "/api/v1/sending_domains/HsVtYk", response: fixture("sending_domain") },
       {
@@ -144,6 +214,15 @@ describe("PostShiba", () => {
         request: "sending_domain_create_request",
         response: fixture("sending_domain"),
       },
+      {
+        name: "sendingDomains.update",
+        call: (c) => c.sendingDomains.update("HsVtYk", fixture("sending_domain_update_request")),
+        method: "PATCH",
+        path: "/api/v1/sending_domains/HsVtYk",
+        request: "sending_domain_update_request",
+        response: fixture("sending_domain_updated"),
+      },
+      { name: "sendingDomains.refresh", call: (c) => c.sendingDomains.refresh("HsVtYk"), method: "POST", path: "/api/v1/sending_domains/HsVtYk/refresh", response: fixture("sending_domain") },
       { name: "sendingDomains.verify", call: (c) => c.sendingDomains.verify("HsVtYk"), method: "POST", path: "/api/v1/sending_domains/HsVtYk/verify", response: fixture("sending_domain") },
       { name: "sendingDomains.suspend", call: (c) => c.sendingDomains.suspend("HsVtYk"), method: "POST", path: "/api/v1/sending_domains/HsVtYk/suspend", response: fixture("sending_domain_suspended") },
       { name: "sendingDomains.resume", call: (c) => c.sendingDomains.resume("HsVtYk"), method: "POST", path: "/api/v1/sending_domains/HsVtYk/resume", response: fixture("sending_domain") },
@@ -174,6 +253,7 @@ describe("PostShiba", () => {
       { name: "inboxes.delete", call: (c) => c.inboxes.delete("PqRzMn"), method: "DELETE", path: "/api/v1/inboxes/PqRzMn", response: fixture("inbox_index") },
       { name: "messages.list", call: (c) => c.messages.list("PqRzMn"), method: "GET", path: "/api/v1/inboxes/PqRzMn/inbound_messages", response: [fixture("message")] },
       { name: "messages.get", call: (c) => c.messages.get("PqRzMn", "GxTyVu"), method: "GET", path: "/api/v1/inboxes/PqRzMn/inbound_messages/GxTyVu", response: fixture("message_show") },
+      { name: "events.listTeam", call: (c) => c.events.listTeam(), method: "GET", path: "/api/v1/teams/KjkAJW/message_events", response: [fixture("event")] },
       { name: "events.list", call: (c) => c.events.list("NmQpXr"), method: "GET", path: "/api/v1/teams/KjkAJW/clusters/NmQpXr/message_events", response: [fixture("event")] },
       { name: "events.get", call: (c) => c.events.get("JkLmNp"), method: "GET", path: "/api/v1/message_events/JkLmNp", response: fixture("event") },
       {
@@ -210,6 +290,27 @@ describe("PostShiba", () => {
         response: fixture("webhook"),
       },
       { name: "webhooks.delete", call: (c) => c.webhooks.delete("CdFgHj"), method: "DELETE", path: "/api/v1/webhook_endpoints/CdFgHj", response: fixture("empty") },
+      { name: "templates.list", call: (c) => c.templates.list(), method: "GET", path: "/api/v1/teams/KjkAJW/templates", response: [fixture("template")] },
+      { name: "templates.get", call: (c) => c.templates.get("TpLmQr"), method: "GET", path: "/api/v1/templates/TpLmQr", response: fixture("template") },
+      {
+        name: "templates.create",
+        call: (c) => c.templates.create(fixture("template_create_request")),
+        method: "POST",
+        path: "/api/v1/teams/KjkAJW/templates",
+        request: "template_create_request",
+        response: fixture("template"),
+      },
+      {
+        name: "templates.update",
+        call: (c) => c.templates.update("TpLmQr", fixture("template_update_request")),
+        method: "PATCH",
+        path: "/api/v1/templates/TpLmQr",
+        request: "template_update_request",
+        response: fixture("template_updated"),
+      },
+      { name: "templates.publish", call: (c) => c.templates.publish("TpLmQr"), method: "POST", path: "/api/v1/templates/TpLmQr/publish", response: fixture("template") },
+      { name: "templates.duplicate", call: (c) => c.templates.duplicate("TpLmQr"), method: "POST", path: "/api/v1/templates/TpLmQr/duplicate", response: fixture("template_duplicated") },
+      { name: "templates.delete", call: (c) => c.templates.delete("TpLmQr"), method: "DELETE", path: "/api/v1/templates/TpLmQr", response: fixture("empty") },
       { name: "suppressions.list", call: (c) => c.suppressions.list(), method: "GET", path: "/api/v1/teams/KjkAJW/suppressions", response: [fixture("suppression")] },
       {
         name: "suppressions.create",
@@ -218,6 +319,14 @@ describe("PostShiba", () => {
         path: "/api/v1/teams/KjkAJW/suppressions",
         request: "suppression_create_request",
         response: fixture("suppression"),
+      },
+      {
+        name: "suppressions.import",
+        call: (c) => c.suppressions.import(fixture("suppression_import_request")),
+        method: "POST",
+        path: "/api/v1/teams/KjkAJW/suppressions/import",
+        request: "suppression_import_request",
+        response: fixture("suppression_import"),
       },
       { name: "suppressions.delete", call: (c) => c.suppressions.delete("YtReWq"), method: "DELETE", path: "/api/v1/suppressions/YtReWq", response: fixture("empty") },
       { name: "firewall.get", call: (c) => c.firewall.get(), method: "GET", path: "/api/v1/teams/KjkAJW/firewall", response: fixture("firewall") },

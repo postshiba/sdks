@@ -3,16 +3,29 @@
   "name": "edge",
   "region": "manual",
   "size": "small",
-  "plan": "small",
-  "emails_per_hour": 5000,
+  "plan": "micro",
+  "emails_per_hour": 1000,
+  "base_emails_per_hour": 1000,
+  "boost": null,
   "ip_assignment": "shared",
   "desired_status": "active",
   "status": "active",
   "smtp_endpoint": "smtp.capsule.test:587",
   "http_endpoint": "smtp.capsule.test:8000",
+  "classification": "transactional",
   "assigned_ip": {
-    "address": "203.0.113.50",
-    "status": "assigned"
+    "address": "203.0.113.2",
+    "status": "active"
   },
+  "sending_ips": [
+    {
+      "address": "203.0.113.2",
+      "status": "active",
+      "kind": "shared",
+      "classification": "transactional",
+      "weight": 100,
+      "provider": null
+    }
+  ],
   "sending_ready": true
 }

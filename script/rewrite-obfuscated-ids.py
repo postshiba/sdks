@@ -24,7 +24,9 @@ SMTP = "RvWsXq"
 SUPPRESSION = "YtReWq"
 FIREWALL_ENTRY = "BnMkLo"
 WEBHOOK = "CdFgHj"
-NODE = "NdHpQr"
+TEMPLATE = "TpLmQr"
+IP_ADDRESS = "IpQwEr"
+NODE = "ZxHvTb"
 OTHER_CLUSTER = "ZzYyXx"
 
 FILE_ID = {
@@ -48,6 +50,14 @@ FILE_ID = {
     "firewall_entry": FIREWALL_ENTRY,
     "webhook": WEBHOOK,
     "webhook_show": WEBHOOK,
+    "template": TEMPLATE,
+    "template_updated": TEMPLATE,
+    "template_duplicated": TEMPLATE,
+    "network": IP_ADDRESS,
+    "network_assigned": IP_ADDRESS,
+    "network_dedicated": IP_ADDRESS,
+    "network_released": IP_ADDRESS,
+    "cluster_boosted": CLUSTER,
 }
 
 FK = {

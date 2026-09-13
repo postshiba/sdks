@@ -18,6 +18,7 @@ const SMTP_CREDENTIAL: &str = "RvWsXq";
 const SUPPRESSION: &str = "YtReWq";
 const FIREWALL_ENTRY: &str = "BnMkLo";
 const WEBHOOK: &str = "CdFgHj";
+const TEMPLATE: &str = "TpLmQr";
 
 struct Recorded {
     method: String,
@@ -178,6 +179,19 @@ fn emails_send_happy_path() {
 }
 
 #[test]
+fn emails_send_published_template() {
+    let body = fixture("email_send_template_request");
+    let (got, recorded) = ok(&fixture("email_send_template_response"), |c| {
+        c.emails().send(&body)
+    });
+    assert_eq!(got, fixture("email_send_template_response"));
+    assert_eq!(recorded.method, "POST");
+    assert_eq!(recorded.path, "/api/v1/emails");
+    assert_eq!(recorded.json(), body);
+    assert_eq!(recorded.header("x-capsule-cluster-id"), None);
+}
+
+#[test]
 fn emails_send_pins_cluster() {
     let body = fixture("email_send_request");
     let (got, recorded) = ok(&fixture("email_send_response"), |c| {
@@ -224,6 +238,14 @@ fn every_catalog_method() {
     let suppression_create = fixture("suppression_create_request");
     let firewall_update = fixture("firewall_update_request");
     let firewall_entry = fixture("firewall_entry_create_request");
+    let cluster_boost = fixture("cluster_boost_request");
+    let cluster_extend_boost = fixture("cluster_extend_boost_request");
+    let network_create = fixture("network_create_request");
+    let network_release = fixture("network_release_request");
+    let domain_update = fixture("sending_domain_update_request");
+    let template_create = fixture("template_create_request");
+    let template_update = fixture("template_update_request");
+    let suppression_import = fixture("suppression_import_request");
 
     let cases: &[(
         &str,
@@ -304,6 +326,81 @@ fn every_catalog_method() {
             Box::new(|c| c.clusters().delete(CLUSTER)),
         ),
         (
+            "POST",
+            "/api/v1/clusters/NmQpXr/boost",
+            fixture("cluster_boosted"),
+            Box::new({
+                let cluster_boost = cluster_boost.clone();
+                move |c| c.clusters().boost(CLUSTER, &cluster_boost)
+            }),
+        ),
+        (
+            "POST",
+            "/api/v1/clusters/NmQpXr/extend_boost",
+            fixture("cluster_boosted"),
+            Box::new({
+                let cluster_extend_boost = cluster_extend_boost.clone();
+                move |c| c.clusters().extend_boost(CLUSTER, &cluster_extend_boost)
+            }),
+        ),
+        (
+            "POST",
+            "/api/v1/clusters/NmQpXr/cancel_boost",
+            fixture("cluster"),
+            Box::new(|c| c.clusters().cancel_boost(CLUSTER)),
+        ),
+        (
+            "GET",
+            "/api/v1/teams/KjkAJW/network",
+            array("network"),
+            Box::new(|c| c.network().list()),
+        ),
+        (
+            "POST",
+            "/api/v1/teams/KjkAJW/network",
+            fixture("network_assigned"),
+            Box::new({
+                let network_create = network_create.clone();
+                move |c| c.network().create(&network_create)
+            }),
+        ),
+        (
+            "POST",
+            "/api/v1/teams/KjkAJW/network/assign",
+            fixture("network_dedicated"),
+            Box::new({
+                let network_create = network_create.clone();
+                move |c| c.network().assign(&network_create)
+            }),
+        ),
+        (
+            "POST",
+            "/api/v1/teams/KjkAJW/network/unassign",
+            fixture("network"),
+            Box::new({
+                let network_create = network_create.clone();
+                move |c| c.network().unassign(&network_create)
+            }),
+        ),
+        (
+            "POST",
+            "/api/v1/teams/KjkAJW/network/switch",
+            fixture("network_assigned"),
+            Box::new({
+                let network_create = network_create.clone();
+                move |c| c.network().switch(&network_create)
+            }),
+        ),
+        (
+            "POST",
+            "/api/v1/teams/KjkAJW/network/release",
+            fixture("network_released"),
+            Box::new({
+                let network_release = network_release.clone();
+                move |c| c.network().release(&network_release)
+            }),
+        ),
+        (
             "GET",
             "/api/v1/teams/KjkAJW/sending_domains",
             array("sending_domain"),
@@ -323,6 +420,21 @@ fn every_catalog_method() {
                 let domain_create = domain_create.clone();
                 move |c| c.sending_domains().create(&domain_create)
             }),
+        ),
+        (
+            "PATCH",
+            "/api/v1/sending_domains/HsVtYk",
+            fixture("sending_domain_updated"),
+            Box::new({
+                let domain_update = domain_update.clone();
+                move |c| c.sending_domains().update(SENDING_DOMAIN, &domain_update)
+            }),
+        ),
+        (
+            "POST",
+            "/api/v1/sending_domains/HsVtYk/refresh",
+            fixture("sending_domain"),
+            Box::new(|c| c.sending_domains().refresh(SENDING_DOMAIN)),
         ),
         (
             "POST",
@@ -428,6 +540,12 @@ fn every_catalog_method() {
         ),
         (
             "GET",
+            "/api/v1/teams/KjkAJW/message_events",
+            array("event"),
+            Box::new(|c| c.events().list_team()),
+        ),
+        (
+            "GET",
             "/api/v1/teams/KjkAJW/clusters/NmQpXr/message_events",
             array("event"),
             Box::new(|c| c.events().list(CLUSTER)),
@@ -491,6 +609,54 @@ fn every_catalog_method() {
         ),
         (
             "GET",
+            "/api/v1/teams/KjkAJW/templates",
+            array("template"),
+            Box::new(|c| c.templates().list()),
+        ),
+        (
+            "GET",
+            "/api/v1/templates/TpLmQr",
+            fixture("template"),
+            Box::new(|c| c.templates().get(TEMPLATE)),
+        ),
+        (
+            "POST",
+            "/api/v1/teams/KjkAJW/templates",
+            fixture("template"),
+            Box::new({
+                let template_create = template_create.clone();
+                move |c| c.templates().create(&template_create)
+            }),
+        ),
+        (
+            "PATCH",
+            "/api/v1/templates/TpLmQr",
+            fixture("template_updated"),
+            Box::new({
+                let template_update = template_update.clone();
+                move |c| c.templates().update(TEMPLATE, &template_update)
+            }),
+        ),
+        (
+            "POST",
+            "/api/v1/templates/TpLmQr/publish",
+            fixture("template"),
+            Box::new(|c| c.templates().publish(TEMPLATE)),
+        ),
+        (
+            "POST",
+            "/api/v1/templates/TpLmQr/duplicate",
+            fixture("template_duplicated"),
+            Box::new(|c| c.templates().duplicate(TEMPLATE)),
+        ),
+        (
+            "DELETE",
+            "/api/v1/templates/TpLmQr",
+            fixture("empty"),
+            Box::new(|c| c.templates().delete(TEMPLATE)),
+        ),
+        (
+            "GET",
             "/api/v1/teams/KjkAJW/suppressions",
             array("suppression"),
             Box::new(|c| c.suppressions().list()),
@@ -502,6 +668,15 @@ fn every_catalog_method() {
             Box::new({
                 let suppression_create = suppression_create.clone();
                 move |c| c.suppressions().create(&suppression_create)
+            }),
+        ),
+        (
+            "POST",
+            "/api/v1/teams/KjkAJW/suppressions/import",
+            fixture("suppression_import"),
+            Box::new({
+                let suppression_import = suppression_import.clone();
+                move |c| c.suppressions().import(&suppression_import)
             }),
         ),
         (

@@ -1,8 +1,44 @@
 import base64
+import json
 
 from django.core.mail.backends.base import BaseEmailBackend
 
 from .client import PostShiba
+
+DROP_HEADERS = {
+    "bcc",
+    "cc",
+    "connection",
+    "content-length",
+    "content-transfer-encoding",
+    "content-type",
+    "date",
+    "feedback-id",
+    "from",
+    "host",
+    "keep-alive",
+    "mime-version",
+    "proxy-authenticate",
+    "proxy-authorization",
+    "received",
+    "reply-to",
+    "return-path",
+    "sender",
+    "subject",
+    "te",
+    "to",
+    "trailer",
+    "trailers",
+    "transfer-encoding",
+    "upgrade",
+    "x-capsule-cluster-id",
+    "x-capsule-unique-args",
+    "x-complaints-to",
+    "x-mailer",
+    "x-report-abuse",
+}
+
+UNIQUE_ARGS_HEADER = "x-capsule-unique-args"
 
 
 def email_payload(message):
@@ -15,21 +51,49 @@ def email_payload(message):
         if mimetype == "text/html":
             html = content
             break
-    reply_to = None
-    if getattr(message, "reply_to", None):
-        reply_to = message.reply_to[0]
-    return {
+    extra = dict(getattr(message, "extra_headers", None) or {})
+    unique_args = _unique_args(extra)
+    headers = {
+        name: value
+        for name, value in extra.items()
+        if str(name).lower() not in DROP_HEADERS and value not in (None, "")
+    }
+    out = {
         "from": message.from_email,
         "to": list(message.to or []),
-        "cc": list(message.cc or []),
-        "bcc": list(message.bcc or []),
-        "reply_to": reply_to,
         "subject": message.subject,
         "text": text,
         "html": html,
         "attachments": _attachments(message),
-        "headers": dict(getattr(message, "extra_headers", None) or {}),
     }
+    cc = list(message.cc or [])
+    if cc:
+        out["cc"] = cc
+    bcc = list(message.bcc or [])
+    if bcc:
+        out["bcc"] = bcc
+    if getattr(message, "reply_to", None):
+        out["reply_to"] = message.reply_to[0]
+    if headers:
+        out["headers"] = headers
+    if unique_args:
+        out["unique_args"] = unique_args
+    return out
+
+
+def _unique_args(extra):
+    raw = None
+    for name, value in extra.items():
+        if str(name).lower() == UNIQUE_ARGS_HEADER:
+            raw = value
+            break
+    if not raw:
+        return None
+    try:
+        decoded = json.loads(raw)
+    except (TypeError, ValueError):
+        return None
+    return decoded if isinstance(decoded, dict) else None
 
 
 def _attachments(message):

@@ -1,10 +1,19 @@
 # frozen_string_literal: true
 
 require "base64"
+require "json"
 require "postshiba/client"
 
 module PostShiba
   module ActionMailer
+    DROP_HEADERS = %w[
+      bcc cc connection content-length content-transfer-encoding content-type
+      date feedback-id from host keep-alive mime-version proxy-authenticate
+      proxy-authorization received reply-to return-path sender subject te to
+      trailer trailers transfer-encoding upgrade x-capsule-cluster-id
+      x-capsule-unique-args x-complaints-to x-mailer x-report-abuse
+    ].freeze
+
     class DeliveryMethod
       def initialize(settings = {})
         @settings = settings
@@ -45,7 +54,42 @@ module PostShiba
         payload.merge!(bodies_from(mail))
         attachments = attachments_from(mail)
         payload["attachments"] = attachments if attachments.any?
+        headers, unique_args = headers_from(mail)
+        payload["headers"] = headers if headers.any?
+        payload["unique_args"] = unique_args if unique_args
         payload
+      end
+
+      def headers_from(mail)
+        extra = {}
+        unique_args = nil
+        mail.header_fields.each do |field|
+          name = field.name.to_s
+          value = header_value(field)
+          next if value.nil? || value.empty?
+
+          if name.downcase == "x-capsule-unique-args"
+            parsed = parse_unique_args(value)
+            unique_args = parsed if parsed
+            next
+          end
+          next if DROP_HEADERS.include?(name.downcase)
+
+          extra[name] = value
+        end
+        [extra, unique_args]
+      end
+
+      def header_value(field)
+        raw = field.respond_to?(:unparsed_value) ? field.unparsed_value : field.value
+        raw.to_s.strip
+      end
+
+      def parse_unique_args(value)
+        parsed = JSON.parse(value)
+        parsed if parsed.is_a?(Hash)
+      rescue JSON::ParserError
+        nil
       end
 
       def from_address(mail)

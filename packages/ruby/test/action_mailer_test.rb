@@ -138,4 +138,43 @@ class ActionMailerTest < Minitest::Test
     refute captured_body.key?("X-Capsule-Cluster-Id")
     refute((captured_body["headers"] || {}).key?("X-Capsule-Cluster-Id"))
   end
+
+  def test_maps_display_name_reply_to_headers_and_unique_args
+    captured = nil
+    stub_request(:post, "https://app.postshiba.com/api/v1/emails")
+      .with { |req|
+        captured = JSON.parse(req.body)
+        true
+      }
+      .to_return(status: 200, body: fixture_json("email_send_response"), headers: {"Content-Type" => "application/json"})
+
+    mail = Mail.new
+    mail.from = "PostShiba <hello@mail.example.com>"
+    mail.to = "you@example.com"
+    mail.cc = "cc@example.com"
+    mail.bcc = "bcc@example.com"
+    mail.reply_to = "Support <hello@mail.example.com>"
+    mail.subject = "PostShiba test"
+    mail.body = "hello from PostShiba"
+    mail["Message-ID"] = "<msg-1@mail.example.com>"
+    mail["In-Reply-To"] = "<orig@mail.example.com>"
+    mail["References"] = "<orig@mail.example.com>"
+    mail["X-Campaign"] = "cmp_123"
+    mail["X-Capsule-Unique-Args"] = '{"campaign_id":"cmp_123","site":"docs"}'
+
+    PostShiba::ActionMailer::DeliveryMethod.new(api_key: "mail-key").deliver!(mail)
+
+    assert_equal "PostShiba <hello@mail.example.com>", captured["from"]
+    assert_equal "Support <hello@mail.example.com>", captured["reply_to"]
+    assert_equal ["cc@example.com"], captured["cc"]
+    assert_equal ["bcc@example.com"], captured["bcc"]
+    headers = captured["headers"] || {}
+    assert_equal "<msg-1@mail.example.com>", headers["Message-ID"]
+    assert_equal "<orig@mail.example.com>", headers["In-Reply-To"]
+    assert_equal "<orig@mail.example.com>", headers["References"]
+    assert_equal "cmp_123", headers["X-Campaign"]
+    refute headers.key?("X-Capsule-Unique-Args")
+    refute headers.key?("X-Capsule-Cluster-Id")
+    assert_equal({"campaign_id" => "cmp_123", "site" => "docs"}, captured["unique_args"])
+  end
 end

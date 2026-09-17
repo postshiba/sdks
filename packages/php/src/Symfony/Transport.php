@@ -8,10 +8,44 @@ use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Header\HeaderInterface;
 use Symfony\Component\Mime\MessageConverter;
 
 class Transport extends AbstractTransport
 {
+    private const DROP_HEADERS = [
+        'bcc',
+        'cc',
+        'connection',
+        'content-length',
+        'content-transfer-encoding',
+        'content-type',
+        'date',
+        'feedback-id',
+        'from',
+        'host',
+        'keep-alive',
+        'mime-version',
+        'proxy-authenticate',
+        'proxy-authorization',
+        'received',
+        'reply-to',
+        'return-path',
+        'sender',
+        'subject',
+        'te',
+        'to',
+        'trailer',
+        'trailers',
+        'transfer-encoding',
+        'upgrade',
+        'x-capsule-cluster-id',
+        'x-capsule-unique-args',
+        'x-complaints-to',
+        'x-mailer',
+        'x-report-abuse',
+    ];
+
     public function __construct(private PostShiba $client)
     {
         parent::__construct();
@@ -38,12 +72,17 @@ class Transport extends AbstractTransport
         }
 
         return Mail::payload([
-            'from' => self::first($email->getFrom()),
+            'from' => self::named(self::firstAddress($email->getFrom())),
             'to' => self::addresses($email->getTo()),
+            'cc' => self::addresses($email->getCc()),
+            'bcc' => self::addresses($email->getBcc()),
+            'reply_to' => self::named(self::firstAddress($email->getReplyTo())),
             'subject' => (string) $email->getSubject(),
             'html' => $email->getHtmlBody(),
             'text' => $email->getTextBody(),
             'attachments' => $attachments,
+            'headers' => self::extraHeaders($email),
+            'unique_args' => self::uniqueArgs($email),
         ]);
     }
 
@@ -55,9 +94,18 @@ class Transport extends AbstractTransport
     /**
      * @param Address[] $addresses
      */
-    private static function first(array $addresses): string
+    private static function firstAddress(array $addresses): ?Address
     {
-        return $addresses === [] ? '' : $addresses[0]->getAddress();
+        return $addresses === [] ? null : $addresses[0];
+    }
+
+    private static function named(?Address $address): string
+    {
+        if ($address === null) {
+            return '';
+        }
+
+        return Mail::address($address->getAddress(), $address->getName());
     }
 
     /**
@@ -67,5 +115,43 @@ class Transport extends AbstractTransport
     private static function addresses(array $addresses): array
     {
         return array_values(array_map(static fn (Address $a) => $a->getAddress(), $addresses));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function extraHeaders(Email $email): array
+    {
+        $out = [];
+        foreach ($email->getHeaders()->all() as $header) {
+            if (!$header instanceof HeaderInterface) {
+                continue;
+            }
+            $name = $header->getName();
+            if (in_array(strtolower($name), self::DROP_HEADERS, true)) {
+                continue;
+            }
+            $value = trim($header->getBodyAsString());
+            if ($value === '') {
+                continue;
+            }
+            $out[$name] = $value;
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function uniqueArgs(Email $email): array
+    {
+        $header = $email->getHeaders()->get('X-Capsule-Unique-Args');
+        if ($header === null) {
+            return [];
+        }
+        $decoded = json_decode(trim($header->getBodyAsString()), true);
+
+        return is_array($decoded) ? $decoded : [];
     }
 }

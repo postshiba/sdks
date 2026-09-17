@@ -111,6 +111,24 @@ final class MailTest extends TestCase
         ], $payload['unique_args']);
     }
 
+    public function testThreadingHeadersStayInHeaders(): void
+    {
+        $payload = Mail::payload([
+            'to' => 'you@example.com',
+            'subject' => 'Re: PostShiba test',
+            'message' => 'hello from PostShiba',
+            'headers' => [
+                'Message-ID: <msg-1@mail.example.com>',
+                'In-Reply-To: <orig@mail.example.com>',
+                'References: <orig@mail.example.com>',
+            ],
+        ], $this->settings());
+
+        $this->assertSame('<msg-1@mail.example.com>', $payload['headers']['Message-ID']);
+        $this->assertSame('<orig@mail.example.com>', $payload['headers']['In-Reply-To']);
+        $this->assertSame('<orig@mail.example.com>', $payload['headers']['References']);
+    }
+
     /**
      * @return array<string, mixed>
      */

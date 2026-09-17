@@ -2,7 +2,42 @@ if Code.ensure_loaded?(Swoosh.Adapter) do
   defmodule PostShiba.Swoosh.Mapper do
     @moduledoc false
 
+    @drop_headers MapSet.new([
+                    "bcc",
+                    "cc",
+                    "connection",
+                    "content-length",
+                    "content-transfer-encoding",
+                    "content-type",
+                    "date",
+                    "feedback-id",
+                    "from",
+                    "host",
+                    "keep-alive",
+                    "mime-version",
+                    "proxy-authenticate",
+                    "proxy-authorization",
+                    "received",
+                    "reply-to",
+                    "return-path",
+                    "sender",
+                    "subject",
+                    "te",
+                    "to",
+                    "trailer",
+                    "trailers",
+                    "transfer-encoding",
+                    "upgrade",
+                    "x-capsule-cluster-id",
+                    "x-capsule-unique-args",
+                    "x-complaints-to",
+                    "x-mailer",
+                    "x-report-abuse"
+                  ])
+
     def to_payload(%Swoosh.Email{} = email) do
+      {headers, unique_args} = split_headers(email.headers)
+
       %{}
       |> put_present("from", format_mailbox(email.from))
       |> put_present("to", Enum.map(List.wrap(email.to), &format_mailbox/1))
@@ -12,13 +47,42 @@ if Code.ensure_loaded?(Swoosh.Adapter) do
       |> put_present("subject", email.subject)
       |> put_present("html", email.html_body)
       |> put_present("text", email.text_body)
-      |> put_present("headers", email.headers)
+      |> put_present("headers", headers)
+      |> put_present("unique_args", unique_args)
       |> put_present("attachments", Enum.map(List.wrap(email.attachments), &format_attachment/1))
     end
 
     defp format_mailbox(nil), do: nil
+    defp format_mailbox({name, address}) when is_binary(name) and name != "", do: "#{name} <#{address}>"
     defp format_mailbox({_name, address}), do: address
     defp format_mailbox(address) when is_binary(address), do: address
+
+    defp split_headers(headers) when is_map(headers) do
+      unique_args =
+        headers
+        |> Enum.find_value(fn {name, value} ->
+          if String.downcase(to_string(name)) == "x-capsule-unique-args", do: decode_unique_args(value)
+        end)
+
+      kept =
+        headers
+        |> Enum.reject(fn {name, value} ->
+          key = String.downcase(to_string(name))
+          value in [nil, ""] or MapSet.member?(@drop_headers, key)
+        end)
+        |> Map.new(fn {name, value} -> {to_string(name), value} end)
+
+      {kept, unique_args}
+    end
+
+    defp decode_unique_args(value) when is_binary(value) do
+      case Jason.decode(value) do
+        {:ok, decoded} when is_map(decoded) -> decoded
+        _ -> nil
+      end
+    end
+
+    defp decode_unique_args(_), do: nil
 
     defp format_reply_to(nil), do: nil
     defp format_reply_to([]), do: nil

@@ -11,10 +11,15 @@ defmodule PostShiba.Swoosh.AdapterTest do
       |> Swoosh.Email.to("you@example.com")
       |> Swoosh.Email.cc("cc@example.com")
       |> Swoosh.Email.bcc(["bcc@example.com"])
-      |> Swoosh.Email.reply_to("hello@mail.example.com")
+      |> Swoosh.Email.reply_to({"Support", "hello@mail.example.com"})
       |> Swoosh.Email.subject("PostShiba test")
       |> Swoosh.Email.html_body("<p>hello from PostShiba</p>")
       |> Swoosh.Email.text_body("hello from PostShiba")
+      |> Swoosh.Email.header("Message-ID", "<msg-1@mail.example.com>")
+      |> Swoosh.Email.header("In-Reply-To", "<orig@mail.example.com>")
+      |> Swoosh.Email.header("References", "<orig@mail.example.com>")
+      |> Swoosh.Email.header("X-Campaign", "cmp_123")
+      |> Swoosh.Email.header("X-Capsule-Unique-Args", ~s({"campaign_id":"cmp_123","site":"docs"}))
       |> Swoosh.Email.attachment(%Swoosh.Attachment{
         filename: "photo.png",
         content_type: "image/png",
@@ -22,14 +27,21 @@ defmodule PostShiba.Swoosh.AdapterTest do
       })
 
     assert Mapper.to_payload(email) == %{
-             "from" => "hello@mail.example.com",
+             "from" => "PostShiba <hello@mail.example.com>",
              "to" => ["you@example.com"],
              "cc" => ["cc@example.com"],
              "bcc" => ["bcc@example.com"],
-             "reply_to" => "hello@mail.example.com",
+             "reply_to" => "Support <hello@mail.example.com>",
              "subject" => "PostShiba test",
              "html" => "<p>hello from PostShiba</p>",
              "text" => "hello from PostShiba",
+             "headers" => %{
+               "Message-ID" => "<msg-1@mail.example.com>",
+               "In-Reply-To" => "<orig@mail.example.com>",
+               "References" => "<orig@mail.example.com>",
+               "X-Campaign" => "cmp_123"
+             },
+             "unique_args" => %{"campaign_id" => "cmp_123", "site" => "docs"},
              "attachments" => [
                %{
                  "filename" => "photo.png",

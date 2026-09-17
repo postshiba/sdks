@@ -57,3 +57,36 @@ def test_django_maps_to_from_subject_html_text_attachments():
     assert captured["html"] == payload["html"]
     assert captured["text"] == payload["text"]
     assert captured["attachments"] == payload["attachments"]
+
+
+def test_django_maps_display_name_reply_to_headers_and_unique_args():
+    message = EmailMultiAlternatives(
+        subject="PostShiba test",
+        body="hello from PostShiba",
+        from_email="PostShiba <hello@mail.example.com>",
+        to=["you@example.com"],
+        cc=["cc@example.com"],
+        bcc=["bcc@example.com"],
+        reply_to=["Support <hello@mail.example.com>"],
+        headers={
+            "Message-ID": "<msg-1@mail.example.com>",
+            "In-Reply-To": "<orig@mail.example.com>",
+            "References": "<orig@mail.example.com>",
+            "X-Campaign": "cmp_123",
+            "X-Capsule-Unique-Args": '{"campaign_id":"cmp_123","site":"docs"}',
+        },
+    )
+    message.attach_alternative("<p>hello from PostShiba</p>", "text/html")
+
+    payload = email_payload(message)
+    assert payload["from"] == "PostShiba <hello@mail.example.com>"
+    assert payload["reply_to"] == "Support <hello@mail.example.com>"
+    assert payload["cc"] == ["cc@example.com"]
+    assert payload["bcc"] == ["bcc@example.com"]
+    assert payload["headers"] == {
+        "Message-ID": "<msg-1@mail.example.com>",
+        "In-Reply-To": "<orig@mail.example.com>",
+        "References": "<orig@mail.example.com>",
+        "X-Campaign": "cmp_123",
+    }
+    assert payload["unique_args"] == {"campaign_id": "cmp_123", "site": "docs"}

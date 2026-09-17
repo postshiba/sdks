@@ -144,7 +144,10 @@ Cover:
 - SMTP password present on create, absent on delete
 - webhook `secret` omitted on list and update, present on get/create
 - missing `teamId` raises on a team-scoped call
-- mail adapter maps to/from/subject/html/text/attachments when this package has one
+- mail adapter maps from, to, cc, bcc, reply_to, subject, html, text, attachments, headers, and unique_args when this package has one
+- from and reply_to keep a display name as `Name <email>`
+- Message-ID, In-Reply-To, and References go in `headers`
+- unique_args comes from an `X-Capsule-Unique-Args` JSON header when the framework exposes headers
 
 Test command for this package must be what `script/test` runs. See that file.
 

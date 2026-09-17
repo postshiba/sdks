@@ -52,4 +52,45 @@ describe("PostShibaModule", () => {
       attachments: [{ filename: "photo.png", content_type: "image/png", content: "abc" }],
     });
   });
+
+  it("maps display names, replyTo, headers, and unique args", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ queued: true }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    const client = new PostShiba("sk_test", { teamId: "KjkAJW" });
+    await sendMail(client, {
+      from: "PostShiba <hello@mail.example.com>",
+      to: "you@example.com",
+      cc: "cc@example.com",
+      bcc: ["bcc@example.com"],
+      replyTo: "Support <hello@mail.example.com>",
+      subject: "PostShiba test",
+      headers: {
+        "Message-ID": "<msg-1@mail.example.com>",
+        "In-Reply-To": "<orig@mail.example.com>",
+        References: "<orig@mail.example.com>",
+        "X-Campaign": "cmp_123",
+        "X-Capsule-Unique-Args": '{"campaign_id":"cmp_123","site":"docs"}',
+      },
+    });
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toEqual({
+      from: "PostShiba <hello@mail.example.com>",
+      to: ["you@example.com"],
+      cc: ["cc@example.com"],
+      bcc: ["bcc@example.com"],
+      reply_to: "Support <hello@mail.example.com>",
+      subject: "PostShiba test",
+      headers: {
+        "Message-ID": "<msg-1@mail.example.com>",
+        "In-Reply-To": "<orig@mail.example.com>",
+        References: "<orig@mail.example.com>",
+        "X-Campaign": "cmp_123",
+      },
+      unique_args: { campaign_id: "cmp_123", site: "docs" },
+    });
+  });
 });

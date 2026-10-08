@@ -29,46 +29,34 @@
     "CHANGELOG.md"
   ],
   "type": "module",
-  "main": "./src/client/index.ts",
-  "module": "./src/client/index.ts",
-  "types": "./src/client/index.ts",
+  "main": "./dist/client/index.js",
+  "module": "./dist/client/index.js",
+  "types": "./dist/client/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
-    ".": "./src/client/index.ts",
-    "./http": "./src/http/index.ts",
+    ".": {
+      "types": "./dist/client/index.d.ts",
+      "default": "./dist/client/index.js"
+    },
+    "./http": {
+      "types": "./dist/http/index.d.ts",
+      "default": "./dist/http/index.js"
+    },
     "./test": "./src/test.ts",
-    "./_generated/component.js": "./src/component/_generated/component.ts",
-    "./convex.config": "./src/component/convex.config.ts",
-    "./convex.config.js": "./src/component/convex.config.ts"
+    "./_generated/component.js": {
+      "types": "./dist/component/_generated/component.d.ts"
+    },
+    "./convex.config": {
+      "types": "./dist/component/convex.config.d.ts",
+      "default": "./dist/component/convex.config.js"
+    },
+    "./convex.config.js": {
+      "types": "./dist/component/convex.config.d.ts",
+      "default": "./dist/component/convex.config.js"
+    }
   },
   "publishConfig": {
-    "access": "public",
-    "exports": {
-      "./package.json": "./package.json",
-      ".": {
-        "types": "./dist/client/index.d.ts",
-        "default": "./dist/client/index.js"
-      },
-      "./http": {
-        "types": "./dist/http/index.d.ts",
-        "default": "./dist/http/index.js"
-      },
-      "./test": "./src/test.ts",
-      "./_generated/component.js": {
-        "types": "./dist/component/_generated/component.d.ts"
-      },
-      "./convex.config": {
-        "types": "./dist/component/convex.config.d.ts",
-        "default": "./dist/component/convex.config.js"
-      },
-      "./convex.config.js": {
-        "types": "./dist/component/convex.config.d.ts",
-        "default": "./dist/component/convex.config.js"
-      }
-    },
-    "main": "./dist/client/index.js",
-    "module": "./dist/client/index.js",
-    "types": "./dist/client/index.d.ts"
+    "access": "public"
   },
   "scripts": {
     "build": "rm -rf dist && tsc --project ./tsconfig.build.json",

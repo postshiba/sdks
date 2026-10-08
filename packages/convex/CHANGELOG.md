@@ -2,7 +2,7 @@
 
 ## 0.1.0
 
-Official PostShiba release. Derived from [wollemiahq/convex-postshiba](https://github.com/wollemiahq/convex-postshiba) (MIT).
+Official PostShiba release. Derived from [wollemiahq/convex-postshiba](https://github.com/wollemiahq/convex-postshiba) (MIT). Published to npm as `@postshiba/convex` (compiled ESM).
 
 - Durable email delivery through PostShiba with workpools, retries, and exponential backoff.
 - Two sending pools (transactional and bulk), each with its own hourly token bucket.

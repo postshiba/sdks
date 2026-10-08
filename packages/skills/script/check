@@ -131,6 +131,7 @@ expected_skills=(
   "skills/postshiba-create-mailbox/SKILL.md"
   "skills/postshiba-send-from-domain/SKILL.md"
   "skills/postshiba-import-dkim/SKILL.md"
+  "skills/postshiba-cli/SKILL.md"
 )
 
 require_file ".cursor-plugin/plugin.json"

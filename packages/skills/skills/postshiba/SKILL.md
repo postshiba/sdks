@@ -5,7 +5,7 @@ description: Manages PostShiba email infrastructure and transactional sending th
 
 # PostShiba
 
-Use the PostShiba MCP server for catalog API work. The platform application token selects the team, so do not ask for or pass a team id.
+Use the PostShiba MCP server for catalog API work. The platform application token selects the team, so do not ask for or pass a team id. For terminal, script, or CI work with the `postshiba` command, use `postshiba-cli`.
 
 ## Start
 

@@ -43,6 +43,18 @@ PostShiba MCP cannot:
 
 Hosted inboxes receive mail only. Send mail from a verified sending domain.
 
+## Skills
+
+- `postshiba` catalog work through MCP
+- `postshiba-first-send` first application send
+- `postshiba-create-cluster` shared-IP cluster
+- `postshiba-create-credentials` one-time SMTP password
+- `postshiba-send-test-email` sandbox send
+- `postshiba-create-mailbox` hosted inbox
+- `postshiba-send-from-domain` custom domain send
+- `postshiba-import-dkim` existing DKIM key
+- `postshiba-cli` terminal, script, and CI via the `postshiba` command
+
 ## Contributing
 
 Open pull requests in [postshiba/sdks](https://github.com/postshiba/sdks).

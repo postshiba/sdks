@@ -16,7 +16,7 @@ Creates missing repos when `CREATE_REPOS=1` and `gh` can write to the `postshiba
 ## Libraries
 
 - [Skills](https://github.com/postshiba/postshiba-skills) ([source](packages/skills/README.md)) Cursor plugin. MCP plus agent skills.
-- [CLI](https://github.com/postshiba/postshiba-cli) ([source](packages/cli/README.md)) Command line. Send mail and manage resources from a terminal.
+- [CLI](https://github.com/postshiba/postshiba-cli) ([source](packages/cli/README.md)) Terminal app. Interactive prompts for humans, JSON for scripts.
 - [Node.js](https://github.com/postshiba/postshiba-node) ([source](packages/node/README.md), NestJS included)
 - [Convex](https://github.com/postshiba/postshiba-convex) ([source](packages/convex/README.md)) component. Durable send plus webhooks.
 - [Inngest](https://github.com/postshiba/postshiba-inngest) ([source](packages/inngest/README.md)) adapter. Send inside `step.run`.

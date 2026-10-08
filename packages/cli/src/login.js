@@ -3,6 +3,7 @@
 import { request } from "./client.js";
 import { readConfig, removeConfig, writeConfig } from "./config.js";
 import { UsageError } from "./errors.js";
+import { spinning } from "./prompts.js";
 
 /**
  * @param {Record<string, any>} values
@@ -26,17 +27,14 @@ export async function login(values, ctx) {
   let teamId = values.team || ctx.env.POSTSHIBA_TEAM_ID;
   const baseUrl = (values["base-url"] || ctx.env.POSTSHIBA_BASE_URL || "https://app.postshiba.com").replace(/\/$/, "");
 
-  const spin = ctx.interactive && ctx.prompts ? ctx.prompts.spinner() : null;
-  spin?.start("Checking key");
   const me = /** @type {{ email?: string }} */ (
-    await request({
-      method: "GET",
-      url: `${baseUrl}/api/v1/users/me`,
-      apiKey,
-      fetch: ctx.fetch,
-    })
+    await spinning(
+      ctx.interactive ? ctx.prompts : null,
+      "Checking key",
+      () => request({ method: "GET", url: `${baseUrl}/api/v1/users/me`, apiKey, fetch: ctx.fetch }),
+      (user) => `Signed in as ${/** @type {{ email?: string }} */ (user).email ?? "unknown"}`,
+    )
   );
-  spin?.stop(`Signed in as ${me.email ?? "unknown"}`);
 
   if (!teamId && ctx.interactive && ctx.prompts) {
     teamId = await ctx.prompts.text({

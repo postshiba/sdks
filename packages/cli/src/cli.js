@@ -13,7 +13,7 @@ import { login, logout } from "./login.js";
 import { mainMenu } from "./menu.js";
 import { isInteractive } from "./mode.js";
 import { VERSION } from "./pkg.js";
-import { createClackPrompts } from "./prompts.js";
+import { createClackPrompts, spinning } from "./prompts.js";
 import { asRecords, colorsFor, formatSummary, formatTable, writeJson } from "./render.js";
 import { buildSendBody, completeSendFlags, loadData, sendPreview, sendRoute } from "./send.js";
 import { installSkill } from "./skills.js";
@@ -222,21 +222,15 @@ async function send(values, ctx) {
     ctx.prompts.note(sendPreview(body, route), "Send");
     const ok = await ctx.prompts.confirm({ message: "Send this email?" });
     if (!ok) throw new CancelError();
-    const spin = ctx.prompts.spinner();
-    spin.start("Sending");
     const result = /** @type {Record<string, unknown>} */ (
-      await request({
-        method: "POST",
-        url: `${creds.baseUrl}${path}`,
-        apiKey: creds.apiKey,
-        body,
-        headers,
-        fetch: ctx.fetch,
-      })
+      await spinning(
+        ctx.prompts,
+        "Sending",
+        () => request({ method: "POST", url: `${creds.baseUrl}${path}`, apiKey: creds.apiKey, body, headers, fetch: ctx.fetch }),
+        () => (body.sandbox ? "Checked in sandbox. Nothing was delivered." : "Queued"),
+      )
     );
-    spin.stop("Sent");
-    const sandboxed = Boolean(body.sandbox);
-    ctx.stdout.write(`Sent ${result.message_id ?? ""}${sandboxed ? " (sandbox)" : ""}\n`);
+    ctx.prompts.outro(`Message id ${colorsFor(ctx).cyan(String(result.message_id ?? ""))}`);
     return 0;
   }
 

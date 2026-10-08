@@ -12,7 +12,7 @@ import { CancelError } from "./errors.js";
  * @property {(message: string) => void} intro
  * @property {(message: string) => void} outro
  * @property {(message: string, title?: string) => void} note
- * @property {() => { start: (message?: string) => void, stop: (message?: string) => void }} spinner
+ * @property {() => { start: (message?: string) => void, stop: (message?: string) => void, error: (message?: string) => void }} spinner
  * @property {(message: string) => void} [cancel]
  * @property {{ success: (message: string) => void, error: (message: string) => void, info: (message: string) => void }} [log]
  */
@@ -23,6 +23,28 @@ import { CancelError } from "./errors.js";
 function unwrap(value) {
   if (clack.isCancel(value)) throw new CancelError();
   return value;
+}
+
+/**
+ * @template T
+ * @param {Prompts | null | undefined} prompts
+ * @param {string} label
+ * @param {() => Promise<T>} work
+ * @param {(result: T) => string} done
+ * @returns {Promise<T>}
+ */
+export async function spinning(prompts, label, work, done) {
+  if (!prompts) return work();
+  const spin = prompts.spinner();
+  spin.start(label);
+  try {
+    const result = await work();
+    spin.stop(done(result));
+    return result;
+  } catch (err) {
+    spin.error(`${label} failed`);
+    throw err;
+  }
 }
 
 /** @returns {Prompts} */
@@ -72,6 +94,9 @@ export function createClackPrompts() {
         },
         stop(message) {
           spin.stop(message);
+        },
+        error(message) {
+          spin.error(message);
         },
       };
     },

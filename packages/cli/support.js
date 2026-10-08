@@ -47,6 +47,7 @@ export function mockFetch(impl) {
 
 export function fakePrompts(answers = {}) {
   const calls = [];
+  const outros = [];
   const take = (name, fallback) => {
     calls.push(name);
     const queue = answers[name];
@@ -66,15 +67,23 @@ export function fakePrompts(answers = {}) {
     intro() {
       calls.push("intro");
     },
-    outro() {
+    outros,
+    outro(message) {
       calls.push("outro");
+      outros.push(message);
     },
     note() {
       calls.push("note");
     },
     spinner() {
       calls.push("spinner");
-      return { start() {}, stop() {} };
+      return {
+        start() {},
+        stop() {},
+        error() {
+          calls.push("spinner-error");
+        },
+      };
     },
     cancel() {
       calls.push("cancel");

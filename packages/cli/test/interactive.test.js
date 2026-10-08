@@ -3,6 +3,7 @@ import { mkdtemp, readFile, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
+import { stripVTControlCharacters } from "node:util";
 import { fakePrompts, fixture, jsonResponse, lastCall, mockFetch, runCli } from "../support.js";
 
 const KEY = "sk_never_print_this_key";
@@ -52,11 +53,28 @@ describe("interactive", () => {
       },
     );
     assert.equal(result.code, 0);
-    assert.match(result.stdout, /Sent abc@capsule.test/);
+    assert.deepEqual(prompts.outros.map(stripVTControlCharacters), ["Message id abc@capsule.test"]);
     assert.ok(prompts.calls.includes("note"));
     assert.ok(prompts.calls.includes("confirm"));
     assert.equal(lastCall(fetchImpl).url, "https://app.postshiba.com/api/v1/emails");
     assert.doesNotMatch(`${result.stdout}${result.stderr}`, /sk_never_print_this_key/);
+  });
+
+  it("marks the spinner failed when the send is rejected", async () => {
+    const prompts = fakePrompts({ confirm: [true] });
+    const fetchImpl = mockFetch(() => jsonResponse(fixture("error_422"), 422));
+    const result = await runCli(
+      ["send", "--from", "hello@mail.example.com", "--to", "you@example.com", "--subject", "Hi", "--text", "hello"],
+      {
+        env: { POSTSHIBA_API_KEY: KEY, POSTSHIBA_TEAM_ID: "KjkAJW", POSTSHIBA_CLUSTER_ID: "NmQpXr" },
+        fetch: fetchImpl,
+        prompts,
+        isTTY: true,
+      },
+    );
+    assert.equal(result.code, 1);
+    assert.ok(prompts.calls.includes("spinner-error"));
+    assert.match(result.stderr, /Error: From domain is not verified \(field: from\)/);
   });
 
   it("renders the main menu and quits", async () => {

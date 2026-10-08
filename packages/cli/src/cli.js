@@ -1,48 +1,74 @@
-import { readFileSync } from "node:fs";
+// @ts-check
+
 import { writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { PostShibaError, request } from "./client.js";
-import { UsageError } from "./errors.js";
-import { actionUsage, commands, findCommand, interpolatePath, pathParamNames, resources } from "./commands.js";
-import { readConfig, removeConfig, resolveCredentials, writeConfig } from "./config.js";
-import { buildSendBody, loadData, readStream, sendRoute } from "./send.js";
-
-const VERSION = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "package.json"), "utf8"))
-  .version;
+import { actionsFor, commands, findCommand, interpolatePath, resources } from "./commands.js";
+import { readConfig, resolveCredentials } from "./config.js";
+import { createSendingDomainWizard } from "./domains.js";
+import { runDoctor, doctorLabel } from "./doctor.js";
+import { CancelError, UsageError, writeApiError } from "./errors.js";
+import { formatHelp } from "./help.js";
+import { login, logout } from "./login.js";
+import { mainMenu } from "./menu.js";
+import { isInteractive } from "./mode.js";
+import { VERSION } from "./pkg.js";
+import { createClackPrompts } from "./prompts.js";
+import { asRecords, colorsFor, formatSummary, formatTable, writeJson } from "./render.js";
+import { buildSendBody, completeSendFlags, loadData, sendPreview, sendRoute } from "./send.js";
+import { installSkill } from "./skills.js";
 
 const OPTIONS = {
-  help: { type: "boolean", short: "h" },
-  version: { type: "boolean" },
-  "api-key": { type: "string" },
-  team: { type: "string" },
-  "base-url": { type: "string" },
-  data: { type: "string" },
-  output: { type: "string" },
-  from: { type: "string" },
-  to: { type: "string", multiple: true },
-  cc: { type: "string", multiple: true },
-  bcc: { type: "string", multiple: true },
-  "reply-to": { type: "string" },
-  subject: { type: "string" },
-  text: { type: "string" },
-  "text-file": { type: "string" },
-  html: { type: "string" },
-  "html-file": { type: "string" },
-  template: { type: "string" },
-  var: { type: "string", multiple: true },
-  header: { type: "string", multiple: true },
-  arg: { type: "string", multiple: true },
-  attach: { type: "string", multiple: true },
-  tenant: { type: "string" },
-  cluster: { type: "string" },
-  sandbox: { type: "boolean" },
-  "idempotency-key": { type: "string" },
+  help: { type: /** @type {const} */ ("boolean"), short: "h" },
+  version: { type: /** @type {const} */ ("boolean") },
+  json: { type: /** @type {const} */ ("boolean") },
+  "no-input": { type: /** @type {const} */ ("boolean") },
+  yes: { type: /** @type {const} */ ("boolean") },
+  "api-key": { type: /** @type {const} */ ("string") },
+  team: { type: /** @type {const} */ ("string") },
+  "base-url": { type: /** @type {const} */ ("string") },
+  data: { type: /** @type {const} */ ("string") },
+  output: { type: /** @type {const} */ ("string") },
+  from: { type: /** @type {const} */ ("string") },
+  to: { type: /** @type {const} */ ("string"), multiple: true },
+  cc: { type: /** @type {const} */ ("string"), multiple: true },
+  bcc: { type: /** @type {const} */ ("string"), multiple: true },
+  "reply-to": { type: /** @type {const} */ ("string") },
+  subject: { type: /** @type {const} */ ("string") },
+  text: { type: /** @type {const} */ ("string") },
+  "text-file": { type: /** @type {const} */ ("string") },
+  html: { type: /** @type {const} */ ("string") },
+  "html-file": { type: /** @type {const} */ ("string") },
+  template: { type: /** @type {const} */ ("string") },
+  var: { type: /** @type {const} */ ("string"), multiple: true },
+  header: { type: /** @type {const} */ ("string"), multiple: true },
+  arg: { type: /** @type {const} */ ("string"), multiple: true },
+  attach: { type: /** @type {const} */ ("string"), multiple: true },
+  tenant: { type: /** @type {const} */ ("string") },
+  cluster: { type: /** @type {const} */ ("string") },
+  sandbox: { type: /** @type {const} */ ("boolean") },
+  "idempotency-key": { type: /** @type {const} */ ("string") },
+  global: { type: /** @type {const} */ ("boolean") },
+  target: { type: /** @type {const} */ ("string") },
 };
 
-export { commands };
+export { commands, formatHelp };
 
+/**
+ * @param {string[]} argv
+ * @param {object} [io]
+ * @param {NodeJS.ProcessEnv} [io.env]
+ * @param {{ write: (chunk: string | Uint8Array) => unknown, isTTY?: boolean }} [io.stdout]
+ * @param {{ write: (chunk: string | Uint8Array) => unknown, isTTY?: boolean }} [io.stderr]
+ * @param {AsyncIterable<string | Uint8Array> & { isTTY?: boolean }} [io.stdin]
+ * @param {string} [io.configDir]
+ * @param {boolean} [io.isTTY]
+ * @param {string} [io.cwd]
+ * @param {string} [io.home]
+ * @param {typeof fetch} [io.fetch]
+ * @param {import("./prompts.js").Prompts} [io.prompts]
+ * @param {(ms: number) => Promise<void>} [io.sleep]
+ */
 export async function main(argv, io = {}) {
   const ctx = {
     env: io.env ?? process.env,
@@ -50,7 +76,13 @@ export async function main(argv, io = {}) {
     stderr: io.stderr ?? process.stderr,
     stdin: io.stdin ?? process.stdin,
     configDir: io.configDir,
+    isTTY: io.isTTY,
+    cwd: io.cwd,
+    home: io.home,
     fetch: io.fetch ?? globalThis.fetch,
+    prompts: io.prompts,
+    sleep: io.sleep,
+    interactive: false,
   };
 
   try {
@@ -65,22 +97,36 @@ export async function main(argv, io = {}) {
       writeApiError(ctx.stderr, err);
       return 1;
     }
-    ctx.stderr.write(`${err && err.message ? err.message : err}\n`);
+    if (err instanceof CancelError) {
+      ctx.stderr.write("Cancelled.\n");
+      return 130;
+    }
+    ctx.stderr.write(`${err && /** @type {Error} */ (err).message ? /** @type {Error} */ (err).message : err}\n`);
     return 1;
   }
 }
 
+/**
+ * @param {string[]} argv
+ * @param {any} ctx
+ */
 async function run(argv, ctx) {
   let parsed;
   try {
     parsed = parseArgs({ args: argv, options: OPTIONS, allowPositionals: true, strict: true });
   } catch (err) {
-    throw new UsageError(err.message);
+    throw new UsageError(/** @type {Error} */ (err).message);
   }
 
   const { values, positionals } = parsed;
+  ctx.interactive = isInteractive(values, ctx);
+  if (ctx.interactive && !ctx.prompts) ctx.prompts = createClackPrompts();
+
   if (values.help || positionals[0] === "help") {
     const topic = values.help ? positionals[0] : positionals[1];
+    if (topic && topic !== "send" && topic !== "login" && topic !== "logout" && topic !== "whoami" && topic !== "doctor" && topic !== "skills") {
+      if (actionsFor(topic).length === 0) throw new UsageError(`Unknown resource ${topic}`);
+    }
     ctx.stdout.write(`${formatHelp(topic)}\n`);
     return 0;
   }
@@ -89,47 +135,39 @@ async function run(argv, ctx) {
     return 0;
   }
   if (positionals.length === 0) {
+    if (ctx.interactive && ctx.prompts) {
+      return mainMenu(ctx, (choice, action) => dispatch(choice, action ? [action] : [], values, ctx));
+    }
     throw new UsageError("Missing command");
   }
 
   const [command, ...rest] = positionals;
+  return dispatch(command, rest, values, ctx);
+}
+
+/**
+ * @param {string} command
+ * @param {string[]} rest
+ * @param {Record<string, any>} values
+ * @param {any} ctx
+ */
+async function dispatch(command, rest, values, ctx) {
   if (command === "login") return login(values, ctx);
   if (command === "logout") return logout(ctx);
   if (command === "whoami") return whoami(values, ctx);
   if (command === "send") return send(values, ctx);
+  if (command === "doctor") return doctor(values, ctx);
+  if (command === "skills") {
+    if (rest[0] !== "install") throw new UsageError("Usage: postshiba skills install", { helpResource: "skills" });
+    return installSkill(values, ctx);
+  }
   return resourceCommand(command, rest, values, ctx);
 }
 
-async function login(values, ctx) {
-  let apiKey = values["api-key"] || ctx.env.POSTSHIBA_API_KEY;
-  if (!apiKey && ctx.stdin.isTTY) {
-    ctx.stderr.write("API key: ");
-    apiKey = (await readStream(ctx.stdin)).trim();
-  }
-  if (!apiKey) {
-    throw new UsageError("Missing API key. Run postshiba login or set POSTSHIBA_API_KEY.");
-  }
-  const teamId = values.team || ctx.env.POSTSHIBA_TEAM_ID;
-  const baseUrl = (values["base-url"] || ctx.env.POSTSHIBA_BASE_URL || "https://app.postshiba.com").replace(/\/$/, "");
-  const me = await request({
-    method: "GET",
-    url: `${baseUrl}/api/v1/users/me`,
-    apiKey,
-    fetch: ctx.fetch,
-  });
-  const saved = { api_key: apiKey };
-  if (teamId) saved.team_id = teamId;
-  if (values["base-url"] || ctx.env.POSTSHIBA_BASE_URL) saved.base_url = baseUrl;
-  await writeConfig(ctx.env, ctx.configDir, saved);
-  ctx.stdout.write(`Signed in as ${me.email}\n`);
-  return 0;
-}
-
-async function logout(ctx) {
-  await removeConfig(ctx.env, ctx.configDir);
-  return 0;
-}
-
+/**
+ * @param {Record<string, any>} values
+ * @param {any} ctx
+ */
 async function whoami(values, ctx) {
   const creds = await credentials(values, ctx, { team: false });
   const body = await request({
@@ -142,11 +180,36 @@ async function whoami(values, ctx) {
   return 0;
 }
 
+/**
+ * @param {Record<string, any>} values
+ * @param {any} ctx
+ */
 async function send(values, ctx) {
-  const route = sendRoute(values);
-  const creds = await credentials(values, ctx, { team: route.team });
-  const body = await buildSendBody(values, ctx.stdin);
+  const creds = await credentials(values, ctx, { team: false });
+  let next = values;
+  if (ctx.interactive && ctx.prompts) {
+    next = await completeSendFlags(
+      values,
+      {
+        prompts: ctx.prompts,
+        api: (method, path) =>
+          request({
+            method,
+            url: `${creds.baseUrl}${path}`,
+            apiKey: creds.apiKey,
+            fetch: ctx.fetch,
+          }),
+      },
+      creds,
+    );
+  }
+  const route = sendRoute(next, creds.clusterId);
+  if (route.team && !creds.teamId) {
+    throw new UsageError("Missing team id. Pass --team, set POSTSHIBA_TEAM_ID, or save one with postshiba login.");
+  }
+  const body = await buildSendBody(next, ctx.stdin);
   if (route.sandbox) body.sandbox = true;
+  /** @type {Record<string, string>} */
   const headers = {};
   if (route.team) {
     if (route.idempotencyKey) headers["Idempotency-Key"] = route.idempotencyKey;
@@ -154,6 +217,29 @@ async function send(values, ctx) {
     headers["X-Capsule-Cluster-Id"] = String(route.clusterId);
   }
   const path = interpolatePath(route.path, { teamId: creds.teamId, clusterId: route.clusterId });
+
+  if (ctx.interactive && ctx.prompts) {
+    ctx.prompts.note(sendPreview(body, route), "Send");
+    const ok = await ctx.prompts.confirm({ message: "Send this email?" });
+    if (!ok) throw new CancelError();
+    const spin = ctx.prompts.spinner();
+    spin.start("Sending");
+    const result = /** @type {Record<string, unknown>} */ (
+      await request({
+        method: "POST",
+        url: `${creds.baseUrl}${path}`,
+        apiKey: creds.apiKey,
+        body,
+        headers,
+        fetch: ctx.fetch,
+      })
+    );
+    spin.stop("Sent");
+    const sandboxed = Boolean(body.sandbox);
+    ctx.stdout.write(`Sent ${result.message_id ?? ""}${sandboxed ? " (sandbox)" : ""}\n`);
+    return 0;
+  }
+
   const result = await request({
     method: "POST",
     url: `${creds.baseUrl}${path}`,
@@ -166,32 +252,107 @@ async function send(values, ctx) {
   return 0;
 }
 
+/**
+ * @param {Record<string, any>} values
+ * @param {any} ctx
+ */
+async function doctor(values, ctx) {
+  const file = await readConfig(ctx.env, ctx.configDir);
+  const creds = resolveCredentials(values, ctx.env, file);
+  const report = await runDoctor(creds, ctx.fetch);
+  if (!ctx.interactive || values.json) {
+    writeJson(ctx.stdout, report);
+    return report.ok ? 0 : 1;
+  }
+  const c = colorsFor(ctx);
+  for (const check of report.checks) {
+    const mark = check.ok ? c.green("✔") : c.red("✖");
+    const extra = check.detail ? ` ${c.dim(check.detail)}` : "";
+    ctx.stdout.write(`${mark} ${doctorLabel(check)}${extra}\n`);
+    if (!check.ok && check.fix) ctx.stdout.write(`  ${c.dim(check.fix)}\n`);
+  }
+  return report.ok ? 0 : 1;
+}
+
+/**
+ * @param {string} resource
+ * @param {string[]} rest
+ * @param {Record<string, any>} values
+ * @param {any} ctx
+ */
 async function resourceCommand(resource, rest, values, ctx) {
   const known = resources();
   if (!known.includes(resource)) {
-    throw new UsageError(`Unknown command ${resource}`, { helpResource: undefined });
+    throw new UsageError(`Unknown command ${resource}`);
   }
-  const action = rest[0];
+  let action = rest[0];
   if (!action) {
-    throw new UsageError(`Missing action for ${resource}`, { helpResource: resource });
+    if (ctx.interactive && ctx.prompts) {
+      action = await ctx.prompts.select({
+        message: `${resource} action`,
+        options: actionsFor(resource).map((row) => ({ value: row.action, label: row.action })),
+      });
+    } else {
+      throw new UsageError(`Missing action for ${resource}`, { helpResource: resource });
+    }
   }
   const row = findCommand(resource, action);
   if (!row) {
     throw new UsageError(`Unknown action ${action} for ${resource}`, { helpResource: resource });
   }
-  const names = pathParamNames(row.path);
-  const ids = rest.slice(1);
+
+  const names = row.ids;
+  /** @type {string[]} */
+  let ids = rest.slice(1);
+  if (ctx.interactive && ctx.prompts) {
+    while (ids.length < names.length) {
+      const name = names[ids.length];
+      ids.push(await ctx.prompts.text({ message: name ?? "id" }));
+    }
+  }
   if (ids.length < names.length) {
     throw new UsageError(`Missing ${names[ids.length]}`, { helpResource: resource });
   }
   if (ids.length > names.length) {
     throw new UsageError(`Unexpected extra argument ${ids[names.length]}`, { helpResource: resource });
   }
-  if (row.data && values.data === undefined) {
-    throw new UsageError(`Missing --data`, { helpResource: resource });
+
+  const wizard =
+    ctx.interactive &&
+    resource === "sending-domains" &&
+    action === "create" &&
+    values.data === undefined;
+  if (row.data && values.data === undefined && !wizard) {
+    if (ctx.interactive && ctx.prompts) {
+      const raw = await ctx.prompts.text({ message: "--data JSON" });
+      values = { ...values, data: raw };
+    } else {
+      throw new UsageError(`Missing --data`, { helpResource: resource });
+    }
   }
 
-  const creds = await credentials(values, ctx, { team: row.path.includes(":teamId") });
+  if (row.destructive && !values.yes) {
+    if (ctx.interactive && ctx.prompts) {
+      const ok = await ctx.prompts.confirm({ message: `Run ${resource} ${action}?` });
+      if (!ok) throw new CancelError();
+    } else {
+      throw new UsageError(`Refusing ${action} without --yes.`, { helpResource: resource });
+    }
+  }
+
+  const creds = await credentials(values, ctx, { team: row.team });
+
+  if (wizard) {
+    const created = await createSendingDomainWizard(ctx, {
+      apiKey: creds.apiKey,
+      teamId: /** @type {string} */ (creds.teamId),
+      baseUrl: creds.baseUrl,
+    });
+    if (values.json) writeJson(ctx.stdout, created);
+    return 0;
+  }
+
+  /** @type {Record<string, string | undefined>} */
   const params = { teamId: creds.teamId };
   names.forEach((name, i) => {
     params[name] = ids[i];
@@ -208,105 +369,53 @@ async function resourceCommand(resource, rest, values, ctx) {
   });
 
   if (row.binary) {
-    if (values.output) await writeFile(values.output, result);
-    else ctx.stdout.write(result);
+    const bytes = /** @type {Buffer} */ (result);
+    if (values.output) await writeFile(values.output, bytes);
+    else ctx.stdout.write(bytes);
+    return 0;
+  }
+
+  if (ctx.interactive && !values.json) {
+    renderResult(ctx, row, result);
     return 0;
   }
   writeJson(ctx.stdout, result);
   return 0;
 }
 
-async function credentials(values, ctx, { team }) {
+/**
+ * @param {any} ctx
+ * @param {import("./commands.js").CommandRow} row
+ * @param {unknown} result
+ */
+function renderResult(ctx, row, result) {
+  const c = colorsFor(ctx);
+  const records = asRecords(result);
+  if (records.length && row.columns) {
+    ctx.stdout.write(`${formatTable(records, row.columns, c)}\n`);
+    return;
+  }
+  if (result && typeof result === "object" && !Array.isArray(result)) {
+    ctx.stdout.write(`${formatSummary(/** @type {Record<string, unknown>} */ (result), c)}\n`);
+    return;
+  }
+  writeJson(ctx.stdout, result);
+}
+
+/**
+ * @param {Record<string, any>} values
+ * @param {any} ctx
+ * @param {{ team: boolean }} opts
+ * @returns {Promise<{ apiKey: string, teamId?: string, clusterId?: string, baseUrl: string }>}
+ */
+async function credentials(values, ctx, opts) {
   const file = await readConfig(ctx.env, ctx.configDir);
   const creds = resolveCredentials(values, ctx.env, file);
   if (!creds.apiKey) {
     throw new UsageError("Missing API key. Run postshiba login or set POSTSHIBA_API_KEY.");
   }
-  if (team && !creds.teamId) {
+  if (opts.team && !creds.teamId) {
     throw new UsageError("Missing team id. Pass --team, set POSTSHIBA_TEAM_ID, or save one with postshiba login.");
   }
-  return creds;
-}
-
-function writeJson(stdout, value) {
-  stdout.write(`${JSON.stringify(value, null, 2)}\n`);
-}
-
-function writeApiError(stderr, err) {
-  let line = `Error: ${err.message}`;
-  if (err.field) line += ` (field: ${err.field})`;
-  stderr.write(`${line}\n`);
-  if (err.status === 429 && err.error === "throttled") {
-    stderr.write("The cluster hit its hourly send limit. Wait until the next hour before retrying.\n");
-  }
-}
-
-export function formatHelp(topic) {
-  if (!topic) return generalHelp();
-  if (topic === "send") return sendHelp();
-  if (topic === "login" || topic === "logout" || topic === "whoami") return generalHelp();
-  const rows = commands.filter((row) => row.resource === topic);
-  if (rows.length === 0) {
-    throw new UsageError(`Unknown resource ${topic}`);
-  }
-  const lines = [`Usage: postshiba ${topic} <action> [ids]`, "", "Actions:"];
-  for (const row of rows) {
-    lines.push(`  ${actionUsage(row)}`);
-  }
-  lines.push("", "Pass --data JSON, --data @file.json, or --data - for writes.");
-  return lines.join("\n");
-}
-
-function generalHelp() {
-  const width = Math.max(...resources().map((name) => name.length));
-  const lines = [
-    "Usage: postshiba <command>",
-    "",
-    "Commands:",
-    "  login                 Sign in and write the local config file",
-    "  logout                Remove the local config file",
-    "  whoami                Print the signed-in user",
-    "  send                  Send an email",
-    "  help [resource]       Show this help or help for a resource",
-    "",
-    "Resources:",
-  ];
-  for (const name of resources()) {
-    const actions = commands.filter((row) => row.resource === name).map((row) => row.action);
-    lines.push(`  ${name.padEnd(width)}  ${actions.join(", ")}`);
-  }
-  lines.push(
-    "",
-    "Options:",
-    "  --api-key KEY         API key (POSTSHIBA_API_KEY)",
-    "  --team ID             Team id (POSTSHIBA_TEAM_ID)",
-    "  --base-url URL        API base URL (POSTSHIBA_BASE_URL)",
-    "  -h, --help            Show help",
-    "  --version             Print version",
-  );
-  return lines.join("\n");
-}
-
-function sendHelp() {
-  return [
-    "Usage: postshiba send [options]",
-    "",
-    "  --from ADDR           from",
-    "  --to ADDR             to (repeatable)",
-    "  --cc ADDR --bcc ADDR  cc / bcc (repeatable)",
-    "  --reply-to ADDR       reply_to",
-    "  --subject TEXT        subject",
-    "  --text TEXT           text",
-    "  --html HTML           html",
-    "  --template ID         template.id",
-    "  --var KEY=VALUE       template.variables (repeatable)",
-    "  --header \"Name: value\" headers (repeatable)",
-    "  --arg KEY=VALUE       unique_args (repeatable)",
-    "  --attach PATH         attachments (repeatable)",
-    "  --tenant NAME         tenant",
-    "  --cluster ID          X-Capsule-Cluster-Id on POST /api/v1/emails",
-    "  --sandbox             POST /api/v1/teams/:teamId/clusters/:clusterId/sends (requires --cluster)",
-    "  --idempotency-key KEY Idempotency-Key on the cluster send path (requires --cluster)",
-    "  --data JSON           base body; flags override keys",
-  ].join("\n");
+  return { apiKey: creds.apiKey, teamId: creds.teamId, clusterId: creds.clusterId, baseUrl: creds.baseUrl };
 }

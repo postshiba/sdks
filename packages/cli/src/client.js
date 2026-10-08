@@ -37,6 +37,7 @@ function parseJson(text) {
  * @param {typeof fetch} [opts.fetch]
  */
 export async function request(opts) {
+  /** @type {Record<string, string>} */
   const headers = {
     Authorization: `Bearer ${opts.apiKey}`,
     Accept: "application/json",

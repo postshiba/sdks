@@ -7,6 +7,8 @@ decisions.tsv
 .audit/
 .scratch/
 
+packages/cli/node_modules/
+
 packages/node/node_modules/
 packages/node/dist/
 

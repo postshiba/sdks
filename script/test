@@ -27,6 +27,7 @@ missing() {
 }
 
 if [[ -d "$root/packages/skills" ]]; then run skills bash script/check; else missing skills; fi
+if [[ -d "$root/packages/cli" ]]; then run cli npm test; else missing cli; fi
 if [[ -d "$root/packages/node" ]]; then run node npm test; else missing node; fi
 if [[ -d "$root/packages/convex" ]]; then run convex npm test; else missing convex; fi
 if [[ -d "$root/packages/inngest" ]]; then run inngest npm test; else missing inngest; fi

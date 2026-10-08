@@ -45,11 +45,52 @@ export function mockFetch(impl) {
   return fetchImpl;
 }
 
+export function fakePrompts(answers = {}) {
+  const calls = [];
+  const take = (name, fallback) => {
+    calls.push(name);
+    const queue = answers[name];
+    if (Array.isArray(queue)) {
+      if (queue.length === 0) throw new Error(`prompted ${name} with no answer`);
+      return queue.shift();
+    }
+    if (queue !== undefined) return queue;
+    return fallback;
+  };
+  return {
+    calls,
+    text: async () => take("text", ""),
+    password: async () => take("password", ""),
+    select: async () => take("select", ""),
+    confirm: async () => take("confirm", true),
+    intro() {
+      calls.push("intro");
+    },
+    outro() {
+      calls.push("outro");
+    },
+    note() {
+      calls.push("note");
+    },
+    spinner() {
+      calls.push("spinner");
+      return { start() {}, stop() {} };
+    },
+    cancel() {
+      calls.push("cancel");
+    },
+    log: {
+      success() {},
+      error() {},
+      info() {},
+    },
+  };
+}
+
 export async function runCli(argv, overrides = {}) {
   const stdout = collect();
   const stderr = collect();
   const fetchImpl = overrides.fetch ?? mockFetch(() => jsonResponse({}));
-  const configDir = overrides.configDir;
   const env = {
     HOME: overrides.home ?? "/tmp/postshiba-missing-home",
     XDG_CONFIG_HOME: overrides.xdg ?? "/tmp/postshiba-missing-xdg",
@@ -60,8 +101,13 @@ export async function runCli(argv, overrides = {}) {
     stdout,
     stderr,
     stdin: overrides.stdin ?? Readable.from([]),
-    configDir,
+    configDir: overrides.configDir,
     fetch: fetchImpl,
+    isTTY: overrides.isTTY,
+    cwd: overrides.cwd,
+    home: overrides.home,
+    prompts: overrides.prompts,
+    sleep: overrides.sleep ?? (async () => {}),
   });
   return { code, stdout: stdout.text(), stderr: stderr.text(), fetch: fetchImpl };
 }

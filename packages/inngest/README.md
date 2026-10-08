@@ -8,7 +8,7 @@ PostShiba email delivery inside an Inngest function.
 ## Installation
 
 ```sh
-npm install github:postshiba/postshiba-inngest inngest
+npm install @postshiba/inngest inngest
 ```
 
 Node 18 or later. Open pull requests on [postshiba/sdks](https://github.com/postshiba/sdks).

@@ -8,7 +8,7 @@ PostShiba email delivery inside a Trigger.dev task.
 ## Installation
 
 ```sh
-npm install github:postshiba/postshiba-trigger @trigger.dev/sdk
+npm install @postshiba/trigger @trigger.dev/sdk
 ```
 
 Node 18 or later. Open pull requests on [postshiba/sdks](https://github.com/postshiba/sdks).

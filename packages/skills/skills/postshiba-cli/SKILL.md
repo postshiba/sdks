@@ -12,11 +12,11 @@ For Cursor MCP workflows (first send, DNS walkthroughs, hosted inboxes), use the
 ## Install
 
 ```bash
-npm install -g github:postshiba/postshiba-cli
+npm install -g @postshiba/cli
 postshiba --version
 ```
 
-One-off: `npx github:postshiba/postshiba-cli`. If `--version` fails, install, then check again.
+One-off: `npx @postshiba/cli`. If `--version` fails, install, then check again.
 
 ## Credentials
 

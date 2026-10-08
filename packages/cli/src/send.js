@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { basename, extname } from "node:path";
-import { UsageError } from "./client.js";
+import { UsageError } from "./errors.js";
 
 const MIME = {
   ".png": "image/png",

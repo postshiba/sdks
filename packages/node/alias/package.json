@@ -1,0 +1,56 @@
+{
+  "name": "postshiba",
+  "version": "0.1.0",
+  "description": "PostShiba API client",
+  "license": "MIT",
+  "author": "PostShiba",
+  "homepage": "https://github.com/postshiba/postshiba-node",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/postshiba/postshiba-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/postshiba/postshiba-node/issues"
+  },
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    },
+    "./nest": {
+      "types": "./nest.d.ts",
+      "import": "./nest.js",
+      "default": "./nest.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "nest.js",
+    "nest.d.ts",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@postshiba/node": "0.1.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0 || ^11.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/common": {
+      "optional": true
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "@postshiba/cli",
+  "version": "0.1.0",
+  "description": "PostShiba command-line interface",
+  "license": "MIT",
+  "author": "PostShiba",
+  "homepage": "https://github.com/postshiba/postshiba-cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/postshiba/postshiba-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/postshiba/postshiba-cli/issues"
+  },
+  "type": "module",
+  "bin": {
+    "postshiba": "bin/postshiba.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

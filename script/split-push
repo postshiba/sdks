@@ -24,6 +24,7 @@ packages=(
   "inngest:postshiba-inngest"
   "trigger:postshiba-trigger"
   "skills:postshiba-skills"
+  "cli:postshiba-cli"
   "node:postshiba-node"
   "python:postshiba-python"
   "php:postshiba-php"
@@ -83,6 +84,8 @@ for pair in "${packages[@]}"; do
   repo="${pair##*:}"
   if [[ "$dir" == "skills" ]]; then
     desc="PostShiba Cursor plugin. MCP plus agent skills. Mirror of $ORG/sdks packages/skills. Open PRs on $ORG/sdks."
+  elif [[ "$dir" == "cli" ]]; then
+    desc="PostShiba command-line interface. Mirror of $ORG/sdks packages/cli. Open PRs on $ORG/sdks."
   elif [[ "$dir" == "wordpress" ]]; then
     desc="PostShiba WordPress plugin. Mirror of $ORG/sdks packages/wordpress. Open PRs on $ORG/sdks."
   elif [[ "$dir" == "convex" ]]; then

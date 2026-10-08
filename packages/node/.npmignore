@@ -1,0 +1,3 @@
+# Alias is its own npm package. Keep it out of the @postshiba/node tarball
+# even if files is edited later.
+alias

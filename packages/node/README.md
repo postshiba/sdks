@@ -8,8 +8,10 @@ PostShiba API client for Node.js.
 ## Installation
 
 ```sh
-npm install github:postshiba/postshiba-node
+npm install @postshiba/node
 ```
+
+`npm install postshiba` is the same client.
 
 Node 18 or later. The client uses `fetch`. Open pull requests on [postshiba/sdks](https://github.com/postshiba/sdks).
 
@@ -22,7 +24,7 @@ Send mail with `emails.send`. Nest services inject the same client and call that
 ## Send an email
 
 ```ts
-import { PostShiba } from "postshiba"
+import { PostShiba } from "@postshiba/node"
 
 const postshiba = new PostShiba(process.env.POSTSHIBA_API_KEY, { teamId: "KjkAJW" })
 
@@ -52,12 +54,12 @@ await postshiba.emails.sendOnCluster("NmQpXr", body, {
 
 ## NestJS
 
-The Nest entry is a module and an injectable token, not a mailer. Import `postshiba` without Nest. Import `postshiba/nest` only in Nest apps.
+The Nest entry is a module and an injectable token, not a mailer. Import `@postshiba/node` without Nest. Import `@postshiba/node/nest` only in Nest apps.
 
 ```ts
 import { Inject, Injectable, Module } from "@nestjs/common"
-import { POSTSHIBA, PostShibaModule, sendMail } from "postshiba/nest"
-import type { PostShiba } from "postshiba"
+import { POSTSHIBA, PostShibaModule, sendMail } from "@postshiba/node/nest"
+import type { PostShiba } from "@postshiba/node"
 
 @Module({
 	imports: [
@@ -280,7 +282,7 @@ const ok = postshiba.webhooks.verify(rawBody, timestamp, signature, secret)
 Non-2xx responses throw `PostShibaError` with `error`, `field`, and `message` from the JSON body.
 
 ```ts
-import { PostShibaError } from "postshiba"
+import { PostShibaError } from "@postshiba/node"
 
 try {
 	await postshiba.emails.send(body)

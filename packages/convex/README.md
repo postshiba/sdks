@@ -8,7 +8,7 @@ PostShiba email delivery as a Convex component.
 ## Installation
 
 ```sh
-npm install github:postshiba/postshiba-convex
+npm install @postshiba/convex
 ```
 
 Node 18 or later. Open pull requests on [postshiba/sdks](https://github.com/postshiba/sdks).

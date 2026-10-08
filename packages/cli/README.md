@@ -5,10 +5,10 @@ Terminal app for the PostShiba API. Interactive prompts for humans. JSON for scr
 ## Installation
 
 ```sh
-npm install -g github:postshiba/postshiba-cli
+npm install -g @postshiba/cli
 ```
 
-Node 20 or later. One-off: `npx github:postshiba/postshiba-cli`. Open pull requests on [postshiba/sdks](https://github.com/postshiba/sdks).
+Node 20 or later. One-off: `npx @postshiba/cli`. Open pull requests on [postshiba/sdks](https://github.com/postshiba/sdks).
 
 ## Sign in
 

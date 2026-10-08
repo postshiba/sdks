@@ -5,7 +5,7 @@
 
 HTTP clients and mail adapters for the PostShiba API.
 
-This repo is the write target. Language repos under [postshiba](https://github.com/orgs/postshiba/repositories) are one-way mirrors. Install from those GitHub URLs. Nothing is on npm, PyPI, or RubyGems yet.
+This repo is the write target. Language repos under [postshiba](https://github.com/orgs/postshiba/repositories) are one-way mirrors. JavaScript packages are on npm under [@postshiba](https://www.npmjs.com/org/postshiba). Other languages install from GitHub.
 
 ```sh
 script/split-push
@@ -43,6 +43,18 @@ The Inngest and Trigger.dev packages wrap that same cluster send. Inngest uses `
 Failed REST calls raise a typed error with `error`, `field`, and `message`. A `429` with `error` `throttled` is the cluster hourly send limit. Do not retry that send immediately. Wait until the next hour. Each language README has the catch shape.
 
 Mail adapters live in the language package. They call `emails.send`. The core client loads without Rails, Laravel, Django, Nest, or Swoosh. The WordPress plugin replaces wp_mail and lives in its own package.
+
+## Publishing
+
+JavaScript packages publish to npm under `@postshiba`, plus the `postshiba` alias for the Node client.
+
+```sh
+script/npm-check
+script/npm-publish
+script/npm-publish --publish
+```
+
+`script/npm-check` builds each package, packs it, and imports the tarball from a fresh Node project. `script/npm-publish` runs that check, then prints what it would publish. Pass `--publish` only from a clean `main` after `npm whoami`. Already-published versions are skipped.
 
 ## Testing
 

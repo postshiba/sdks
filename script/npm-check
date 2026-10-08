@@ -1,0 +1,205 @@
+#!/usr/bin/env bash
+# Pack each JS package and prove plain Node can import the tarball.
+# This is the guard that catches a .ts main/exports entry.
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+
+packages=(
+  "cli"
+  "node"
+  "node/alias"
+  "inngest"
+  "trigger"
+  "convex"
+)
+
+workdir="$(mktemp -d)"
+trap 'rm -rf "$workdir"' EXIT
+packdir="$workdir/tarballs"
+mkdir -p "$packdir"
+
+node_tarball=""
+failed=0
+
+pkg_json() {
+  node -e 'const p=require(process.argv[1]); process.stdout.write(String(p[process.argv[2]] ?? ""))' "$1" "$2"
+}
+
+has_script() {
+  node -e 'const p=require(process.argv[1]); process.exit(p.scripts && p.scripts[process.argv[2]] ? 0 : 1)' "$1" "$2"
+}
+
+# Import specifiers whose export target is loadable JS (skip types-only, .ts,
+# and Convex bundler entries that pull workpool/batch-worker config).
+loadable_specs() {
+  node -e '
+    const p = require(process.argv[1]);
+    const name = p.name;
+    const exportsMap = p.exports;
+    const specs = [];
+    const skip = new Set(["./package.json", "./convex.config", "./convex.config.js"]);
+    const target = (value) => {
+      if (typeof value === "string") return value;
+      if (value && typeof value === "object") return value.import || value.default || "";
+      return "";
+    };
+    if (exportsMap && typeof exportsMap === "object") {
+      for (const [key, value] of Object.entries(exportsMap)) {
+        if (skip.has(key)) continue;
+        const dest = target(value);
+        if (!dest.endsWith(".js") && !dest.endsWith(".mjs")) continue;
+        specs.push(key === "." ? name : name + key.slice(1));
+      }
+    } else if (p.main) {
+      specs.push(name);
+    }
+    process.stdout.write(specs.join("\n"));
+  ' "$1"
+}
+
+# Every export target that names a file must exist in the packed tarball.
+assert_packed_exports() {
+  local json="$1"
+  local tgz="$2"
+  node -e '
+    const { execFileSync } = require("node:child_process");
+    const p = require(process.argv[1]);
+    const listing = execFileSync("tar", ["-tzf", process.argv[2]], { encoding: "utf8" });
+    const files = new Set(listing.split("\n").filter(Boolean));
+    const prefix = p.name.replace(/^@/, "").replace("/", "-") + "-" + p.version + "/";
+    const targets = [];
+    const collect = (value) => {
+      if (typeof value === "string") targets.push(value);
+      else if (value && typeof value === "object") {
+        for (const v of Object.values(value)) if (typeof v === "string") targets.push(v);
+      }
+    };
+    if (p.exports && typeof p.exports === "object") {
+      for (const [key, value] of Object.entries(p.exports)) {
+        if (key === "./package.json") continue;
+        collect(value);
+      }
+    }
+    if (p.main) targets.push(p.main);
+    if (p.types) targets.push(p.types);
+    let missing = 0;
+    for (const dest of new Set(targets)) {
+      const rel = dest.replace(/^\.\//, "");
+      const names = [rel, "package/" + rel, prefix + rel];
+      if (!names.some((name) => files.has(name))) {
+        console.error("missing packed export target " + dest);
+        missing = 1;
+      }
+    }
+    process.exit(missing);
+  ' "$json" "$tgz"
+}
+
+peer_installs() {
+  case "$1" in
+    node|node/alias) printf '%s\n' "@nestjs/common" ;;
+    inngest) printf '%s\n' "inngest" ;;
+    trigger) printf '%s\n' "@trigger.dev/sdk" ;;
+    convex) printf '%s\n' "convex" "convex-helpers" ;;
+  esac
+}
+
+check_package() {
+  local dir="$1"
+  local pkg="$root/packages/$dir"
+  local json="$pkg/package.json"
+
+  if [[ ! -f "$json" ]]; then
+    echo "fail $dir (missing package.json)"
+    return 1
+  fi
+
+  local name version
+  name="$(pkg_json "$json" name)"
+  version="$(pkg_json "$json" version)"
+  echo "==> $name@$version ($dir)"
+
+  (
+    cd "$pkg"
+    # The alias depends on @postshiba/node at the same version, which is not
+    # on the registry until publish. Pack does not need node_modules.
+    if [[ -f package-lock.json ]]; then
+      npm ci
+    elif has_script "$json" build; then
+      npm install
+    fi
+    if has_script "$json" build; then
+      npm run build
+    fi
+  )
+
+  local tarball
+  tarball="$(cd "$pkg" && npm pack --pack-destination "$packdir")"
+  local tgz="$packdir/$tarball"
+
+  if [[ "$dir" == "node" ]]; then
+    node_tarball="$tgz"
+    if tar -tzf "$tgz" | grep -E '/alias(/|$)' >/dev/null; then
+      echo "fail $name@$version (alias leaked into tarball)"
+      return 1
+    fi
+  fi
+
+  if ! assert_packed_exports "$json" "$tgz"; then
+    echo "fail $name@$version (packed exports)"
+    return 1
+  fi
+
+  local probe="$workdir/probe-${dir//\//-}"
+  rm -rf "$probe"
+  mkdir -p "$probe"
+  printf '%s\n' '{"name":"postshiba-npm-check","private":true,"type":"module"}' > "$probe/package.json"
+
+  local installs=()
+  if [[ "$dir" == "node/alias" ]]; then
+    if [[ -z "$node_tarball" ]]; then
+      echo "fail $name@$version (node tarball missing; pack @postshiba/node first)"
+      return 1
+    fi
+    installs+=("$node_tarball")
+  fi
+  installs+=("$tgz")
+  local peer
+  while IFS= read -r peer; do
+    [[ -n "$peer" ]] && installs+=("$peer")
+  done < <(peer_installs "$dir")
+
+  (cd "$probe" && npm install --ignore-scripts "${installs[@]}")
+
+  if [[ "$dir" == "cli" ]]; then
+    if ! (cd "$probe" && ./node_modules/.bin/postshiba --version); then
+      echo "fail $name@$version (bin --version)"
+      return 1
+    fi
+  else
+    local spec
+    while IFS= read -r spec; do
+      [[ -z "$spec" ]] && continue
+      if ! (cd "$probe" && node --input-type=module -e "await import($(node -e 'process.stdout.write(JSON.stringify(process.argv[1]))' "$spec"))"); then
+        echo "fail $name@$version (import $spec)"
+        return 1
+      fi
+    done < <(loadable_specs "$json")
+  fi
+
+  echo "ok $name@$version"
+}
+
+for dir in "${packages[@]}"; do
+  if ! check_package "$dir"; then
+    failed=1
+  fi
+done
+
+if [[ "$failed" -ne 0 ]]; then
+  echo "npm-check failed"
+  exit 1
+fi
+
+echo "npm-check passed"

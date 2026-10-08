@@ -1,5 +1,5 @@
 {
-  "name": "@postshiba/node",
+  "name": "postshiba",
   "version": "0.1.0",
   "description": "PostShiba API client",
   "license": "MIT",
@@ -13,22 +13,25 @@
     "url": "https://github.com/postshiba/postshiba-node/issues"
   },
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
     },
     "./nest": {
-      "types": "./dist/nest.d.ts",
-      "import": "./dist/nest.js",
-      "default": "./dist/nest.js"
+      "types": "./nest.d.ts",
+      "import": "./nest.js",
+      "default": "./nest.js"
     }
   },
   "files": [
-    "dist",
+    "index.js",
+    "index.d.ts",
+    "nest.js",
+    "nest.d.ts",
     "LICENSE",
     "README.md",
     "CHANGELOG.md"
@@ -39,10 +42,8 @@
   "engines": {
     "node": ">=18"
   },
-  "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm run build && npm test",
-    "test": "vitest run"
+  "dependencies": {
+    "@postshiba/node": "0.1.0"
   },
   "peerDependencies": {
     "@nestjs/common": "^10.0.0 || ^11.0.0"
@@ -51,11 +52,5 @@
     "@nestjs/common": {
       "optional": true
     }
-  },
-  "devDependencies": {
-    "@nestjs/common": "^11.1.6",
-    "@types/node": "^24.5.2",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
   }
 }

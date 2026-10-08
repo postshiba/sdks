@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Dry-run (default) or publish JS packages in dependency order.
+# Never publishes unless you pass --publish. The human publishes.
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$root"
+
+do_publish=0
+if [[ "${1:-}" == "--publish" ]]; then
+  do_publish=1
+elif [[ $# -gt 0 ]]; then
+  echo "usage: script/npm-publish [--publish]"
+  exit 1
+fi
+
+packages=(
+  "cli"
+  "node"
+  "node/alias"
+  "inngest"
+  "trigger"
+  "convex"
+)
+
+pkg_json() {
+  node -e 'const p=require(process.argv[1]); process.stdout.write(String(p[process.argv[2]] ?? ""))' "$1" "$2"
+}
+
+echo "==> npm-check"
+"$root/script/npm-check"
+
+if [[ "$do_publish" -eq 1 ]]; then
+  if ! npm whoami >/dev/null; then
+    echo "npm whoami failed; log in before publishing"
+    exit 1
+  fi
+  branch="$(git rev-parse --abbrev-ref HEAD)"
+  if [[ "$branch" != "main" ]]; then
+    echo "publish from main (on $branch)"
+    exit 1
+  fi
+  if [[ -n "$(git status --porcelain)" ]]; then
+    echo "git tree is dirty; commit or stash before publishing"
+    exit 1
+  fi
+fi
+
+for dir in "${packages[@]}"; do
+  json="$root/packages/$dir/package.json"
+  name="$(pkg_json "$json" name)"
+  version="$(pkg_json "$json" version)"
+
+  if published="$(npm view "$name@$version" version 2>/dev/null)" && [[ "$published" == "$version" ]]; then
+    echo "skip $name@$version (already published)"
+    continue
+  fi
+
+  echo "publish $name@$version from packages/$dir"
+  if [[ "$do_publish" -eq 1 ]]; then
+    (cd "$root/packages/$dir" && npm publish --access public)
+  else
+    (cd "$root/packages/$dir" && npm publish --dry-run --access public)
+  fi
+done
+
+if [[ "$do_publish" -eq 1 ]]; then
+  echo "npm-publish passed"
+else
+  echo "npm-publish dry run passed"
+fi

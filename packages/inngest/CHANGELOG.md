@@ -2,4 +2,4 @@
 
 ## 0.1.0
 
-Initial Inngest adapter. Cluster send inside `step.run`, webhook ingest, throttled waits one hour.
+Initial Inngest adapter. Cluster send inside `step.run`, webhook ingest, throttled waits one hour. Published to npm as `@postshiba/inngest` (compiled ESM).

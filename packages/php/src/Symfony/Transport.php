@@ -54,7 +54,11 @@ class Transport extends AbstractTransport
     protected function doSend(SentMessage $message): void
     {
         $email = MessageConverter::toEmail($message->getOriginalMessage());
-        $this->client->emails->send(self::map($email));
+        $response = $this->client->emails->send(self::map($email));
+
+        if (is_array($response) && is_string($response['message_id'] ?? null) && $response['message_id'] !== '') {
+            $message->setMessageId($response['message_id']);
+        }
     }
 
     /**

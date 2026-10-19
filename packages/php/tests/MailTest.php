@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use PostShiba\Mail;
 use PostShiba\PostShiba;
 use PostShiba\Symfony\Transport;
+use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
@@ -147,5 +148,38 @@ final class MailTest extends TestCase
         $this->assertSame('cmp_123', $payload['headers']['X-Campaign']);
         $this->assertArrayNotHasKey('X-Capsule-Unique-Args', $payload['headers']);
         $this->assertSame(['campaign_id' => 'cmp_123', 'site' => 'docs'], $payload['unique_args']);
+    }
+
+    public function testTransportSetsTheSentMessageIdFromTheResponse(): void
+    {
+        $http = new FakeHttp();
+        $http->enqueueJson(200, ['queued' => true, 'message_id' => 'abc@capsule.test']);
+        $transport = new Transport(new PostShiba('tok_test', 'https://api.example.test', 'KjkAJW', $http));
+
+        $sent = $transport->send($this->email());
+
+        $this->assertInstanceOf(SentMessage::class, $sent);
+        $this->assertSame('abc@capsule.test', $sent->getMessageId());
+        $this->assertStringEndsWith('/api/v1/emails', $http->last()['url']);
+    }
+
+    public function testTransportKeepsTheGeneratedMessageIdWhenTheResponseHasNone(): void
+    {
+        $http = new FakeHttp();
+        $http->enqueueJson(200, ['queued' => true]);
+        $transport = new Transport(new PostShiba('tok_test', 'https://api.example.test', 'KjkAJW', $http));
+
+        $sent = $transport->send($this->email());
+
+        $this->assertNotSame('', $sent->getMessageId());
+    }
+
+    private function email(): Email
+    {
+        return (new Email())
+            ->from('hello@mail.example.com')
+            ->to('you@example.com')
+            ->subject('PostShiba test')
+            ->text('hello from PostShiba');
     }
 }

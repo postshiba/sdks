@@ -139,6 +139,53 @@ class ActionMailerTest < Minitest::Test
     refute((captured_body["headers"] || {}).key?("X-Capsule-Cluster-Id"))
   end
 
+  def test_settings_tenant_goes_in_the_body
+    captured = []
+    stub_request(:post, "https://app.postshiba.com/api/v1/emails")
+      .with { |req|
+        captured << JSON.parse(req.body)
+        true
+      }
+      .to_return(status: 200, body: fixture_json("email_send_response"), headers: {"Content-Type" => "application/json"})
+
+    mail = Mail.new
+    mail.from = "hello@mail.example.com"
+    mail.to = "you@example.com"
+    mail.subject = "PostShiba test"
+    mail.body = "hello from PostShiba"
+
+    PostShiba::ActionMailer::DeliveryMethod.new(api_key: "mail-key", tenant: "acme").deliver!(mail)
+    PostShiba::ActionMailer::DeliveryMethod.new(api_key: "mail-key").deliver!(mail)
+
+    assert_equal "acme", captured[0]["tenant"]
+    refute captured[1].key?("tenant")
+  end
+
+  def test_delivery_method_options_tenant_wins_over_settings
+    captured = nil
+    stub_request(:post, "https://app.postshiba.com/api/v1/emails")
+      .with { |req|
+        captured = JSON.parse(req.body)
+        true
+      }
+      .to_return(status: 200, body: fixture_json("email_send_response"), headers: {"Content-Type" => "application/json"})
+
+    mailer_class = Class.new(ActionMailer::Base) do
+      self.delivery_method = :postshiba
+      self.postshiba_settings = {api_key: "settings-key", tenant: "default"}
+      self.perform_deliveries = true
+      self.raise_delivery_errors = true
+
+      def hello
+        mail(from: "hello@mail.example.com", to: "you@example.com", subject: "PostShiba test", body: "hello from PostShiba",
+          delivery_method_options: {tenant: "acme"})
+      end
+    end
+
+    mailer_class.hello.deliver_now
+    assert_equal "acme", captured["tenant"]
+  end
+
   def test_maps_display_name_reply_to_headers_and_unique_args
     captured = nil
     stub_request(:post, "https://app.postshiba.com/api/v1/emails")

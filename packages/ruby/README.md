@@ -62,6 +62,12 @@ config.action_mailer.postshiba_settings = {
 
 Then `deliver_now` on any mailer. `to`, `from`, `subject`, `html`, `text`, and attachments map to `send_email`.
 
+Set `tenant` in `postshiba_settings`, as its id or slug, to send through that tenant. Without it, PostShiba uses the team's default tenant. It goes in the JSON body as `tenant`. Pass it in `delivery_method_options` to pick the tenant per message.
+
+```ruby
+mail(to: "you@example.com", subject: "Hello", delivery_method_options: {tenant: "acme"})
+```
+
 Set `cluster_id` in `postshiba_settings` to send `X-Capsule-Cluster-Id`. A mail header of that name wins and is not copied into the JSON body.
 
 ```ruby

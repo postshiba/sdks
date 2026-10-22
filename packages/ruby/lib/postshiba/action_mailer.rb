@@ -57,8 +57,7 @@ module PostShiba
         headers, unique_args = headers_from(mail)
         payload["headers"] = headers if headers.any?
         payload["unique_args"] = unique_args if unique_args
-        tenant = @settings[:tenant].to_s.strip
-        payload["tenant"] = tenant unless tenant.empty?
+        payload["tenant"] = @settings[:tenant] if @settings[:tenant]
         payload
       end
 

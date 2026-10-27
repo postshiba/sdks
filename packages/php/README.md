@@ -105,6 +105,16 @@ Mail::raw('hello from PostShiba', function ($message) {
 
 The package registers `PostShiba\Laravel\PostShibaServiceProvider` through Composer.
 
+Set `tenant` in `services.postshiba`, as its id or slug, to send through that tenant. Without it, PostShiba uses the team's default tenant. It goes in the JSON body as `tenant`. A `tenant` on a mailer in `config/mail.php` wins, so each mailer can send through its own tenant.
+
+```php
+// config/services.php
+'postshiba' => [
+    'key' => env('POSTSHIBA_API_KEY'),
+    'tenant' => env('POSTSHIBA_TENANT'),
+],
+```
+
 ### Symfony Mailer
 
 ```yaml
@@ -116,6 +126,12 @@ services:
 
 ```env
 MAILER_DSN=postshiba://API_KEY@default?team_id=KjkAJW
+```
+
+Add `tenant` to the DSN, or pass it as the second argument of `Transport`, to send through that tenant.
+
+```env
+MAILER_DSN=postshiba://API_KEY@default?team_id=KjkAJW&tenant=WbLcFd
 ```
 
 ```php

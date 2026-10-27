@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 use PostShiba\Mail;
 use PostShiba\PostShiba;
 use PostShiba\Symfony\Transport;
+use PostShiba\Symfony\TransportFactory;
+use Symfony\Component\Mailer\Transport\Dsn;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
@@ -112,6 +114,52 @@ final class MailTest extends TestCase
         $this->assertArrayNotHasKey('reply_to', $payload);
         $this->assertArrayNotHasKey('headers', $payload);
         $this->assertArrayNotHasKey('unique_args', $payload);
+        $this->assertArrayNotHasKey('tenant', $payload);
+    }
+
+    public function testPayloadKeepsTenant(): void
+    {
+        $payload = Mail::payload([
+            'from' => 'hello@mail.example.com',
+            'to' => 'you@example.com',
+            'subject' => 'Hi',
+            'tenant' => 'acme-florist',
+        ]);
+
+        $this->assertSame('acme-florist', $payload['tenant']);
+    }
+
+    public function testTransportSendsTenantInTheBody(): void
+    {
+        $http = new FakeHttp();
+        $http->enqueueJson(200, ['queued' => true, 'message_id' => 'm1']);
+        $http->enqueueJson(200, ['queued' => true, 'message_id' => 'm2']);
+        $client = new PostShiba('tok_test', 'https://api.example.test', 'KjkAJW', $http);
+        $email = (new Email())
+            ->from('hello@mail.example.com')
+            ->to('you@example.com')
+            ->subject('PostShiba test')
+            ->text('hello from PostShiba');
+
+        (new Transport($client, 'WbLcFd'))->send($email);
+        $withTenant = json_decode($http->last()['body'], true);
+        (new Transport($client))->send($email);
+        $withoutTenant = json_decode($http->last()['body'], true);
+
+        $this->assertSame('https://api.example.test/api/v1/emails', $http->last()['url']);
+        $this->assertSame('WbLcFd', $withTenant['tenant']);
+        $this->assertArrayNotHasKey('tenant', $withoutTenant);
+    }
+
+    public function testTransportFactoryReadsTenantFromTheDsn(): void
+    {
+        $factory = new TransportFactory();
+        $withTenant = $factory->create(Dsn::fromString('postshiba://tok_test@default?team_id=KjkAJW&tenant=acme-florist'));
+        $withoutTenant = $factory->create(Dsn::fromString('postshiba://tok_test@default?team_id=KjkAJW'));
+        $tenant = new \ReflectionProperty(Transport::class, 'tenant');
+
+        $this->assertSame('acme-florist', $tenant->getValue($withTenant));
+        $this->assertNull($tenant->getValue($withoutTenant));
     }
 
     public function testTransportMapCopiesDisplayNamesReplyToHeadersAndUniqueArgs(): void

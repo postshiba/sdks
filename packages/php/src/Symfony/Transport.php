@@ -46,7 +46,10 @@ class Transport extends AbstractTransport
         'x-report-abuse',
     ];
 
-    public function __construct(private PostShiba $client)
+    /**
+     * @param string|null $tenant Tenant id or slug. Without it, PostShiba uses the team's default tenant.
+     */
+    public function __construct(private PostShiba $client, private ?string $tenant = null)
     {
         parent::__construct();
     }
@@ -54,13 +57,13 @@ class Transport extends AbstractTransport
     protected function doSend(SentMessage $message): void
     {
         $email = MessageConverter::toEmail($message->getOriginalMessage());
-        $this->client->emails->send(self::map($email));
+        $this->client->emails->send(self::map($email, $this->tenant));
     }
 
     /**
      * @return array<string, mixed>
      */
-    public static function map(Email $email): array
+    public static function map(Email $email, ?string $tenant = null): array
     {
         $attachments = [];
         foreach ($email->getAttachments() as $part) {
@@ -83,6 +86,7 @@ class Transport extends AbstractTransport
             'attachments' => $attachments,
             'headers' => self::extraHeaders($email),
             'unique_args' => self::uniqueArgs($email),
+            'tenant' => $tenant,
         ]);
     }
 

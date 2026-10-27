@@ -23,8 +23,11 @@ class PostShibaServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Mail::extend('postshiba', function () {
-            return new Transport($this->app->make(PostShiba::class));
+        Mail::extend('postshiba', function (array $config = []) {
+            return new Transport(
+                $this->app->make(PostShiba::class),
+                $config['tenant'] ?? $this->app['config']->get('services.postshiba.tenant'),
+            );
         });
     }
 }

@@ -15,7 +15,7 @@ class TransportFactory extends AbstractTransportFactory
             $this->getUser($dsn),
             $dsn->getOption('base_url') ?: $dsn->getOption('baseUrl'),
             $dsn->getOption('team_id') ?: $dsn->getOption('teamId'),
-        ));
+        ), $dsn->getOption('tenant'));
     }
 
     protected function getSupportedSchemes(): array

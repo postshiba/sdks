@@ -76,6 +76,10 @@ class Mail
         if (is_array($unique) && $unique !== []) {
             $out['unique_args'] = $unique;
         }
+        $tenant = trim((string) ($input['tenant'] ?? ''));
+        if ($tenant !== '') {
+            $out['tenant'] = $tenant;
+        }
 
         return $out;
     }
